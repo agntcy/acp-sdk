@@ -1,0 +1,78 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.sample-agent-1",
+      "version": "0.0.1"
+    },
+    "description": "Sample agent description. Says what the agent does."
+  },
+  "specs": {
+    "capabilities": {
+      "threads": true,
+      "callbacks": true,
+      "streaming": {
+        "updates": "true",
+        "values": "true"
+      }
+    },
+    "input": {
+      "type": "integer"
+    },
+    "thread_state": {
+      "type": "object",
+      "description": "The state of the agent",
+      "properties": {
+        "state": {
+          "type": "string"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "description": "The output of the agent",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "examples": [
+        {
+          "name": "John"
+        },
+        {
+          "name": "Adele"
+        }
+      ]
+    },
+    "config": {
+      "type": "object",
+      "description": "The configuration of the agent",
+      "properties": {
+        "test": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "dependencies": [
+    {
+      "name": "org.agntcy.sample-agent-2",
+      "version": "0.0.1"
+    },
+    {
+      "name": "org.agntcy.sample-agent-3",
+      "version": "0.0.1"
+    }
+  ],
+  "deployments": [
+    {
+      "type": "source_code",
+      "name": "src",
+      "url": "file:///tmp/agent-1",
+      "framework_config": {
+        "framework_type": "langgraph",
+        "graph": "agentgraph"
+      }
+    }
+  ]
+}

@@ -82,22 +82,40 @@ components:
               properties:
                 callbacks:
                   default: false
-                  description: this it True if the agent supports a webhook to report
-                    run results. If this is false, providing a `webhook` at run creation
-                    has no effect. If missing, it means `false`
+                  description: This is `true` if the agent supports a webhook to report
+                    run results. If this is `false`, providing a `webhook` at run
+                    creation has no effect. If missing, it means `false`
                   title: Callback Support
                   type: boolean
                 interrupts:
                   default: false
-                  description: this is True if the agent runs can interrupt to request
+                  description: This is `true` if the agent runs can interrupt to request
                     additional input and can be subsequently resumed. If missing,
                     it means `false`
                   title: Interrupt Support
                   type: boolean
+                streaming:
+                  description: Streaming modes supported. If missing, streaming is
+                    not supported.  If no mode is supported attempts to stream output
+                    will result in an error.
+                  properties:
+                    custom:
+                      description: This is `true` if the agent supports streaming
+                        of agent specified objects. If `false` or missing, custom
+                        streaming is not supported.
+                      title: Streaming Custom Objects
+                      type: boolean
+                    values:
+                      description: This is `true` if the agent supports values streaming.
+                        If `false` or missing values streaming is not supported.
+                      title: Values Streaming
+                      type: boolean
+                  title: Streaming Modes
+                  type: object
                 threads:
                   default: false
-                  description: this is True if the agent supports run threads. If
-                    this is False, then the threads tagged with `Threads` are not
+                  description: This is `true` if the agent supports run threads. If
+                    this is `false`, then the threads tagged with `Threads` are not
                     available. If missing, it means `false`
                   title: Thread Support
                   type: boolean
@@ -106,16 +124,34 @@ components:
             config:
               description: 'This object contains an instance of an OpenAPI schema
                 object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
-              example:
-                properties:
-                  address:
-                    type: string
-                  age:
-                    format: int32
-                    minimum: 0
-                    type: integer
-                  name:
-                    type: string
+              examples:
+              - address:
+                  type: string
+                age:
+                  format: int32
+                  minimum: 0
+                  type: integer
+                name:
+                  type: string
+                properties: null
+                required:
+                - name
+                type: object
+              type: object
+            custom_streaming_update:
+              description: 'This describes the format of an Update in the streaming.  Must
+                be specified if `streaming.custom` capability is true and cannot be
+                specified otherwise. Format follows: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+              examples:
+              - address:
+                  type: string
+                age:
+                  format: int32
+                  minimum: 0
+                  type: integer
+                name:
+                  type: string
+                properties: null
                 required:
                 - name
                 type: object
@@ -123,8 +159,8 @@ components:
             input:
               description: 'This object contains an instance of an OpenAPI schema
                 object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
-              example:
-                properties:
+              examples:
+              - properties:
                   address:
                     type: string
                   age:
@@ -146,16 +182,16 @@ components:
                   interrupt_payload:
                     description: 'This object contains an instance of an OpenAPI schema
                       object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
-                    example:
-                      properties:
-                        address:
-                          type: string
-                        age:
-                          format: int32
-                          minimum: 0
-                          type: integer
-                        name:
-                          type: string
+                    examples:
+                    - address:
+                        type: string
+                      age:
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      name:
+                        type: string
+                      properties: null
                       required:
                       - name
                       type: object
@@ -168,16 +204,16 @@ components:
                   resume_payload:
                     description: 'This object contains an instance of an OpenAPI schema
                       object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
-                    example:
-                      properties:
-                        address:
-                          type: string
-                        age:
-                          format: int32
-                          minimum: 0
-                          type: integer
-                        name:
-                          type: string
+                    examples:
+                    - address:
+                        type: string
+                      age:
+                        format: int32
+                        minimum: 0
+                        type: integer
+                      name:
+                        type: string
+                      properties: null
                       required:
                       - name
                       type: object
@@ -191,16 +227,16 @@ components:
             output:
               description: 'This object contains an instance of an OpenAPI schema
                 object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
-              example:
-                properties:
-                  address:
-                    type: string
-                  age:
-                    format: int32
-                    minimum: 0
-                    type: integer
-                  name:
-                    type: string
+              examples:
+              - address:
+                  type: string
+                age:
+                  format: int32
+                  minimum: 0
+                  type: integer
+                name:
+                  type: string
+                properties: null
                 required:
                 - name
                 type: object
@@ -211,16 +247,16 @@ components:
                 capability is true, then the API to retrieve ThreadState from a Thread
                 or a Run is not available. This object contains an instance of an
                 OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
-              example:
-                properties:
-                  address:
-                    type: string
-                  age:
-                    format: int32
-                    minimum: 0
-                    type: integer
-                  name:
-                    type: string
+              examples:
+              - address:
+                  type: string
+                age:
+                  format: int32
+                  minimum: 0
+                  type: integer
+                name:
+                  type: string
+                properties: null
                 required:
                 - name
                 type: object
@@ -309,6 +345,24 @@ components:
         test:
           type: boolean
       type: object
+    CustomRunResultUpdate:
+      description: Object holding a custom defined update of the agent result during
+        streaming.
+      properties:
+        run_id:
+          description: The ID of the run.
+          format: uuid
+          title: Run Id
+          type: string
+        type:
+          enum:
+          - custom
+          title: Output Type
+          type: string
+        update:
+          $ref: '#/components/schemas/StreamUpdateSchema'
+      title: Custom Run Result Update
+      type: object
     DockerDeployment:
       description: Describes the docker deployment for this agent
       properties:
@@ -373,6 +427,9 @@ components:
       type: object
     OutputSchema:
       description: The output of the agent
+      examples:
+      - name: John
+      - name: Adele
       properties:
         name:
           type: string
@@ -467,10 +524,10 @@ components:
           title: Agent ID
           type: string
         webhook:
-          description: Webhook to call after run finishes or interrupts. If missing
-            no callback is called and the client needs to poll.
+          description: Webhook to call upon change of run status. This is a url that
+            accepts a POST containing the `Run` object as body. See Callbacks definition.
           format: uri
-          title: Completion or Interrupt webhook
+          title: Status change webhook
           type: string
       required:
       - agent_id
@@ -524,6 +581,36 @@ components:
       - $ref: '#/components/schemas/RunInterrupt'
       - $ref: '#/components/schemas/RunError'
       title: Run Output
+    RunOutputStream:
+      description: Server-sent event containing one agent output event. Actual event
+        type is carried inside the data.
+      properties:
+        data:
+          description: A serialized JSON data structure carried in the SSE event data
+            field. The event can carry either a full result, if streaming mode is
+            `values` or an update if streaming mode is `updates`
+          discriminator:
+            mapping:
+              custom: '#/components/schemas/CustomRunResultUpdate'
+              result: '#/components/schemas/RunResult'
+            propertyName: type
+          oneOf:
+          - $ref: '#/components/schemas/RunResult'
+          - $ref: '#/components/schemas/CustomRunResultUpdate'
+          title: Stream Event Payload
+        event:
+          description: Event type. This is the constant string `agent_event` to be
+            compatible with SSE spec. The actual type differentiation is done in the
+            event itself.
+          enum:
+          - agent_event
+          type: string
+        id:
+          description: Unique identifier of the event
+          title: Event ID
+          type: string
+      title: Run Output Stream Event
+      type: object
     RunResult:
       description: Final result of a Run.
       properties:
@@ -583,8 +670,8 @@ components:
     SecurityScheme:
       description: 'This object contains an instance of an OpenAPI schema object,
         formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0'
-      example:
-        in: header
+      examples:
+      - in: header
         name: api-key
         type: apiKey
       type: object
@@ -622,6 +709,11 @@ components:
       - url
       - framework_config
       title: Source Code Deployment
+      type: object
+    StreamUpdateSchema:
+      description: An update in the SSE event streaming where streaming mode is set
+        to custom. The schema is described in Agent Manifest under 'spec.custom_streaming_update'.
+      title: Stream Update Schema
       type: object
     Thread:
       description: Represents a collection of consecutive runs on an agent. Thread
@@ -683,10 +775,9 @@ components:
       title: Thread Search Request
       type: object
     ThreadStateSchema:
-      description: The state of the agent
-      properties:
-        state:
-          type: string
+      description: The thread state. The schema is described in Agent Manifest under
+        'spec.thread_state'.
+      title: Thread State Schema
       type: object
     clarificationInterruptPayload:
       description: Additional question the agent is asking
@@ -774,7 +865,7 @@ components:
 info:
   title: ACP Spec for org.agntcy.sample-agent-1:0.0.1
   version: '0.1'
-openapi: 3.0.3
+openapi: 3.1.1
 paths:
   /agents/search:
     post:
@@ -883,6 +974,19 @@ paths:
       - Agents
   /runs:
     post:
+      callbacks:
+        runstatuschange:
+          '{$request.body#/webhook}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Run'
+                required: true
+              responses:
+                '200':
+                  description: Your server returns this code if it accepts the callback
       description: Create a run, return the run descriptor immediately. Don't wait
         for the final run output.
       operationId: create_run
@@ -1124,283 +1228,6 @@ paths:
       summary: Retrieve last output of a run if available
       tags:
       - Runs
-  /runs/{run_id}/threadstate:
-    get:
-      description: This call can be used only for agents that support thread, i.e.
-        for Runs that specify a thread ID. It can be called only on runs that are
-        in `success` status. It returns the thread state at the end of the Run. Can
-        be used to reconstruct the evolution of the thread state in its history.
-      operationId: get_run_threadstate
-      parameters:
-      - description: The ID of the run.
-        in: path
-        name: run_id
-        required: true
-        schema:
-          description: The ID of the run.
-          format: uuid
-          title: Run Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ThreadStateSchema'
-          description: Success
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Conflict
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation Error
-      summary: Retrieve the thread state at the end of the run
-      tags:
-      - Threads
-  /threads:
-    post:
-      description: Create an empty thread. This is useful to associate metadata to
-        a thread.
-      operationId: create_thread
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ThreadCreate'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Thread'
-          description: Success
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Conflict
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation Error
-      summary: Create an empty Thread
-      tags:
-      - Threads
-  /threads/search:
-    post:
-      description: 'Search for threads.
-
-
-        This endpoint also functions as the endpoint to list all threads.'
-      operationId: search_threads
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ThreadSearchRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Thread'
-                title: Response Search Agents Agents Search Post
-                type: array
-          description: Success
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation Error
-      summary: Search Threads
-      tags:
-      - Threads
-  /threads/{thread_id}:
-    delete:
-      description: Delete a thread.
-      operationId: delete_thread
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Thread'
-          description: Success
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Conflict
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation Error
-      summary: Delete a thread. If the thread contains any pending run, deletion fails.
-      tags:
-      - Threads
-    get:
-      description: 'Get a thread from its ID. '
-      operationId: get_thread
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Thread'
-          description: Success
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Conflict
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation Error
-      summary: Get a previously created Thread
-      tags:
-      - Threads
-    parameters:
-    - description: The ID of the thread.
-      in: path
-      name: thread_id
-      required: true
-      schema:
-        description: The ID of the thread.
-        format: uuid
-        title: Thread ID
-        type: string
-  /threads/{thread_id}/history:
-    get:
-      description: Retrieve ordered list of runs for this thread in chronological
-        order.
-      operationId: get_thread_history
-      parameters:
-      - description: The ID of the thread.
-        in: path
-        name: thread_id
-        required: true
-        schema:
-          description: The ID of the thread.
-          format: uuid
-          title: Thread Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Run'
-                title: List of runs for the specified thread
-                type: array
-          description: Success
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Conflict
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation Error
-      summary: Retrieve the list of runs and associated state at the end of each run.
-      tags:
-      - Threads
-  /threads/{thread_id}/state:
-    get:
-      description: Retrieve the the current state associated with the thread
-      operationId: get_thread_state
-      parameters:
-      - description: The ID of the thread.
-        in: path
-        name: thread_id
-        required: true
-        schema:
-          description: The ID of the thread.
-          format: uuid
-          title: Thread Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ThreadStateSchema'
-          description: Success
-        '404':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Not Found
-        '409':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Conflict
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: Validation Error
-      summary: Retrieve the current state associated with the thread
-      tags:
-      - Threads
 tags:
 - description: "Agents are AI workflows that can be configured and/or executed on\
     \ this server.  This means that a client of this server can start a Run on any\
@@ -1418,12 +1245,4 @@ tags:
 
     See `Run`  and `RunOutput` models below for more info.'
   name: Runs
-- description: "If supported by the agent, Run can be grouped in Threads. When a Run\
-    \ is created without specifying a Thread ID , a new thread is automatically created\
-    \ and a Thread ID is returned together with the created Run. At the end of the\
-    \ Run, the server keeps a thread state associated to the thread.\nWhen a Run is\
-    \ created specifying a Thread ID, the agent uses the previous state of the thread\
-    \ together with the provided input. \nA run can be created on a thread **only**\
-    \ if there is no run in the `pending` status on the same thread. \nCurrent thread\
-    \ state is accessible through this API.\nSee `Thread` for more info."
-  name: Threads
+

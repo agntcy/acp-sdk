@@ -29,21 +29,39 @@ class AgentManifestRef(BaseModel):
     )
 
 
+class Streaming(BaseModel):
+    values: Optional[bool] = Field(
+        None,
+        description='This is `true` if the agent supports values streaming. If `false` or missing values streaming is not supported.',
+        title='Values Streaming',
+    )
+    custom: Optional[bool] = Field(
+        None,
+        description='This is `true` if the agent supports streaming of agent specified objects. If `false` or missing, custom streaming is not supported.',
+        title='Streaming Custom Objects',
+    )
+
+
 class Capabilities(BaseModel):
     threads: Optional[bool] = Field(
         False,
-        description='this is True if the agent supports run threads. If this is False, then the threads tagged with `Threads` are not available. If missing, it means `false`',
+        description='This is `true` if the agent supports run threads. If this is `false`, then the threads tagged with `Threads` are not available. If missing, it means `false`',
         title='Thread Support',
     )
     interrupts: Optional[bool] = Field(
         False,
-        description='this is True if the agent runs can interrupt to request additional input and can be subsequently resumed. If missing, it means `false`',
+        description='This is `true` if the agent runs can interrupt to request additional input and can be subsequently resumed. If missing, it means `false`',
         title='Interrupt Support',
     )
     callbacks: Optional[bool] = Field(
         False,
-        description='this it True if the agent supports a webhook to report run results. If this is false, providing a `webhook` at run creation has no effect. If missing, it means `false`',
+        description='This is `true` if the agent supports a webhook to report run results. If this is `false`, providing a `webhook` at run creation has no effect. If missing, it means `false`',
         title='Callback Support',
+    )
+    streaming: Optional[Streaming] = Field(
+        None,
+        description='Streaming modes supported. If missing, streaming is not supported.  If no mode is supported attempts to stream output will result in an error.',
+        title='Streaming Modes',
     )
 
 
@@ -60,11 +78,10 @@ class Interrupt(BaseModel):
             {
                 'type': 'object',
                 'required': ['name'],
-                'properties': {
-                    'name': {'type': 'string'},
-                    'address': {'type': 'string'},
-                    'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
-                },
+                'properties': None,
+                'name': {'type': 'string'},
+                'address': {'type': 'string'},
+                'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
             }
         ],
     )
@@ -75,11 +92,10 @@ class Interrupt(BaseModel):
             {
                 'type': 'object',
                 'required': ['name'],
-                'properties': {
-                    'name': {'type': 'string'},
-                    'address': {'type': 'string'},
-                    'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
-                },
+                'properties': None,
+                'name': {'type': 'string'},
+                'address': {'type': 'string'},
+                'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
             }
         ],
     )
@@ -113,11 +129,24 @@ class Specs(BaseModel):
             {
                 'type': 'object',
                 'required': ['name'],
-                'properties': {
-                    'name': {'type': 'string'},
-                    'address': {'type': 'string'},
-                    'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
-                },
+                'properties': None,
+                'name': {'type': 'string'},
+                'address': {'type': 'string'},
+                'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
+            }
+        ],
+    )
+    custom_streaming_update: Optional[Dict[str, Any]] = Field(
+        None,
+        description='This describes the format of an Update in the streaming.  Must be specified if `streaming.custom` capability is true and cannot be specified otherwise. Format follows: https://spec.openapis.org/oas/v3.1.1.html#schema-object',
+        examples=[
+            {
+                'type': 'object',
+                'required': ['name'],
+                'properties': None,
+                'name': {'type': 'string'},
+                'address': {'type': 'string'},
+                'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
             }
         ],
     )
@@ -128,11 +157,10 @@ class Specs(BaseModel):
             {
                 'type': 'object',
                 'required': ['name'],
-                'properties': {
-                    'name': {'type': 'string'},
-                    'address': {'type': 'string'},
-                    'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
-                },
+                'properties': None,
+                'name': {'type': 'string'},
+                'address': {'type': 'string'},
+                'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
             }
         ],
     )
@@ -143,11 +171,10 @@ class Specs(BaseModel):
             {
                 'type': 'object',
                 'required': ['name'],
-                'properties': {
-                    'name': {'type': 'string'},
-                    'address': {'type': 'string'},
-                    'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
-                },
+                'properties': None,
+                'name': {'type': 'string'},
+                'address': {'type': 'string'},
+                'age': {'type': 'integer', 'format': 'int32', 'minimum': 0},
             }
         ],
     )
@@ -218,6 +245,11 @@ class ErrorResponse(RootModel[str]):
     )
 
 
+class Streaming1(Enum):
+    values = 'values'
+    custom = 'custom'
+
+
 class Status(Enum):
     pending = 'pending'
     error = 'error'
@@ -254,7 +286,15 @@ class Type4(Enum):
     result = 'result'
 
 
+class Event(Enum):
+    agent_event = 'agent_event'
+
+
 class Type5(Enum):
+    custom = 'custom'
+
+
+class Type6(Enum):
     error = 'error'
 
 
@@ -271,7 +311,7 @@ class RunError(BaseModel):
     )
 
 
-class Type6(Enum):
+class Type7(Enum):
     interrupt = 'interrupt'
 
 
@@ -288,6 +328,10 @@ class ConfigSchema(BaseModel):
 
 
 class ThreadStateSchema(BaseModel):
+    pass
+
+
+class StreamUpdateSchema(BaseModel):
     pass
 
 
@@ -398,8 +442,13 @@ class RunCreate(BaseModel):
     config: Optional[ConfigSchema] = None
     webhook: Optional[AnyUrl] = Field(
         None,
-        description='Webhook to call after run finishes or interrupts. If missing no callback is called and the client needs to poll.',
-        title='Completion or Interrupt webhook',
+        description='Webhook to call upon change of run status. This is a url that accepts a POST containing the `Run` object as body. See Callbacks definition.',
+        title='Status change webhook',
+    )
+    streaming: Optional[Streaming1] = Field(
+        None,
+        description='If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in its manifest.',
+        title='Streaming Mode',
     )
 
 
@@ -437,6 +486,14 @@ class RunResult(BaseModel):
     result: Optional[OutputSchema] = None
 
 
+class CustomRunResultUpdate(BaseModel):
+    type: Literal['custom'] = Field(..., title='Output Type')
+    run_id: Optional[UUID] = Field(
+        None, description='The ID of the run.', title='Run Id'
+    )
+    update: Optional[StreamUpdateSchema] = None
+
+
 class RunInterrupt(BaseModel):
     type: Literal['interrupt'] = Field(..., title='Output Type')
     interrupt: Optional[InterruptPayloadSchema] = None
@@ -470,6 +527,22 @@ class RunOutput(RootModel[Union[RunResult, RunInterrupt, RunError]]):
         description='Output of a Run. Can be the final result or an interrupt.',
         discriminator='type',
         title='Run Output',
+    )
+
+
+class RunOutputStream(BaseModel):
+    id: Optional[str] = Field(
+        None, description='Unique identifier of the event', title='Event ID'
+    )
+    event: Optional[Event] = Field(
+        None,
+        description='Event type. This is the constant string `agent_event` to be compatible with SSE spec. The actual type differentiation is done in the event itself.',
+    )
+    data: Optional[Union[RunResult, CustomRunResultUpdate]] = Field(
+        None,
+        description='A serialized JSON data structure carried in the SSE event data field. The event can carry either a full result, if streaming mode is `values` or an update if streaming mode is `updates`',
+        discriminator='type',
+        title='Stream Event Payload',
     )
 
 

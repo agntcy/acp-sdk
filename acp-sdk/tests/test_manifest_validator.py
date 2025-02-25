@@ -32,7 +32,12 @@ def test_manifest_validator(test_filename, test_success, error_message):
 @pytest.mark.parametrize(
     "test_filename, oas_ref_filename",
     [
-        ("manifest_ok.json", "oas.manifest_ok.yml"),
+        ("manifest_ok.json", "manifest_ok.json.oas.yml"),
+        ("manifest_ok_no_callbacks.json", "manifest_ok_no_callbacks.json.oas.yml"),
+        ("manifest_ok_no_interrupts.json", "manifest_ok_no_interrupts.json.oas.yml"),
+        ("manifest_ok_no_streaming.json", "manifest_ok_no_streaming.json.oas.yml"),
+        ("manifest_ok_no_threads.json", "manifest_ok_no_threads.json.oas.yml"),
+        ("manifest_ok_updates_streaming.json", "manifest_ok_updates_streaming.json.oas.yml"),
     ],
 )
 def test_oas_generator(test_filename, oas_ref_filename):

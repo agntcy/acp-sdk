@@ -10,11 +10,7 @@
     "capabilities": {
       "threads": true,
       "interrupts": true,
-      "callbacks": true,
-      "streaming": {
-        "custom": "true",
-        "values": "true"
-      }
+      "callbacks": true
     },
     "input": {
       "type": "integer"
@@ -27,53 +23,6 @@
           "type": "string"
         }
       }
-    },
-    "custom_streaming_update": {
-      "description": "Array of atomic updates to the `OutputSchema` data structure.",
-      "items": {
-        "properties": {
-          "affected_field": {
-            "description": "A Json path pointing to the value the result schema this delta is for.",
-            "format": "jsonpath",
-            "type": "string"
-          },
-          "operation": {
-            "description": "Specify the operation to perform on the afftected field. **Note that `append` is only supported if the type of affected field is `array` or `string`**",
-            "enum": [
-              "replace",
-              "append"
-            ],
-            "type": "string"
-          },
-          "value_delta": {
-            "description": "Value delta on the field specified in `affected_field`.  Type of this field must correspond to the type of the affected field.",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              },
-              {
-                "type": "integer"
-              },
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "array"
-              },
-              {
-                "type": "object"
-              }
-            ],
-            "title": "Value Delta"
-          }
-        },
-        "type": "object"
-      },
-      "title": "Delta",
-      "type": "array"
     },
     "output": {
       "type": "object",
