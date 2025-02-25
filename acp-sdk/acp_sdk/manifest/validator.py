@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 
+from pydantic import ValidationError
+
 from acp_sdk.models.models import AgentManifest
-from .generator import generate_agent_oapi
-from .exceptions import ManifestValidationException
 
 
 def validate_manifest_file(manifest_file_path: str) -> AgentManifest:
@@ -13,10 +13,16 @@ def validate_manifest_file(manifest_file_path: str) -> AgentManifest:
     return validate_manifest(json_manifest)
 
 
-def validate_manifest(json_manifest: dict) -> AgentManifest:
+def validate_manifest(json_manifest: dict) -> AgentManifest | None:
     # pydantic validation
-    manifest = AgentManifest.model_validate(json_manifest)
-    generate_agent_oapi(manifest)
+    try:
+        manifest = AgentManifest.model_validate(json_manifest)
+    except ValidationError as e:
+        print(e)
+        return None
+
+    print("Manifest is valid")
+
     return manifest
 
 
