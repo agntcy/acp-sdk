@@ -36,9 +36,9 @@ This is a generic client, because schemas for input, output, and configurations 
 
 ```
 cd acp-sdk
-poetry run python3 -m acp_sdk --help
+poetry run acp --help
 
-Usage: python -m acp_sdk [OPTIONS] COMMAND [ARGS]...
+Usage: acp [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --help  Show this message and exit.

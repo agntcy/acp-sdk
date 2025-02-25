@@ -15,6 +15,9 @@ fastapi-code-generator = "^0.5.2"
 pytest = "*"
 deepdiff = "^8.1.1"
 
+[tool.poetry.scripts]
+acp = "acp_sdk.__main__:cli"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
