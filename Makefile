@@ -37,11 +37,6 @@ test: install generate_sdk_models
 	make -C acp-sdk test
 
 check: test
-	@if [[ $$( git status --porcelain ) != "" ]]; then\
-		echo "ERROR: stale SDK models. Run 'make generate_sdk_models' and commit again";\
-		exit 1;\
-	else\
-		echo "SDK Models are up to date";\
-	fi
+	scripts/check-models.sh
 
 all: install generate test
