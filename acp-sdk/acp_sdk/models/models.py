@@ -32,7 +32,7 @@ class AgentManifestRef(BaseModel):
 class Streaming(BaseModel):
     result: Optional[bool] = Field(
         None,
-        description='This is `true` if the agent supports result streaming. If `false` or missing, result streaming is not supported. Result streaming consists of a stream of objects of type `RunResult`, where each one sent over the stream fully replace the previus one.',
+        description='This is `true` if the agent supports result streaming. If `false` or missing, result streaming is not supported. Result streaming consists of a stream of objects of type `RunResult`, where each one sent over the stream fully replace the previous one.',
         title='Result Streaming',
     )
     custom: Optional[bool] = Field(
