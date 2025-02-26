@@ -36,4 +36,7 @@ generate: generate_sdk_models generate_acp_client generate_acp_server
 test: install generate_sdk_models
 	make -C acp-sdk test
 
+check: test
+	scripts/check-models.sh
+
 all: install generate test
