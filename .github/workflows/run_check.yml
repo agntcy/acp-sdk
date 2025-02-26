@@ -15,7 +15,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12.7"
-  POETRY_VERSION: "1.8.4"
+  POETRY_VERSION: "2.1.1"
   POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
 permissions:
