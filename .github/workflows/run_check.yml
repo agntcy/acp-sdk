@@ -1,0 +1,58 @@
+---
+name: Check ACP SDK
+
+on:
+  pull_request:
+    branches:
+      - main
+
+
+# When pushing twice in a row on the same branch, the second push will be cancelled
+# This prevents from having multiple builds running at the same time, for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12.7"
+  POETRY_VERSION: "1.8.4"
+  POETRY_VIRTUALENVS_IN_PROJECT: "true"
+
+permissions:
+  contents: read
+
+# Note: consider the job names to be global if you want to require
+# them to succeed for a PR. :)
+jobs:
+  sdk-code-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Set up python ${{ env.PYTHON_VERSION }}
+      id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        update-environment: true
+
+    - name: Install Poetry
+      run: |
+        pipx install poetry==${{ env.POETRY_VERSION }}
+
+    - name: Check poetry configuration
+      run: poetry check
+
+    - name: Check code
+      run: make check
+
+    - name: Print summary
+      run: |
+        echo "## Code Check" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- Poetry Version: ${{ env.POETRY_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Python Version: ${{ env.PYTHON_VERSION}}" >> $GITHUB_STEP_SUMMARY
+
