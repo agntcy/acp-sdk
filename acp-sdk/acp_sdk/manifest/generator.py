@@ -138,11 +138,13 @@ def _gen_oas_streaming(manifest: AgentManifest, spec_dict):
         return
 
     # If we reach this point only 1 streaming mode is supported, hence we need to restrict the APIs only to accept it and not the other.
-    assert(len(streaming_modes) == 1)
+    assert (len(streaming_modes) == 1)
 
     supported_mode = streaming_modes[0].value
     spec_dict['components']['schemas']['StreamingMode']['enum'] = [supported_mode]
-    spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['$ref'] = spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][supported_mode]
+    spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['$ref'] = \
+    spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][
+        supported_mode]
     del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['oneOf']
     del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping']
 
