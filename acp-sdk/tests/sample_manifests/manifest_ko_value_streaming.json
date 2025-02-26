@@ -12,7 +12,6 @@
       "interrupts": true,
       "callbacks": true,
       "streaming": {
-        "custom": "true",
         "result": "true"
       }
     },

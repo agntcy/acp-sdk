@@ -11,8 +11,7 @@
       "threads": true,
       "callbacks": true,
       "streaming": {
-        "updates": "true",
-        "values": "true"
+        "result": "true"
       }
     },
     "input": {

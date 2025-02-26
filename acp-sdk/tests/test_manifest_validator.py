@@ -13,6 +13,7 @@ from deepdiff import diff
     [
         ("manifest_ok.json", True, ""),
         ("manifest_ko.json", False, ""),
+        ("manifest_ko_value_streaming.json", False, "custom_streaming_update defined with `spec.capabilities.streaming.custom=false`"),
         ("manifest_thread_support_ko.json", False,
          "Cannot define `specs.thread_state` if `specs.capabilities.threads` is `false`"),
         ("manifest_no_interrupts_ko.json", False, "Interrupts defined with `spec.capabilities.interrupts=false`")
@@ -37,7 +38,6 @@ def test_manifest_validator(test_filename, test_success, error_message):
         ("manifest_ok_no_interrupts.json", "manifest_ok_no_interrupts.json.oas.yml"),
         ("manifest_ok_no_streaming.json", "manifest_ok_no_streaming.json.oas.yml"),
         ("manifest_ok_no_threads.json", "manifest_ok_no_threads.json.oas.yml"),
-        ("manifest_ok_updates_streaming.json", "manifest_ok_updates_streaming.json.oas.yml"),
     ],
 )
 def test_oas_generator(test_filename, oas_ref_filename):

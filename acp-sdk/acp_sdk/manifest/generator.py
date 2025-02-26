@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 
-from acp_sdk.models.models import AgentManifest
+from acp_sdk.models.models import AgentManifest, StreamingMode
 import yaml
 from openapi_spec_validator import validate
 from openapi_spec_validator.readers import read_from_filename
@@ -112,44 +112,39 @@ def _gen_oas_interrupts(manifest: AgentManifest, spec_dict):
 
 def _gen_oas_streaming(manifest: AgentManifest, spec_dict):
     # Manipulate the spec according to the streaming capability flag in the manifest
+    streaming_modes = []
+    if manifest.specs.capabilities.streaming:
+        if manifest.specs.capabilities.streaming.custom: streaming_modes.append(StreamingMode.custom)
+        if manifest.specs.capabilities.streaming.result: streaming_modes.append(StreamingMode.result)
 
-    if (
-            not manifest.specs.capabilities.streaming or not manifest.specs.capabilities.streaming.custom) and manifest.specs.custom_streaming_update:
+    # Perform the checks for custom_streaming_update
+    if StreamingMode.custom not in streaming_modes and manifest.specs.custom_streaming_update:
         raise ManifestValidationException(
             "custom_streaming_update defined with `spec.capabilities.streaming.custom=false`")
 
-    if not manifest.specs.capabilities.streaming or (
-            not manifest.specs.capabilities.streaming.custom and not manifest.specs.capabilities.streaming.custom):
+    if StreamingMode.custom in streaming_modes and not manifest.specs.custom_streaming_update:
+        raise ManifestValidationException(
+            "Missing custom_streaming_update definitions with `spec.capabilities.streaming.custom=true`")
+
+    if len(streaming_modes) == 0:
         # No streaming is supported. Removing streaming method.
         del spec_dict['paths']['/runs/{run_id}/stream']
         # Removing streaming option from RunCreate
         del spec_dict['components']['schemas']['RunCreate']['properties']['streaming']
-    else:
-        # Restricting streaming modes to those supported in RunCreate
-        streaming_modes = []
+        return
 
-        if manifest.specs.capabilities.streaming.custom and not manifest.specs.capabilities.streaming.values:
-            spec_dict['components']['schemas']['RunCreate']['properties']['streaming']['enum'] = ['custom']
-            spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['$ref'] = \
-            spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][
-                'custom']
-            del spec_dict['components']['schemas']['RunOutputStream']['properties']['oneOf']
-            del spec_dict['components']['schemas']['RunOutputStream']['properties']['mapping']
+    if len(streaming_modes) == 2:
+        # Nothing to do
+        return
 
-        if not manifest.specs.capabilities.streaming.custom and manifest.specs.capabilities.streaming.values:
-            spec_dict['components']['schemas']['RunCreate']['properties']['streaming']['enum'] = ['values']
-            spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['$ref'] = \
-            spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][
-                'result']
-            del spec_dict['components']['schemas']['RunOutputStream']['properties']['oneOf']
-            del spec_dict['components']['schemas']['RunOutputStream']['properties']['mapping']
+    # If we reach this point only 1 streaming mode is supported, hence we need to restrict the APIs only to accept it and not the other.
+    assert(len(streaming_modes) == 1)
 
-        if manifest.specs.capabilities.streaming.custom:
-            if manifest.specs.custom_streaming_update:
-                spec_dict['components']['schemas']["StreamUpdateSchema"] = manifest.specs.custom_streaming_update
-            else:
-                raise ManifestValidationException(
-                    "Missing custom_streaming_update definitions with `spec.capabilities.streaming.custom=true`")
+    supported_mode = streaming_modes[0].value
+    spec_dict['components']['schemas']['StreamingMode']['enum'] = [supported_mode]
+    spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['$ref'] = spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][supported_mode]
+    del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['oneOf']
+    del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping']
 
 
 def _gen_oas_callback(manifest: AgentManifest, spec_dict):

@@ -100,15 +100,20 @@ components:
                     will result in an error.
                   properties:
                     custom:
-                      description: This is `true` if the agent supports streaming
-                        of agent specified objects. If `false` or missing, custom
-                        streaming is not supported.
-                      title: Streaming Custom Objects
+                      description: This is `true` if the agent supports custom objects
+                        streaming. If `false` or missing, custom streaming is not
+                        supported. Custom Objects streaming consists of a stream of
+                        object whose schema is specified by the agent in its manifest
+                        under `specs.custom_streaming_update`.
+                      title: Custom Objects Streaming
                       type: boolean
-                    values:
-                      description: This is `true` if the agent supports values streaming.
-                        If `false` or missing values streaming is not supported.
-                      title: Values Streaming
+                    result:
+                      description: This is `true` if the agent supports result streaming.
+                        If `false` or missing, result streaming is not supported.
+                        Result streaming consists of a stream of objects of type `RunResult`,
+                        where each one sent over the stream fully replace the previus
+                        one.
+                      title: Result Streaming
                       type: boolean
                   title: Streaming Modes
                   type: object
@@ -221,7 +226,7 @@ components:
                 required:
                 - interrupt_type
                 - resume_payload
-                - resume_input
+                - interrupt_payload
                 type: object
               type: array
             output:
@@ -354,6 +359,10 @@ components:
           format: uuid
           title: Run Id
           type: string
+        status:
+          $ref: '#/components/schemas/RunStatus'
+          description: Status of the Run when this result was generated
+          title: Run Status
         type:
           enum:
           - custom
@@ -361,6 +370,11 @@ components:
           type: string
         update:
           $ref: '#/components/schemas/StreamUpdateSchema'
+      required:
+      - type
+      - run_id
+      - status
+      - update
       title: Custom Run Result Update
       type: object
     DockerDeployment:
@@ -478,16 +492,10 @@ components:
           title: Run Id
           type: string
         status:
+          $ref: '#/components/schemas/RunStatus'
           description: The status of the run. One of 'pending', 'error', 'success',
             'timeout', 'interrupted'.
-          enum:
-          - pending
-          - error
-          - success
-          - timeout
-          - interrupted
           title: Status
-          type: string
         thread_id:
           description: Optional Thread ID wher the Run belongs to. This is populated
             only for runs on agents agents supporting Threads.
@@ -499,6 +507,13 @@ components:
           format: date-time
           title: Updated At
           type: string
+      required:
+      - creation
+      - run_id
+      - agent_id
+      - created_at
+      - updated_at
+      - status
       title: Agent Run
     RunCreate:
       description: Payload for creating a run.
@@ -554,6 +569,11 @@ components:
           - error
           title: Output Type
           type: string
+      required:
+      - type
+      - run_id
+      - errcode
+      - description
       title: Run Error
       type: object
     RunInterrupt:
@@ -566,6 +586,9 @@ components:
           - interrupt
           title: Output Type
           type: string
+      required:
+      - type
+      - interrupt
       title: Run Interrupt
       type: object
     RunOutput:
@@ -587,8 +610,8 @@ components:
       properties:
         data:
           description: A serialized JSON data structure carried in the SSE event data
-            field. The event can carry either a full result, if streaming mode is
-            `values` or an update if streaming mode is `updates`
+            field. The event can carry either a full `RunResult`, if streaming mode
+            is `result` or an custom update if streaming mode is `custom`
           discriminator:
             mapping:
               custom: '#/components/schemas/CustomRunResultUpdate'
@@ -609,6 +632,10 @@ components:
           description: Unique identifier of the event
           title: Event ID
           type: string
+      required:
+      - id
+      - event
+      - data
       title: Run Output Stream Event
       type: object
     RunResult:
@@ -621,11 +648,23 @@ components:
           format: uuid
           title: Run Id
           type: string
+        status:
+          $ref: '#/components/schemas/RunStatus'
+          description: Status of the Run when this result was generated. This is particurarly
+            useful when this data structure is used for streaming results. As the
+            server can indicate an interrupt or an error condition while streaming
+            the result.
+          title: Run Status
         type:
           enum:
           - result
           title: Output Type
           type: string
+      required:
+      - type
+      - run_id
+      - status
+      - result
       title: Run Result
       type: object
     RunSearchRequest:
@@ -655,18 +694,20 @@ components:
           title: Offset
           type: integer
         status:
+          $ref: '#/components/schemas/RunStatus'
           description: Matches all the Runs associated with the specified status.
             One of 'pending', 'error', 'success', 'timeout', 'interrupted'.
-          enum:
-          - pending
-          - error
-          - success
-          - timeout
-          - interrupted
           title: Status
-          type: string
       title: Run Search Request
       type: object
+    RunStatus:
+      enum:
+      - pending
+      - error
+      - success
+      - timeout
+      - interrupted
+      type: string
     SecurityScheme:
       description: 'This object contains an instance of an OpenAPI schema object,
         formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0'
@@ -715,6 +756,11 @@ components:
         to custom. The schema is described in Agent Manifest under 'spec.custom_streaming_update'.
       title: Stream Update Schema
       type: object
+    StreamingMode:
+      enum:
+      - result
+      - custom
+      type: string
     Thread:
       description: Represents a collection of consecutive runs on an agent. Thread
         is associated with a state
@@ -731,6 +777,9 @@ components:
           description: unique identifier of a thread
           title: Thread ID
           type: string
+      required:
+      - thread_id
+      - agent_id
       title: Thread
       type: object
     ThreadCreate:
@@ -744,6 +793,8 @@ components:
           description: Free form metadata for this thread
           title: Metadata
           type: object
+      required:
+      - agent_id
       title: Thread
       type: object
     ThreadSearchRequest:

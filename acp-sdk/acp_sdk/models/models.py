@@ -30,15 +30,15 @@ class AgentManifestRef(BaseModel):
 
 
 class Streaming(BaseModel):
-    values: Optional[bool] = Field(
+    result: Optional[bool] = Field(
         None,
-        description='This is `true` if the agent supports values streaming. If `false` or missing values streaming is not supported.',
-        title='Values Streaming',
+        description='This is `true` if the agent supports result streaming. If `false` or missing, result streaming is not supported. Result streaming consists of a stream of objects of type `RunResult`, where each one sent over the stream fully replace the previus one.',
+        title='Result Streaming',
     )
     custom: Optional[bool] = Field(
         None,
-        description='This is `true` if the agent supports streaming of agent specified objects. If `false` or missing, custom streaming is not supported.',
-        title='Streaming Custom Objects',
+        description='This is `true` if the agent supports custom objects streaming. If `false` or missing, custom streaming is not supported. Custom Objects streaming consists of a stream of object whose schema is specified by the agent in its manifest under `specs.custom_streaming_update`.',
+        title='Custom Objects Streaming',
     )
 
 
@@ -71,8 +71,8 @@ class Interrupt(BaseModel):
         description='Name of this interrupt type. Needs to be unique in the list of interrupts.',
         title='Interrupt Type Name',
     )
-    interrupt_payload: Optional[Dict[str, Any]] = Field(
-        None,
+    interrupt_payload: Dict[str, Any] = Field(
+        ...,
         description='This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object',
         examples=[
             {
@@ -245,12 +245,12 @@ class ErrorResponse(RootModel[str]):
     )
 
 
-class Streaming1(Enum):
-    values = 'values'
+class StreamingMode(Enum):
+    result = 'result'
     custom = 'custom'
 
 
-class Status(Enum):
+class RunStatus(Enum):
     pending = 'pending'
     error = 'error'
     success = 'success'
@@ -264,7 +264,7 @@ class RunSearchRequest(BaseModel):
         description='Matches all the Runs associated with the specified Agent ID.',
         title='Agent Id',
     )
-    status: Optional[Status] = Field(
+    status: Optional[RunStatus] = Field(
         None,
         description="Matches all the Runs associated with the specified status. One of 'pending', 'error', 'success', 'timeout', 'interrupted'.",
         title='Status',
@@ -300,14 +300,10 @@ class Type6(Enum):
 
 class RunError(BaseModel):
     type: Literal['error'] = Field(..., title='Output Type')
-    run_id: Optional[UUID] = Field(
-        None, description='The ID of the run.', title='Run Id'
-    )
-    errcode: Optional[int] = Field(
-        None, description='code of the error', title='Error Code'
-    )
-    description: Optional[str] = Field(
-        None, description='description of the error', title='Error Description'
+    run_id: UUID = Field(..., description='The ID of the run.', title='Run Id')
+    errcode: int = Field(..., description='code of the error', title='Error Code')
+    description: str = Field(
+        ..., description='description of the error', title='Error Description'
     )
 
 
@@ -344,8 +340,8 @@ class ResumePayloadSchema(BaseModel):
 
 
 class ThreadCreate(BaseModel):
-    agent_id: Optional[str] = Field(
-        None,
+    agent_id: str = Field(
+        ...,
         description='Identifier of the agent this thread is executed on',
         title='Agent ID',
     )
@@ -374,11 +370,11 @@ class ThreadSearchRequest(BaseModel):
 
 
 class Thread(BaseModel):
-    thread_id: Optional[str] = Field(
-        None, description='unique identifier of a thread', title='Thread ID'
+    thread_id: str = Field(
+        ..., description='unique identifier of a thread', title='Thread ID'
     )
-    agent_id: Optional[str] = Field(
-        None,
+    agent_id: str = Field(
+        ...,
         description='Identifier of the agent this thread is executed on',
         title='Agent ID',
     )
@@ -445,34 +441,32 @@ class RunCreate(BaseModel):
         description='Webhook to call upon change of run status. This is a url that accepts a POST containing the `Run` object as body. See Callbacks definition.',
         title='Status change webhook',
     )
-    streaming: Optional[Streaming1] = Field(
+    streaming: Optional[StreamingMode] = Field(
         None,
-        description='If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in its manifest.',
+        description='If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in its manifest under `specs.capabilities`',
         title='Streaming Mode',
     )
 
 
 class Run(BaseModel):
-    creation: Optional[RunCreate] = None
-    run_id: Optional[UUID] = Field(
-        None, description='The ID of the run.', title='Run Id'
-    )
-    agent_id: Optional[UUID] = Field(
-        None, description='The agent that was used for this run.', title='Agent Id'
+    creation: RunCreate
+    run_id: UUID = Field(..., description='The ID of the run.', title='Run Id')
+    agent_id: UUID = Field(
+        ..., description='The agent that was used for this run.', title='Agent Id'
     )
     thread_id: Optional[UUID] = Field(
         None,
         description='Optional Thread ID wher the Run belongs to. This is populated only for runs on agents agents supporting Threads.',
         title='Agent ID',
     )
-    created_at: Optional[AwareDatetime] = Field(
-        None, description='The time the run was created.', title='Created At'
+    created_at: AwareDatetime = Field(
+        ..., description='The time the run was created.', title='Created At'
     )
-    updated_at: Optional[AwareDatetime] = Field(
-        None, description='The last time the run was updated.', title='Updated At'
+    updated_at: AwareDatetime = Field(
+        ..., description='The last time the run was updated.', title='Updated At'
     )
-    status: Optional[Status] = Field(
-        None,
+    status: RunStatus = Field(
+        ...,
         description="The status of the run. One of 'pending', 'error', 'success', 'timeout', 'interrupted'.",
         title='Status',
     )
@@ -480,23 +474,29 @@ class Run(BaseModel):
 
 class RunResult(BaseModel):
     type: Literal['result'] = Field(..., title='Output Type')
-    run_id: Optional[UUID] = Field(
-        None, description='The ID of the run.', title='Run Id'
+    run_id: UUID = Field(..., description='The ID of the run.', title='Run Id')
+    status: RunStatus = Field(
+        ...,
+        description='Status of the Run when this result was generated. This is particurarly useful when this data structure is used for streaming results. As the server can indicate an interrupt or an error condition while streaming the result.',
+        title='Run Status',
     )
-    result: Optional[OutputSchema] = None
+    result: OutputSchema
 
 
 class CustomRunResultUpdate(BaseModel):
     type: Literal['custom'] = Field(..., title='Output Type')
-    run_id: Optional[UUID] = Field(
-        None, description='The ID of the run.', title='Run Id'
+    run_id: UUID = Field(..., description='The ID of the run.', title='Run Id')
+    status: RunStatus = Field(
+        ...,
+        description='Status of the Run when this result was generated',
+        title='Run Status',
     )
-    update: Optional[StreamUpdateSchema] = None
+    update: StreamUpdateSchema
 
 
 class RunInterrupt(BaseModel):
     type: Literal['interrupt'] = Field(..., title='Output Type')
-    interrupt: Optional[InterruptPayloadSchema] = None
+    interrupt: InterruptPayloadSchema
 
 
 class Agent(BaseModel):
@@ -531,16 +531,14 @@ class RunOutput(RootModel[Union[RunResult, RunInterrupt, RunError]]):
 
 
 class RunOutputStream(BaseModel):
-    id: Optional[str] = Field(
-        None, description='Unique identifier of the event', title='Event ID'
-    )
-    event: Optional[Event] = Field(
-        None,
+    id: str = Field(..., description='Unique identifier of the event', title='Event ID')
+    event: Event = Field(
+        ...,
         description='Event type. This is the constant string `agent_event` to be compatible with SSE spec. The actual type differentiation is done in the event itself.',
     )
-    data: Optional[Union[RunResult, CustomRunResultUpdate]] = Field(
-        None,
-        description='A serialized JSON data structure carried in the SSE event data field. The event can carry either a full result, if streaming mode is `values` or an update if streaming mode is `updates`',
+    data: Union[RunResult, CustomRunResultUpdate] = Field(
+        ...,
+        description='A serialized JSON data structure carried in the SSE event data field. The event can carry either a full `RunResult`, if streaming mode is `result` or an custom update if streaming mode is `custom`',
         discriminator='type',
         title='Stream Event Payload',
     )

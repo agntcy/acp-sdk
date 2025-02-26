@@ -12,7 +12,7 @@
       "interrupts": true,
       "callbacks": true,
       "streaming": {
-        "updates": true
+        "result": "true"
       }
     },
     "input": {
