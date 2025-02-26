@@ -51,7 +51,8 @@ jobs:
 
     - name: Check poetry configuration
       run: poetry check
-
+      working-directory: ./acp-sdk
+      
     - name: Check code
       run: make check
 
