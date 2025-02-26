@@ -18,7 +18,8 @@ def validate_manifest(manifest_path):
     """
     Validate the manifest provided against the ACP specification
     """
-    validate_manifest_file(manifest_path)
+    manifest = validate_manifest_file(manifest_path)
+    if manifest: print("Manifest is valid")
 
 
 @cli.command()

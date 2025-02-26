@@ -26,8 +26,6 @@ def validate_manifest(json_manifest: dict, raise_exception: bool = False) -> Age
         if raise_exception: raise e
         return None
 
-    print("Manifest is valid")
-
     return manifest
 
 

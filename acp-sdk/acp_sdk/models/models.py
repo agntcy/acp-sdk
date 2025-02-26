@@ -60,7 +60,7 @@ class Capabilities(BaseModel):
     )
     streaming: Optional[Streaming] = Field(
         None,
-        description='Streaming modes supported. If missing, streaming is not supported.  If no mode is supported attempts to stream output will result in an error.',
+        description='Supported streaming modes. If missing, streaming is not supported.  If no mode is supported attempts to stream output will result in an error.',
         title='Streaming Modes',
     )
 
