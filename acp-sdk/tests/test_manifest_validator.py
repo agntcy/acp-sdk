@@ -23,8 +23,8 @@ def test_manifest_validator(test_filename, test_success, error_message):
     curpwd = os.path.dirname(os.path.realpath(__file__))
     fullpath = os.path.join(curpwd, "sample_manifests", test_filename)
     try:
-        validate_manifest_file(fullpath)
-        assert (test_success)
+        manifest = validate_manifest_file(fullpath, raise_exception=True)
+        assert (manifest is not None)
     except Exception as e:
         assert (not test_success)
         assert (error_message in str(e))
