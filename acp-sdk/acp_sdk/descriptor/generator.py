@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 
-from acp_sdk.models.models import AgentACPDescriptor, StreamingMode
+from acp_sdk.models import AgentACPDescriptor, StreamingMode
 import yaml
 from openapi_spec_validator import validate
 from openapi_spec_validator.readers import read_from_filename
@@ -113,6 +113,7 @@ def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
 def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
     # Manipulate the spec according to the streaming capability flag in the descriptor
     streaming_modes = []
+<<<<<<< HEAD:acp-sdk/acp_sdk/descriptor/generator.py
     if descriptor.specs.capabilities.streaming:
         if descriptor.specs.capabilities.streaming.custom: streaming_modes.append(StreamingMode.custom)
         if descriptor.specs.capabilities.streaming.result: streaming_modes.append(StreamingMode.result)
@@ -124,6 +125,19 @@ def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
 
     if StreamingMode.custom in streaming_modes and not descriptor.specs.custom_streaming_update:
         raise ACPDescriptorValidationException(
+=======
+    if manifest.specs.capabilities.streaming:
+        if manifest.specs.capabilities.streaming.custom: streaming_modes.append(StreamingMode.CUSTOM)
+        if manifest.specs.capabilities.streaming.result: streaming_modes.append(StreamingMode.RESULT)
+
+    # Perform the checks for custom_streaming_update
+    if StreamingMode.CUSTOM not in streaming_modes and manifest.specs.custom_streaming_update:
+        raise ManifestValidationException(
+            "custom_streaming_update defined with `spec.capabilities.streaming.custom=false`")
+
+    if StreamingMode.CUSTOM in streaming_modes and not manifest.specs.custom_streaming_update:
+        raise ManifestValidationException(
+>>>>>>> 17b142f (feat: Added singular ACPClient class for ACP APIs. Added openapi generated api client. Fixed tests. Added test of ACPClient object.):acp-sdk/acp_sdk/manifest/generator.py
             "Missing custom_streaming_update definitions with `spec.capabilities.streaming.custom=true`")
 
     if len(streaming_modes) == 0:

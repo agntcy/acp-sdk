@@ -9,6 +9,14 @@ readme = "README.md"
 python = "^3.12"
 click = "^8.1.8"
 openapi-spec-validator = "^0.7.1"
+datamodel-code-generator = "^0.25.6"
+# Inherited from generated openapi model
+urllib3 = ">= 1.25.3, < 3.0.0"
+python_dateutil = ">= 2.8.2"
+pydantic = ">= 2"
+typing-extensions = ">= 4.7.1"
+
+[tool.poetry.group.generate_server.dependencies]
 fastapi-code-generator = "^0.5.2"
 
 [tool.poetry.group.test.dependencies]

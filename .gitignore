@@ -11,3 +11,4 @@ venv
 .venv
 acp-client
 acp-server-stub
+acp-models
