@@ -10,5 +10,5 @@ ___*
 venv
 .venv
 acp-client
+acp-async-client
 acp-server-stub
-acp-models

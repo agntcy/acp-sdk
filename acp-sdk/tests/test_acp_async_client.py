@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import datetime
 import io
-from acp_sdk import ACPClient, ApiResponse, Configuration, ApiClient
+from acp_sdk import AsyncACPClient, ApiResponse, Configuration, AsyncApiClient
 from acp_sdk.models import RunCreate, RunSearchRequest, Run, RunStatus
 
 class RESTResponse(io.IOBase):
@@ -12,7 +12,7 @@ class RESTResponse(io.IOBase):
         self.reason = None
         self.data = body
 
-    def read(self):
+    async def read(self):
         return self.data
 
     def getheaders(self):
@@ -22,14 +22,14 @@ class RESTResponse(io.IOBase):
         """Returns a given response header."""
         return "bogus"
 
-def test_acp_client_runs_api(monkeypatch):
+async def test_acp_client_runs_api(monkeypatch):
     agent_id = "bogus-agent-id"
     init_run_id = "bugus-run-id"
     run_create = RunCreate(agent_id=agent_id)
 
-    api_client = ApiClient(Configuration(retries=2, api_key="bogus"))
+    api_client = AsyncApiClient(Configuration(retries=2, api_key="bogus"))
     # Make sure apis return data
-    def mock_call_api(
+    async def mock_call_api(
         method,
         url,
         header_params=None,
@@ -54,26 +54,26 @@ run_id: 1234-5678-90123
         )
         return ApiResponse[Run](status_code=200, data=run, raw_data=run.model_dump_json(exclude_unset=True).encode())
     monkeypatch.setattr(api_client, "response_deserialize", mock_response_deserialize)
-    client = ACPClient(api_client)
+    client = AsyncACPClient(api_client)
 
-    response = client.create_run(run_create=run_create)
+    response = await client.create_run(run_create=run_create)
     assert response is not None
     run_id = response.run_id
 
-    response = client.get_run(run_id)
+    response = await client.get_run(run_id)
     assert response is not None
 
-    response = client.get_run_output(run_id)
+    response = await client.get_run_output(run_id)
     assert response is not None
 
-    response = client.get_run_stream(run_id)
+    response = await client.get_run_stream(run_id)
     assert response is not None
 
-    response = client.resume_run(run_id, {})
+    response = await client.resume_run(run_id, {})
     assert response is not None
 
-    response = client.search_runs(RunSearchRequest(agent_id=agent_id))
+    response = await client.search_runs(RunSearchRequest(agent_id=agent_id))
     assert response is not None
 
-    response = client.delete_run(run_id)
+    response = await client.delete_run(run_id)
     assert response is not None

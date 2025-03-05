@@ -9,4 +9,4 @@ setup_test:
 test: setup_test
 	@poetry run pytest --exitfirst -q tests/test_descriptor_validator.py::test_descriptor_validator
 	@poetry run pytest --exitfirst -q tests/test_descriptor_validator.py::test_oas_generator
-	poetry run pytest -vv tests/test_acp_client.py
+	poetry run pytest -vv tests/test_acp_client.py tests/test_acp_async_client.py

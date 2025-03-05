@@ -3,8 +3,12 @@
 ACP_SPEC_RELEASE?=main
 ACP_SPEC_DIR?=acp-sdk/acp_sdk/acp-spec
 
-.PHONY: default install generate_sdk_models generate_acp_client \
-	generate_acp_server generate install_test test check all
+ACP_CLIENT_DIR=acp-client
+ACP_ASYNC_CLIENT_DIR=acp-async-client
+
+.PHONY: default install generate_acp_client \
+	generate_acp_server generate install_test test check all \
+	generate_async_acp_client
 
 default: test
 install: 
@@ -13,38 +17,25 @@ install:
 $(ACP_SPEC_DIR)/openapi.yaml: 
 	git submodule update $(ACP_SPEC_DIR)
 
-generate_sdk_models: $(ACP_SPEC_DIR)/openapi.yaml
-	-@mkdir acp-models
-	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
-	cd acp-sdk && poetry run datamodel-codegen \
-		--input acp_sdk/acp-spec/openapi.yaml \
-		--input-file-type openapi \
-		--output-model-type pydantic_v2.BaseModel \
-		--output ../acp-models/models_v$${ACP_SPEC_VERSION}.py \
-		--disable-timestamp
-
 generate_acp_client: $(ACP_SPEC_DIR)/openapi.yaml
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
 	docker run --rm \
 	-v ${PWD}:/local openapitools/openapi-generator-cli generate \
 	-i local/$(ACP_SPEC_DIR)/openapi.yaml \
 	--package-name acp_client_v$${ACP_SPEC_VERSION} \
-	--additional-properties=generateSourceCodeOnly=true \
+	"--additional-properties=library=urllib3" \
 	-g python \
-	-o local/acp-client && \
-	sed -E -i '' -e 's/^import[[:space:]]+acp_client_v'$${ACP_SPEC_VERSION}'.models$$/from . import models as acp_models/' \
-	    -e 's/acp_client_v'$${ACP_SPEC_VERSION}'.models/acp_models/' \
-		acp-client/acp_client_v$${ACP_SPEC_VERSION}/api_client.py && \
-	sed -E -i '' -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\././' \
-	    -e 's/acp_client_v'$${ACP_SPEC_VERSION}'[[:space:]]/. /' \
-		acp-client/acp_client_v$${ACP_SPEC_VERSION}/*.py && \
-	sed -E -i '' -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\.api\././' \
-	    -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\.api[[:space:]]/. /' \
-	    -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\./../' \
-		acp-client/acp_client_v$${ACP_SPEC_VERSION}/api/*.py && \
-	sed -E -i '' -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\.models\././' \
-	    -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\.models[[:space:]]/. /' \
-		acp-client/acp_client_v$${ACP_SPEC_VERSION}/models/*.py
+	-o local/$(ACP_CLIENT_DIR)
+
+generate_acp_async_client: $(ACP_SPEC_DIR)/openapi.yaml
+	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
+	docker run --rm \
+	-v ${PWD}:/local openapitools/openapi-generator-cli generate \
+	-i local/$(ACP_SPEC_DIR)/openapi.yaml \
+	--package-name acp_async_client_v$${ACP_SPEC_VERSION} \
+	"--additional-properties=library=asyncio" \
+	-g python \
+	-o local/$(ACP_ASYNC_CLIENT_DIR)
 
 generate_acp_server: $(ACP_SPEC_DIR)/openapi.yaml
 	poetry new acp-server-stub
@@ -58,7 +49,7 @@ generate_acp_server: $(ACP_SPEC_DIR)/openapi.yaml
 	--disable-timestamp
 
 
-generate: generate_sdk_models generate_acp_client generate_acp_server
+generate: generate_acp_client generate_acp_server
 
 install_test: 
 	cd acp-sdk && poetry sync --with test --without generate_server
