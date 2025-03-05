@@ -101,7 +101,7 @@ class Interrupt(BaseModel):
     )
 
 
-class Specs(BaseModel):
+class AgentACPSpec(BaseModel):
     capabilities: Capabilities = Field(
         ...,
         description='Declares what invocation features this agent is capable of.',
@@ -356,11 +356,7 @@ class AgentMetadata(BaseModel):
 
 class AgentACPDescriptor(BaseModel):
     metadata: AgentMetadata
-    specs: Specs = Field(
-        ...,
-        description='Specification of agent capabilities, config, input, output, and interrupts',
-        title='Agent ACP Specs',
-    )
+    specs: AgentACPSpec
 
 
 class RunCreate(BaseModel):
