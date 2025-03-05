@@ -11,21 +11,21 @@ from pydantic import AnyUrl, AwareDatetime, BaseModel, Field, RootModel, conint
 from typing_extensions import Literal
 
 
-class AgentManifestRef(BaseModel):
+class AgentRef(BaseModel):
     name: str = Field(
         ...,
-        description='Name of the agent that identifies the agent in its manifest',
+        description='Name of the agent that identifies the agent in its record',
         title='Name',
     )
     version: str = Field(
         ...,
-        description='Version of the agent in its manifest. Should be formatted according to semantic versioning (https://semver.org)',
+        description='Version of the agent in its record. Should be formatted according to semantic versioning (https://semver.org)',
         title='Version',
     )
     url: Optional[AnyUrl] = Field(
         None,
-        description='URL of the manifest. Can be a network location or a file.',
-        title='Manifest URL',
+        description='URL of the record. Can be a network location or a file.',
+        title='Agent Record URL',
     )
 
 
@@ -37,7 +37,7 @@ class Streaming(BaseModel):
     )
     custom: Optional[bool] = Field(
         None,
-        description='This is `true` if the agent supports custom objects streaming. If `false` or missing, custom streaming is not supported. Custom Objects streaming consists of a stream of object whose schema is specified by the agent in its manifest under `specs.custom_streaming_update`.',
+        description='This is `true` if the agent supports custom objects streaming. If `false` or missing, custom streaming is not supported. Custom Objects streaming consists of a stream of object whose schema is specified by the agent ACP descriptor under `specs.custom_streaming_update`.',
         title='Custom Objects Streaming',
     )
 
@@ -184,44 +184,6 @@ class Specs(BaseModel):
     )
 
 
-class Type(Enum):
-    source_code = 'source_code'
-
-
-class FrameworkType(Enum):
-    langgraph = 'langgraph'
-
-
-class LangGraphConfig(BaseModel):
-    framework_type: Literal['langgraph']
-    graph: str
-
-
-class FrameworkType1(Enum):
-    llamaindex = 'llamaindex'
-
-
-class LlamaIndexConfig(BaseModel):
-    framework_type: Literal['llamaindex']
-    path: str
-
-
-class Type1(Enum):
-    remote_service = 'remote_service'
-
-
-class Type2(Enum):
-    docker = 'docker'
-
-
-class Type3(Enum):
-    ACP = 'ACP'
-
-
-class SecurityScheme(BaseModel):
-    pass
-
-
 class AgentSearchRequest(BaseModel):
     name: Optional[str] = Field(
         None, description='Match all agents with the name specified.', title='Name'
@@ -282,7 +244,7 @@ class RunSearchRequest(BaseModel):
     )
 
 
-class Type4(Enum):
+class Type(Enum):
     result = 'result'
 
 
@@ -290,11 +252,11 @@ class Event(Enum):
     agent_event = 'agent_event'
 
 
-class Type5(Enum):
+class Type1(Enum):
     custom = 'custom'
 
 
-class Type6(Enum):
+class Type2(Enum):
     error = 'error'
 
 
@@ -307,7 +269,7 @@ class RunError(BaseModel):
     )
 
 
-class Type7(Enum):
+class Type3(Enum):
     interrupt = 'interrupt'
 
 
@@ -384,7 +346,7 @@ class Thread(BaseModel):
 
 
 class AgentMetadata(BaseModel):
-    ref: AgentManifestRef
+    ref: AgentRef
     description: str = Field(
         ...,
         description='Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect',
@@ -392,34 +354,13 @@ class AgentMetadata(BaseModel):
     )
 
 
-class SourceCodeDeployment(BaseModel):
-    type: Literal['source_code']
-    name: Optional[str] = Field(
-        None,
-        description='Name this deployment option is referred to within this agent. This is needed to indicate which one is preferred when this manifest is referred. Can be omitted, in such case selection is not possible.',
-        title='Deployment Option Name',
-    )
-    url: AnyUrl = Field(
+class AgentACPDescriptor(BaseModel):
+    metadata: AgentMetadata
+    specs: Specs = Field(
         ...,
-        description='Location of the source code. E.g. path to code root, github repo url etc.',
-        title='Source Code Locator',
+        description='Specification of agent capabilities, config, input, output, and interrupts',
+        title='Agent ACP Specs',
     )
-    framework_config: Union[LangGraphConfig, LlamaIndexConfig] = Field(
-        ..., discriminator='framework_type'
-    )
-
-
-class AgentConnectProtocol(BaseModel):
-    type: Type3
-    url: AnyUrl = Field(
-        ..., description='URL pointing to the ACP endpoint root.', title='ACP URL'
-    )
-    agent_id: Optional[UUID] = Field(
-        None,
-        description='Agent identifier in ACP server. If missing, the first returned agent with matching name and version should be used.',
-        title='Agent identifier',
-    )
-    authentication: Optional[SecurityScheme] = None
 
 
 class RunCreate(BaseModel):
@@ -443,7 +384,7 @@ class RunCreate(BaseModel):
     )
     streaming: Optional[StreamingMode] = Field(
         None,
-        description='If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in its manifest under `specs.capabilities`',
+        description='If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in agent ACP descriptor  under `specs.capabilities`',
         title='Streaming Mode',
     )
 
@@ -508,19 +449,6 @@ class Agent(BaseModel):
     metadata: AgentMetadata
 
 
-class RemoteServiceDeployment(BaseModel):
-    type: Literal['remote_service']
-    protocol: AgentConnectProtocol
-
-
-class DockerDeployment(BaseModel):
-    type: Literal['docker']
-    image: AnyUrl = Field(
-        ..., description='Container image for the agent', title='Agent Docker image'
-    )
-    protocol: AgentConnectProtocol
-
-
 class RunOutput(RootModel[Union[RunResult, RunInterrupt, RunError]]):
     root: Union[RunResult, RunInterrupt, RunError] = Field(
         ...,
@@ -541,31 +469,4 @@ class RunOutputStream(BaseModel):
         description='A serialized JSON data structure carried in the SSE event data field. The event can carry either a full `RunResult`, if streaming mode is `result` or an custom update if streaming mode is `custom`',
         discriminator='type',
         title='Stream Event Payload',
-    )
-
-
-class Deployments(
-    RootModel[Union[SourceCodeDeployment, RemoteServiceDeployment, DockerDeployment]]
-):
-    root: Union[SourceCodeDeployment, RemoteServiceDeployment, DockerDeployment] = (
-        Field(..., discriminator='type')
-    )
-
-
-class AgentManifest(BaseModel):
-    metadata: AgentMetadata
-    specs: Specs = Field(
-        ...,
-        description='Specification of agent capabilities, config, input, output, and interrupts',
-        title='Agent Specs',
-    )
-    dependencies: Optional[List[AgentManifestRef]] = Field(
-        None,
-        description='List of all other agents this agent depends on',
-        title='Agent Dependencies',
-    )
-    deployments: Optional[List[Deployments]] = Field(
-        None,
-        description='List of possible methods to instantiate or consume the agent.  Any of the available option could be used.\nEvery option could be associated with a unique name within this agent. If present, when another manifest refers to this manifest, it can also select the preferred deployment option.',
-        title='Deployment Options',
     )

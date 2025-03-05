@@ -8,11 +8,24 @@
   },
   "specs": {
     "capabilities": {
-        "threads": false,
-        "callbacks": true
+      "threads": true,
+      "interrupts": true,
+      "callbacks": true,
+      "streaming": {
+        "result": "true"
+      }
     },
     "input": {
       "type": "integer"
+    },
+    "thread_state": {
+      "type": "object",
+      "description": "The state of the agent",
+      "properties": {
+        "state": {
+          "type": "string"
+        }
+      }
     },
     "output": {
       "type": "object",
@@ -21,7 +34,15 @@
         "name": {
           "type": "string"
         }
-      }
+      },
+      "examples": [
+        {
+          "name": "John"
+        },
+        {
+          "name": "Adele"
+        }
+      ]
     },
     "config": {
       "type": "object",
@@ -116,26 +137,5 @@
         }
       }
     ]
-  },
-  "dependencies": [
-    {
-      "name": "org.agntcy.sample-agent-2",
-      "version": "0.0.1"
-    },
-    {
-      "name": "org.agntcy.sample-agent-3",
-      "version": "0.0.1"
-    }
-  ],
-  "deployments": [
-    {
-      "type": "source_code",
-      "name": "src",
-      "url": "file:///tmp/agent-1",
-      "framework_config": {
-        "framework_type": "langgraph",
-        "graph": "agentgraph"
-      }
-    }
-  ]
+  }
 }
