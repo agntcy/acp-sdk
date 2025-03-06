@@ -21,12 +21,12 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List, Optional
+from .agent_acp_spec_interrupts_inner import AgentACPSpecInterruptsInner
 from .agent_capabilities import AgentCapabilities
-from .agent_specs_interrupts_inner import AgentSpecsInterruptsInner
 from typing import Optional, Set
 from typing_extensions import Self
 
-class AgentSpecs(BaseModel):
+class AgentACPSpec(BaseModel):
     """
     Specification of agent capabilities, config, input, output, and interrupts
     """ # noqa: E501
@@ -36,7 +36,7 @@ class AgentSpecs(BaseModel):
     custom_streaming_update: Optional[Dict[str, Any]] = Field(default=None, description="This describes the format of an Update in the streaming.  Must be specified if `streaming.custom` capability is true and cannot be specified otherwise. Format follows: https://spec.openapis.org/oas/v3.1.1.html#schema-object")
     thread_state: Optional[Dict[str, Any]] = Field(default=None, description="This describes the format of ThreadState.  Cannot be specified if `threads` capability is false. If not specified, when `threads` capability is true, then the API to retrieve ThreadState from a Thread or a Run is not available. This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object")
     config: Dict[str, Any] = Field(description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object")
-    interrupts: Optional[List[AgentSpecsInterruptsInner]] = Field(default=None, description="List of possible interrupts that can be provided by the agent. If `interrupts` capability is true, this needs to have at least one item.")
+    interrupts: Optional[List[AgentACPSpecInterruptsInner]] = Field(default=None, description="List of possible interrupts that can be provided by the agent. If `interrupts` capability is true, this needs to have at least one item.")
     __properties: ClassVar[List[str]] = ["capabilities", "input", "output", "custom_streaming_update", "thread_state", "config", "interrupts"]
 
     model_config = ConfigDict(
@@ -57,7 +57,7 @@ class AgentSpecs(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of AgentSpecs from a JSON string"""
+        """Create an instance of AgentACPSpec from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -92,7 +92,7 @@ class AgentSpecs(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of AgentSpecs from a dict"""
+        """Create an instance of AgentACPSpec from a dict"""
         if obj is None:
             return None
 
@@ -106,7 +106,7 @@ class AgentSpecs(BaseModel):
             "custom_streaming_update": obj.get("custom_streaming_update"),
             "thread_state": obj.get("thread_state"),
             "config": obj.get("config"),
-            "interrupts": [AgentSpecsInterruptsInner.from_dict(_item) for _item in obj["interrupts"]] if obj.get("interrupts") is not None else None
+            "interrupts": [AgentACPSpecInterruptsInner.from_dict(_item) for _item in obj["interrupts"]] if obj.get("interrupts") is not None else None
         })
         return _obj
 

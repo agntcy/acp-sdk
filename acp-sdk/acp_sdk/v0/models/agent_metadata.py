@@ -21,7 +21,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from .agent_manifest_ref import AgentManifestRef
+from .agent_ref import AgentRef
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,7 +29,7 @@ class AgentMetadata(BaseModel):
     """
     Basic information associated to the agent
     """ # noqa: E501
-    ref: AgentManifestRef
+    ref: AgentRef
     description: StrictStr = Field(description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect")
     __properties: ClassVar[List[str]] = ["ref", "description"]
 
@@ -87,7 +87,7 @@ class AgentMetadata(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "ref": AgentManifestRef.from_dict(obj["ref"]) if obj.get("ref") is not None else None,
+            "ref": AgentRef.from_dict(obj["ref"]) if obj.get("ref") is not None else None,
             "description": obj.get("description")
         })
         return _obj

@@ -32,7 +32,7 @@ class RunResult(BaseModel):
     type: StrictStr
     run_id: StrictStr = Field(description="The ID of the run.")
     status: RunStatus = Field(description="Status of the Run when this result was generated. This is particurarly useful when this data structure is used for streaming results. As the server can indicate an interrupt or an error condition while streaming the result.")
-    result: Dict[str, Any] = Field(description="The output of the agent. The schema is described in Agent Manifest under 'spec.output'.")
+    result: Dict[str, Any] = Field(description="The output of the agent. The schema is described in agent ACP descriptor under 'spec.output'.")
     __properties: ClassVar[List[str]] = ["type", "run_id", "status", "result"]
 
     @field_validator('type')

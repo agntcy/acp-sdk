@@ -19,26 +19,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
-from .agent_connect_protocol import AgentConnectProtocol
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class RemoteServiceDeployment(BaseModel):
+class AgentRef(BaseModel):
     """
-    Describes the network endpoint where the agent is available
+    Reference to an Agent Record in the Agent Directory, it includes name, version and a locator.
     """ # noqa: E501
-    type: StrictStr
-    protocol: AgentConnectProtocol
-    __properties: ClassVar[List[str]] = ["type", "protocol"]
-
-    @field_validator('type')
-    def type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['remote_service']):
-            raise ValueError("must be one of enum values ('remote_service')")
-        return value
+    name: StrictStr = Field(description="Name of the agent that identifies the agent in its record")
+    version: StrictStr = Field(description="Version of the agent in its record. Should be formatted according to semantic versioning (https://semver.org)")
+    url: Optional[StrictStr] = Field(default=None, description="URL of the record. Can be a network location or a file.")
+    __properties: ClassVar[List[str]] = ["name", "version", "url"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -58,7 +51,7 @@ class RemoteServiceDeployment(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of RemoteServiceDeployment from a JSON string"""
+        """Create an instance of AgentRef from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -79,14 +72,11 @@ class RemoteServiceDeployment(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of protocol
-        if self.protocol:
-            _dict['protocol'] = self.protocol.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of RemoteServiceDeployment from a dict"""
+        """Create an instance of AgentRef from a dict"""
         if obj is None:
             return None
 
@@ -94,8 +84,9 @@ class RemoteServiceDeployment(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "type": obj.get("type"),
-            "protocol": AgentConnectProtocol.from_dict(obj["protocol"]) if obj.get("protocol") is not None else None
+            "name": obj.get("name"),
+            "version": obj.get("version"),
+            "url": obj.get("url")
         })
         return _obj
 

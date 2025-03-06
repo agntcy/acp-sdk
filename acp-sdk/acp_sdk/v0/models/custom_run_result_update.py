@@ -32,7 +32,7 @@ class CustomRunResultUpdate(BaseModel):
     type: StrictStr
     run_id: StrictStr = Field(description="The ID of the run.")
     status: RunStatus = Field(description="Status of the Run when this result was generated")
-    update: Dict[str, Any] = Field(description="An update in the SSE event streaming where streaming mode is set to custom. The schema is described in Agent Manifest under 'spec.custom_streaming_update'.")
+    update: Dict[str, Any] = Field(description="An update in the SSE event streaming where streaming mode is set to custom. The schema is described in agent ACP descriptor under 'spec.custom_streaming_update'.")
     __properties: ClassVar[List[str]] = ["type", "run_id", "status", "update"]
 
     @field_validator('type')

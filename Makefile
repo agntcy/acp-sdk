@@ -17,6 +17,7 @@ install:
 $(ACP_SPEC_DIR)/openapi.yaml: 
 	git submodule update $(ACP_SPEC_DIR)
 
+# Generate client and correct models for convenience.
 generate_acp_client: $(ACP_SPEC_DIR)/openapi.yaml
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
 	docker run --rm \
@@ -25,7 +26,14 @@ generate_acp_client: $(ACP_SPEC_DIR)/openapi.yaml
 	--package-name acp_client_v$${ACP_SPEC_VERSION} \
 	"--additional-properties=library=urllib3" \
 	-g python \
-	-o local/$(ACP_CLIENT_DIR)
+	-o local/$(ACP_CLIENT_DIR) && \
+	for pyfile in $$(find $(ACP_CLIENT_DIR) -name '*.py'); do \
+	   { cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && mv $${pyfile}.bak $${pyfile} ; \
+	done && \
+	sed -i '' -E -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\.models\././' \
+	  $(ACP_CLIENT_DIR)/acp_client_v$${ACP_SPEC_VERSION}/models/*.py && \
+	sed -i '' -E -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\././' \
+	  $(ACP_CLIENT_DIR)/acp_client_v$${ACP_SPEC_VERSION}/*.py
 
 generate_acp_async_client: $(ACP_SPEC_DIR)/openapi.yaml
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
@@ -35,7 +43,14 @@ generate_acp_async_client: $(ACP_SPEC_DIR)/openapi.yaml
 	--package-name acp_async_client_v$${ACP_SPEC_VERSION} \
 	"--additional-properties=library=asyncio" \
 	-g python \
-	-o local/$(ACP_ASYNC_CLIENT_DIR)
+	-o local/$(ACP_ASYNC_CLIENT_DIR) && \
+	for pyfile in $$(find $(ACP_ASYNC_CLIENT_DIR) -name '*.py'); do \
+	   { cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && mv $${pyfile}.bak $${pyfile} ; \
+	done && \
+	sed -i '' -E -e 's/acp_async_client_v'$${ACP_SPEC_VERSION}'\.models\././' \
+	  $(ACP_ASYNC_CLIENT_DIR)/acp_async_client_v$${ACP_SPEC_VERSION}/models/*.py && \
+	sed -i '' -E -e 's/acp_async_client_v'$${ACP_SPEC_VERSION}'\././' \
+	  $(ACP_ASYNC_CLIENT_DIR)/acp_async_client_v$${ACP_SPEC_VERSION}/*.py
 
 generate_acp_server: $(ACP_SPEC_DIR)/openapi.yaml
 	poetry new acp-server-stub

@@ -19,25 +19,20 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
+from .agent_acp_spec import AgentACPSpec
+from .agent_metadata import AgentMetadata
 from typing import Optional, Set
 from typing_extensions import Self
 
-class LangGraphConfig(BaseModel):
+class AgentACPDescriptor(BaseModel):
     """
-    Describes langgraph based agent deployment config
+    Describe all the ACP specs of an agent, including schemas and protocol features.
     """ # noqa: E501
-    framework_type: StrictStr
-    graph: StrictStr
-    __properties: ClassVar[List[str]] = ["framework_type", "graph"]
-
-    @field_validator('framework_type')
-    def framework_type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['langgraph']):
-            raise ValueError("must be one of enum values ('langgraph')")
-        return value
+    metadata: AgentMetadata
+    specs: AgentACPSpec
+    __properties: ClassVar[List[str]] = ["metadata", "specs"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -57,7 +52,7 @@ class LangGraphConfig(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of LangGraphConfig from a JSON string"""
+        """Create an instance of AgentACPDescriptor from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -78,11 +73,17 @@ class LangGraphConfig(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of metadata
+        if self.metadata:
+            _dict['metadata'] = self.metadata.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of specs
+        if self.specs:
+            _dict['specs'] = self.specs.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of LangGraphConfig from a dict"""
+        """Create an instance of AgentACPDescriptor from a dict"""
         if obj is None:
             return None
 
@@ -90,8 +91,8 @@ class LangGraphConfig(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "framework_type": obj.get("framework_type"),
-            "graph": obj.get("graph")
+            "metadata": AgentMetadata.from_dict(obj["metadata"]) if obj.get("metadata") is not None else None,
+            "specs": AgentACPSpec.from_dict(obj["specs"]) if obj.get("specs") is not None else None
         })
         return _obj
 

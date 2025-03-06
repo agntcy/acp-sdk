@@ -31,11 +31,11 @@ class RunCreate(BaseModel):
     """ # noqa: E501
     agent_id: StrictStr = Field(description="The ID of the agent.")
     thread_id: Optional[StrictStr] = Field(default=None, description="Optional Thread ID wher the Run belongs to. This can be used only for agents supporting Threads.")
-    input: Optional[Dict[str, Any]] = Field(default=None, description="The input to the agent. The schema is described in Agent Manifest under 'spec.thread_state'.'input'.")
+    input: Optional[Dict[str, Any]] = Field(default=None, description="The input to the agent. The schema is described in agent ACP descriptor under 'spec.thread_state'.'input'.")
     metadata: Optional[Dict[str, Any]] = Field(default=None, description="Metadata to assign to the run. Optional free format metadata to attach to the run.")
-    config: Optional[Dict[str, Any]] = Field(default=None, description="The configuration for this agent. The schema is described in Agent Manifest under 'spec.config'. If missing, default values are used.")
+    config: Optional[Dict[str, Any]] = Field(default=None, description="The configuration for this agent. The schema is described in agent ACP descriptor under 'spec.config'. If missing, default values are used.")
     webhook: Optional[StrictStr] = Field(default=None, description="Webhook to call upon change of run status. This is a url that accepts a POST containing the `Run` object as body. See Callbacks definition.")
-    streaming: Optional[StreamingMode] = Field(default=None, description="If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in its manifest under `specs.capabilities`")
+    streaming: Optional[StreamingMode] = Field(default=None, description="If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in agent ACP descriptor  under `specs.capabilities`")
     __properties: ClassVar[List[str]] = ["agent_id", "thread_id", "input", "metadata", "config", "webhook", "streaming"]
 
     model_config = ConfigDict(

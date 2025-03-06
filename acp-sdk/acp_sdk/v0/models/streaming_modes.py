@@ -29,7 +29,7 @@ class StreamingModes(BaseModel):
     Supported streaming modes. If missing, streaming is not supported.  If no mode is supported attempts to stream output will result in an error.
     """ # noqa: E501
     result: Optional[StrictBool] = Field(default=None, description="This is `true` if the agent supports result streaming. If `false` or missing, result streaming is not supported. Result streaming consists of a stream of objects of type `RunResult`, where each one sent over the stream fully replace the previous one.")
-    custom: Optional[StrictBool] = Field(default=None, description="This is `true` if the agent supports custom objects streaming. If `false` or missing, custom streaming is not supported. Custom Objects streaming consists of a stream of object whose schema is specified by the agent in its manifest under `specs.custom_streaming_update`.")
+    custom: Optional[StrictBool] = Field(default=None, description="This is `true` if the agent supports custom objects streaming. If `false` or missing, custom streaming is not supported. Custom Objects streaming consists of a stream of object whose schema is specified by the agent ACP descriptor under `specs.custom_streaming_update`.")
     __properties: ClassVar[List[str]] = ["result", "custom"]
 
     model_config = ConfigDict(

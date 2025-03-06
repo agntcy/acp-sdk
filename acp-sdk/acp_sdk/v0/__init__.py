@@ -1,5 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
+# coding: utf-8
+
+# flake8: noqa
+
 """
     Agent Connect Protocol
 
@@ -10,6 +14,7 @@
 
     Do not edit the class manually.
 """  # noqa: E501
+
 
 __version__ = "1.0.0"
 
@@ -25,20 +30,14 @@ from .exceptions import ApiException
 
 # import models into sdk package
 from .models.agent import Agent
+from .models.agent_acp_descriptor import AgentACPDescriptor
+from .models.agent_acp_spec import AgentACPSpec
+from .models.agent_acp_spec_interrupts_inner import AgentACPSpecInterruptsInner
 from .models.agent_capabilities import AgentCapabilities
-from .models.agent_connect_protocol import AgentConnectProtocol
-from .models.agent_manifest import AgentManifest
-from .models.agent_manifest_deployments_inner import AgentManifestDeploymentsInner
-from .models.agent_manifest_ref import AgentManifestRef
 from .models.agent_metadata import AgentMetadata
+from .models.agent_ref import AgentRef
 from .models.agent_search_request import AgentSearchRequest
-from .models.agent_specs import AgentSpecs
-from .models.agent_specs_interrupts_inner import AgentSpecsInterruptsInner
 from .models.custom_run_result_update import CustomRunResultUpdate
-from .models.docker_deployment import DockerDeployment
-from .models.lang_graph_config import LangGraphConfig
-from .models.llama_index_config import LlamaIndexConfig
-from .models.remote_service_deployment import RemoteServiceDeployment
 from .models.run import Run
 from .models.run_create import RunCreate
 from .models.run_error import RunError
@@ -48,15 +47,12 @@ from .models.run_output_stream import RunOutputStream
 from .models.run_result import RunResult
 from .models.run_search_request import RunSearchRequest
 from .models.run_status import RunStatus
-from .models.source_code_deployment import SourceCodeDeployment
-from .models.source_code_deployment_framework_config import SourceCodeDeploymentFrameworkConfig
 from .models.stream_event_payload import StreamEventPayload
 from .models.streaming_mode import StreamingMode
 from .models.streaming_modes import StreamingModes
 from .models.thread import Thread
 from .models.thread_create import ThreadCreate
 from .models.thread_search_request import ThreadSearchRequest
-
 
 # import apis into sdk package
 from .acp_client import AgentsApi, RunsApi, ThreadsApi, ApiClient

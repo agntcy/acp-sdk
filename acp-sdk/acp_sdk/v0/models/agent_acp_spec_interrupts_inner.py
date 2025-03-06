@@ -19,27 +19,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class AgentConnectProtocol(BaseModel):
+class AgentACPSpecInterruptsInner(BaseModel):
     """
-    ACP endpoint description
+    AgentACPSpecInterruptsInner
     """ # noqa: E501
-    type: StrictStr
-    url: StrictStr = Field(description="URL pointing to the ACP endpoint root.")
-    agent_id: Optional[StrictStr] = Field(default=None, description="Agent identifier in ACP server. If missing, the first returned agent with matching name and version should be used.")
-    authentication: Optional[Dict[str, Any]] = Field(default=None, description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#security-scheme-object-0")
-    __properties: ClassVar[List[str]] = ["type", "url", "agent_id", "authentication"]
-
-    @field_validator('type')
-    def type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['ACP']):
-            raise ValueError("must be one of enum values ('ACP')")
-        return value
+    interrupt_type: StrictStr = Field(description="Name of this interrupt type. Needs to be unique in the list of interrupts.")
+    interrupt_payload: Dict[str, Any] = Field(description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object")
+    resume_payload: Dict[str, Any] = Field(description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object")
+    __properties: ClassVar[List[str]] = ["interrupt_type", "interrupt_payload", "resume_payload"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,7 +51,7 @@ class AgentConnectProtocol(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of AgentConnectProtocol from a JSON string"""
+        """Create an instance of AgentACPSpecInterruptsInner from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -84,7 +76,7 @@ class AgentConnectProtocol(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of AgentConnectProtocol from a dict"""
+        """Create an instance of AgentACPSpecInterruptsInner from a dict"""
         if obj is None:
             return None
 
@@ -92,10 +84,9 @@ class AgentConnectProtocol(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "type": obj.get("type"),
-            "url": obj.get("url"),
-            "agent_id": obj.get("agent_id"),
-            "authentication": obj.get("authentication")
+            "interrupt_type": obj.get("interrupt_type"),
+            "interrupt_payload": obj.get("interrupt_payload"),
+            "resume_payload": obj.get("resume_payload")
         })
         return _obj
 
