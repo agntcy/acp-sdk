@@ -20,37 +20,43 @@ $(ACP_SPEC_DIR)/openapi.yaml:
 # Generate client and correct models for convenience.
 generate_acp_client: $(ACP_SPEC_DIR)/openapi.yaml
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
+	ACP_PACKAGE_NAME="acp_client_v$${ACP_SPEC_VERSION}" ; \
+	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.v$${ACP_SPEC_VERSION}.acp_client" ; \
 	docker run --rm \
 	-v ${PWD}:/local openapitools/openapi-generator-cli generate \
 	-i local/$(ACP_SPEC_DIR)/openapi.yaml \
-	--package-name acp_client_v$${ACP_SPEC_VERSION} \
+	--package-name "$${ACP_PACKAGE_NAME}" \
 	"--additional-properties=library=urllib3" \
 	-g python \
 	-o local/$(ACP_CLIENT_DIR) && \
 	for pyfile in $$(find $(ACP_CLIENT_DIR) -name '*.py'); do \
-	   { cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && mv $${pyfile}.bak $${pyfile} ; \
-	done && \
-	sed -i '' -E -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\.models\././' \
-	  $(ACP_CLIENT_DIR)/acp_client_v$${ACP_SPEC_VERSION}/models/*.py && \
-	sed -i '' -E -e 's/acp_client_v'$${ACP_SPEC_VERSION}'\././' \
-	  $(ACP_CLIENT_DIR)/acp_client_v$${ACP_SPEC_VERSION}/*.py
+	   { cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && \
+		sed -i '' -E -e "s/$${ACP_PACKAGE_NAME}.api_client/$${ACP_SDK_SUBPACKAGE_NAME}.api_client/" \
+	    	-e "s/$${ACP_PACKAGE_NAME}.rest\\./$${ACP_SDK_SUBPACKAGE_NAME}.rest./" \
+	    	-e "s/$${ACP_PACKAGE_NAME}.api\\./$${ACP_SDK_SUBPACKAGE_NAME}.api./" \
+	    	-e "s/$${ACP_PACKAGE_NAME}/acp_sdk.v$${ACP_SPEC_VERSION}/" $${pyfile}.bak && \
+		mv $${pyfile}.bak $${pyfile} ; \
+	done
 
 generate_acp_async_client: $(ACP_SPEC_DIR)/openapi.yaml
-	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
+	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
+	ACP_PACKAGE_NAME="acp_async_client_v$${ACP_SPEC_VERSION}" ; \
+	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.v$${ACP_SPEC_VERSION}.acp_async_client" ; \
 	docker run --rm \
 	-v ${PWD}:/local openapitools/openapi-generator-cli generate \
 	-i local/$(ACP_SPEC_DIR)/openapi.yaml \
-	--package-name acp_async_client_v$${ACP_SPEC_VERSION} \
+	--package-name "$${ACP_PACKAGE_NAME}" \
 	"--additional-properties=library=asyncio" \
 	-g python \
 	-o local/$(ACP_ASYNC_CLIENT_DIR) && \
 	for pyfile in $$(find $(ACP_ASYNC_CLIENT_DIR) -name '*.py'); do \
-	   { cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && mv $${pyfile}.bak $${pyfile} ; \
-	done && \
-	sed -i '' -E -e 's/acp_async_client_v'$${ACP_SPEC_VERSION}'\.models\././' \
-	  $(ACP_ASYNC_CLIENT_DIR)/acp_async_client_v$${ACP_SPEC_VERSION}/models/*.py && \
-	sed -i '' -E -e 's/acp_async_client_v'$${ACP_SPEC_VERSION}'\././' \
-	  $(ACP_ASYNC_CLIENT_DIR)/acp_async_client_v$${ACP_SPEC_VERSION}/*.py
+		{ cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && \
+		sed -i '' -E -e "s/$${ACP_PACKAGE_NAME}.api_client/$${ACP_SDK_SUBPACKAGE_NAME}.api_client/" \
+	    	-e "s/$${ACP_PACKAGE_NAME}.rest\\./$${ACP_SDK_SUBPACKAGE_NAME}.rest./" \
+	    	-e "s/$${ACP_PACKAGE_NAME}.api\\./$${ACP_SDK_SUBPACKAGE_NAME}.api./" \
+	    	-e "s/$${ACP_PACKAGE_NAME}/acp_sdk.v$${ACP_SPEC_VERSION}/" $${pyfile}.bak && \
+		mv $${pyfile}.bak $${pyfile} ; \
+	done
 
 generate_acp_server: $(ACP_SPEC_DIR)/openapi.yaml
 	poetry new acp-server-stub
