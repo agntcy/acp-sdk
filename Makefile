@@ -32,7 +32,8 @@ generate_acp_client $(ACP_CLIENT_DIR)/README.md : $(ACP_SPEC_DIR)/openapi.yaml
 	for pyfile in $$(find $(ACP_CLIENT_DIR) -name '*.py'); do \
 	   { cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && \
 		sed -i '' -E -e "s/$${ACP_PACKAGE_NAME}.api_client/$${ACP_SDK_SUBPACKAGE_NAME}.api_client/" \
-	    	-e "s/$${ACP_PACKAGE_NAME}.rest\\./$${ACP_SDK_SUBPACKAGE_NAME}.rest./" \
+	    	-e "s/^from[[:space:]]+$${ACP_PACKAGE_NAME}[[:space:]]+import[[:space:]]+rest$$/from . import rest/" \
+	    	-e "s/$${ACP_PACKAGE_NAME}.rest/$${ACP_SDK_SUBPACKAGE_NAME}.rest/" \
 	    	-e "s/$${ACP_PACKAGE_NAME}.api\\./$${ACP_SDK_SUBPACKAGE_NAME}.api./" \
 	    	-e "s/$${ACP_PACKAGE_NAME}/acp_sdk.v$${ACP_SPEC_VERSION}/" $${pyfile}.bak && \
 		mv $${pyfile}.bak $${pyfile} ; \
@@ -52,7 +53,8 @@ generate_acp_async_client $(ACP_ASYNC_CLIENT_DIR)/README.md : $(ACP_SPEC_DIR)/op
 	for pyfile in $$(find $(ACP_ASYNC_CLIENT_DIR) -name '*.py'); do \
 		{ cat .spdx_header $${pyfile} ; } > $${pyfile}.bak && \
 		sed -i '' -E -e "s/$${ACP_PACKAGE_NAME}.api_client/$${ACP_SDK_SUBPACKAGE_NAME}.api_client/" \
-	    	-e "s/$${ACP_PACKAGE_NAME}.rest\\./$${ACP_SDK_SUBPACKAGE_NAME}.rest./" \
+	    	-e "s/^from[[:space:]]+$${ACP_PACKAGE_NAME}[[:space:]]+import[[:space:]]+rest$$/from . import rest/" \
+	    	-e "s/$${ACP_PACKAGE_NAME}.rest/$${ACP_SDK_SUBPACKAGE_NAME}.rest/" \
 	    	-e "s/$${ACP_PACKAGE_NAME}.api\\./$${ACP_SDK_SUBPACKAGE_NAME}.api./" \
 	    	-e "s/$${ACP_PACKAGE_NAME}/acp_sdk.v$${ACP_SPEC_VERSION}/" $${pyfile}.bak && \
 		mv $${pyfile}.bak $${pyfile} ; \

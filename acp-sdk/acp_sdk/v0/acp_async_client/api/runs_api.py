@@ -29,7 +29,7 @@ from acp_sdk.v0.models.run_search_request import RunSearchRequest
 
 from acp_sdk.v0.acp_async_client.api_client import ApiClient, RequestSerialized
 from acp_sdk.v0.api_response import ApiResponse
-from acp_sdk.v0.rest import RESTResponseType
+from acp_sdk.v0.acp_async_client.rest import RESTResponseType
 
 
 class RunsApi:

@@ -31,7 +31,7 @@ from pydantic import SecretStr
 from acp_sdk.v0.configuration import Configuration
 from acp_sdk.v0.api_response import ApiResponse, T as ApiResponseT
 import acp_sdk.v0.models
-from acp_sdk.v0 import rest
+from . import rest
 from acp_sdk.v0.exceptions import (
     ApiValueError,
     ApiException,

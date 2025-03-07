@@ -27,7 +27,7 @@ from acp_sdk.v0.models.agent_search_request import AgentSearchRequest
 
 from acp_sdk.v0.acp_client.api_client import ApiClient, RequestSerialized
 from acp_sdk.v0.api_response import ApiResponse
-from acp_sdk.v0.rest import RESTResponseType
+from acp_sdk.v0.acp_client.rest import RESTResponseType
 
 
 class AgentsApi:

@@ -19,14 +19,9 @@
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from acp_sdk.v0.acp_client import AgentsApi
-from acp_sdk.v0.acp_client import RunsApi
-from acp_sdk.v0.acp_client import ThreadsApi
-from acp_sdk.v0.acp_client import ApiClient
-from acp_sdk.v0.acp_async_client import ApiClient as AsyncApiClient
-from acp_sdk.v0.acp_async_client import AgentsApi as AsyncAgentsApi
-from acp_sdk.v0.acp_async_client import RunsApi as AsyncRunsApi
-from acp_sdk.v0.acp_async_client import ThreadsApi as AsyncThreadsApi
+from acp_sdk.v0.acp_client.api.agents_api import AgentsApi
+from acp_sdk.v0.acp_client.api.runs_api import RunsApi
+from acp_sdk.v0.acp_client.api.threads_api import ThreadsApi
 
 # import ApiClient
 from acp_sdk.v0.api_response import ApiResponse
