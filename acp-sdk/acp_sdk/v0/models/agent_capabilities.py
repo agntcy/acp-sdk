@@ -21,7 +21,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from typing import Any, ClassVar, Dict, List, Optional
-from .streaming_modes import StreamingModes
+from acp_sdk.v0.models.streaming_modes import StreamingModes
 from typing import Optional, Set
 from typing_extensions import Self
 

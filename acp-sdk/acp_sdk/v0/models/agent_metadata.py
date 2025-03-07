@@ -21,7 +21,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from .agent_ref import AgentRef
+from acp_sdk.v0.models.agent_ref import AgentRef
 from typing import Optional, Set
 from typing_extensions import Self
 

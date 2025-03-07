@@ -27,9 +27,9 @@ from acp_sdk.v0.models.run_output import RunOutput
 from acp_sdk.v0.models.run_output_stream import RunOutputStream
 from acp_sdk.v0.models.run_search_request import RunSearchRequest
 
-from ..api_client import ApiClient, RequestSerialized
+from acp_sdk.v0.acp_client.api_client import ApiClient, RequestSerialized
 from acp_sdk.v0.api_response import ApiResponse
-from ..rest import RESTResponseType
+from acp_sdk.v0.rest import RESTResponseType
 
 
 class RunsApi:

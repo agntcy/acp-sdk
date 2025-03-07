@@ -22,7 +22,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
-from .run_status import RunStatus
+from acp_sdk.v0.models.run_status import RunStatus
 from typing import Optional, Set
 from typing_extensions import Self
 

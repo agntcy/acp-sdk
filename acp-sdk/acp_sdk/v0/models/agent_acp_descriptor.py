@@ -21,8 +21,8 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
-from .agent_acp_spec import AgentACPSpec
-from .agent_metadata import AgentMetadata
+from acp_sdk.v0.models.agent_acp_spec import AgentACPSpec
+from acp_sdk.v0.models.agent_metadata import AgentMetadata
 from typing import Optional, Set
 from typing_extensions import Self
 

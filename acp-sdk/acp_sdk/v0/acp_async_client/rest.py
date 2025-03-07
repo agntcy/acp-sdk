@@ -23,7 +23,7 @@ from typing import Optional, Union
 import aiohttp
 import aiohttp_retry
 
-from ..exceptions import ApiException, ApiValueError
+from acp_sdk.v0.exceptions import ApiException, ApiValueError
 
 RESTResponseType = aiohttp.ClientResponse
 

@@ -21,7 +21,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List
-from .stream_event_payload import StreamEventPayload
+from acp_sdk.v0.models.stream_event_payload import StreamEventPayload
 from typing import Optional, Set
 from typing_extensions import Self
 

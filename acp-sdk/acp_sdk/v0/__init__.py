@@ -18,45 +18,49 @@
 
 __version__ = "1.0.0"
 
+# import apis into sdk package
+from acp_sdk.v0.acp_client import AgentsApi
+from acp_sdk.v0.acp_client import RunsApi
+from acp_sdk.v0.acp_client import ThreadsApi
+from acp_sdk.v0.acp_client import ApiClient
+from acp_sdk.v0.acp_async_client import ApiClient as AsyncApiClient
+from acp_sdk.v0.acp_async_client import AgentsApi as AsyncAgentsApi
+from acp_sdk.v0.acp_async_client import RunsApi as AsyncRunsApi
+from acp_sdk.v0.acp_async_client import ThreadsApi as AsyncThreadsApi
+
 # import ApiClient
-from .api_response import ApiResponse
-from .configuration import Configuration
-from .exceptions import OpenApiException
-from .exceptions import ApiTypeError
-from .exceptions import ApiValueError
-from .exceptions import ApiKeyError
-from .exceptions import ApiAttributeError
-from .exceptions import ApiException
+from acp_sdk.v0.api_response import ApiResponse
+from acp_sdk.v0.acp_client.api_client import ApiClient
+from acp_sdk.v0.configuration import Configuration
+from acp_sdk.v0.exceptions import OpenApiException
+from acp_sdk.v0.exceptions import ApiTypeError
+from acp_sdk.v0.exceptions import ApiValueError
+from acp_sdk.v0.exceptions import ApiKeyError
+from acp_sdk.v0.exceptions import ApiAttributeError
+from acp_sdk.v0.exceptions import ApiException
 
 # import models into sdk package
-from .models.agent import Agent
-from .models.agent_acp_descriptor import AgentACPDescriptor
-from .models.agent_acp_spec import AgentACPSpec
-from .models.agent_acp_spec_interrupts_inner import AgentACPSpecInterruptsInner
-from .models.agent_capabilities import AgentCapabilities
-from .models.agent_metadata import AgentMetadata
-from .models.agent_ref import AgentRef
-from .models.agent_search_request import AgentSearchRequest
-from .models.custom_run_result_update import CustomRunResultUpdate
-from .models.run import Run
-from .models.run_create import RunCreate
-from .models.run_error import RunError
-from .models.run_interrupt import RunInterrupt
-from .models.run_output import RunOutput
-from .models.run_output_stream import RunOutputStream
-from .models.run_result import RunResult
-from .models.run_search_request import RunSearchRequest
-from .models.run_status import RunStatus
-from .models.stream_event_payload import StreamEventPayload
-from .models.streaming_mode import StreamingMode
-from .models.streaming_modes import StreamingModes
-from .models.thread import Thread
-from .models.thread_create import ThreadCreate
-from .models.thread_search_request import ThreadSearchRequest
-
-# import apis into sdk package
-from .acp_client import AgentsApi, RunsApi, ThreadsApi, ApiClient
-from .acp_async_client import ApiClient as AsyncApiClient
-from .acp_async_client import AgentsApi as AsyncAgentsApi
-from .acp_async_client import RunsApi as AsyncRunsApi
-from .acp_async_client import ThreadsApi as AsyncThreadsApi
+from acp_sdk.v0.models.agent import Agent
+from acp_sdk.v0.models.agent_acp_descriptor import AgentACPDescriptor
+from acp_sdk.v0.models.agent_acp_spec import AgentACPSpec
+from acp_sdk.v0.models.agent_acp_spec_interrupts_inner import AgentACPSpecInterruptsInner
+from acp_sdk.v0.models.agent_capabilities import AgentCapabilities
+from acp_sdk.v0.models.agent_metadata import AgentMetadata
+from acp_sdk.v0.models.agent_ref import AgentRef
+from acp_sdk.v0.models.agent_search_request import AgentSearchRequest
+from acp_sdk.v0.models.custom_run_result_update import CustomRunResultUpdate
+from acp_sdk.v0.models.run import Run
+from acp_sdk.v0.models.run_create import RunCreate
+from acp_sdk.v0.models.run_error import RunError
+from acp_sdk.v0.models.run_interrupt import RunInterrupt
+from acp_sdk.v0.models.run_output import RunOutput
+from acp_sdk.v0.models.run_output_stream import RunOutputStream
+from acp_sdk.v0.models.run_result import RunResult
+from acp_sdk.v0.models.run_search_request import RunSearchRequest
+from acp_sdk.v0.models.run_status import RunStatus
+from acp_sdk.v0.models.stream_event_payload import StreamEventPayload
+from acp_sdk.v0.models.streaming_mode import StreamingMode
+from acp_sdk.v0.models.streaming_modes import StreamingModes
+from acp_sdk.v0.models.thread import Thread
+from acp_sdk.v0.models.thread_create import ThreadCreate
+from acp_sdk.v0.models.thread_search_request import ThreadSearchRequest

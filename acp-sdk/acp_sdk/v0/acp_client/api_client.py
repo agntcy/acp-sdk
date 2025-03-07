@@ -28,11 +28,11 @@ from urllib.parse import quote
 from typing import Tuple, Optional, List, Dict, Union
 from pydantic import SecretStr
 
-from ..configuration import Configuration
-from ..api_response import ApiResponse, T as ApiResponseT
-from .. import models as acp_models
-from . import rest
-from ..exceptions import (
+from acp_sdk.v0.configuration import Configuration
+from acp_sdk.v0.api_response import ApiResponse, T as ApiResponseT
+import acp_sdk.v0.models
+from acp_sdk.v0 import rest
+from acp_sdk.v0.exceptions import (
     ApiValueError,
     ApiException,
     BadRequestException,
@@ -451,7 +451,7 @@ class ApiClient:
             if klass in self.NATIVE_TYPES_MAPPING:
                 klass = self.NATIVE_TYPES_MAPPING[klass]
             else:
-                klass = getattr(acp_models, klass)
+                klass = getattr(acp_sdk.v0.models, klass)
 
         if klass in self.PRIMITIVE_TYPES:
             return self.__deserialize_primitive(data, klass)

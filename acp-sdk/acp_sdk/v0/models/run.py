@@ -22,8 +22,8 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from .run_create import RunCreate
-from .run_status import RunStatus
+from acp_sdk.v0.models.run_create import RunCreate
+from acp_sdk.v0.models.run_status import RunStatus
 from typing import Optional, Set
 from typing_extensions import Self
 

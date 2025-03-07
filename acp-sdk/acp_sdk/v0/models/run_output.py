@@ -19,9 +19,9 @@ import json
 import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
 from typing import Any, List, Optional
-from .run_error import RunError
-from .run_interrupt import RunInterrupt
-from .run_result import RunResult
+from acp_sdk.v0.models.run_error import RunError
+from acp_sdk.v0.models.run_interrupt import RunInterrupt
+from acp_sdk.v0.models.run_result import RunResult
 from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self

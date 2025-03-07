@@ -8,7 +8,7 @@ ACP_ASYNC_CLIENT_DIR=acp-async-client
 
 .PHONY: default install generate_acp_client \
 	generate_acp_server generate install_test test check all \
-	generate_async_acp_client
+	generate_async_acp_client update_python_subpackage
 
 default: test
 install: 
@@ -18,8 +18,8 @@ $(ACP_SPEC_DIR)/openapi.yaml:
 	git submodule update $(ACP_SPEC_DIR)
 
 # Generate client and correct models for convenience.
-generate_acp_client: $(ACP_SPEC_DIR)/openapi.yaml
-	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.", "_")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
+generate_acp_client $(ACP_CLIENT_DIR)/README.md : $(ACP_SPEC_DIR)/openapi.yaml
+	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
 	ACP_PACKAGE_NAME="acp_client_v$${ACP_SPEC_VERSION}" ; \
 	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.v$${ACP_SPEC_VERSION}.acp_client" ; \
 	docker run --rm \
@@ -38,7 +38,7 @@ generate_acp_client: $(ACP_SPEC_DIR)/openapi.yaml
 		mv $${pyfile}.bak $${pyfile} ; \
 	done
 
-generate_acp_async_client: $(ACP_SPEC_DIR)/openapi.yaml
+generate_acp_async_client $(ACP_ASYNC_CLIENT_DIR)/README.md : $(ACP_SPEC_DIR)/openapi.yaml
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
 	ACP_PACKAGE_NAME="acp_async_client_v$${ACP_SPEC_VERSION}" ; \
 	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.v$${ACP_SPEC_VERSION}.acp_async_client" ; \
@@ -68,6 +68,25 @@ generate_acp_server: $(ACP_SPEC_DIR)/openapi.yaml
 	--output ../acp-server-stub/acp_server_stub \
 	--generate-routers \
 	--disable-timestamp
+
+update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/README.md 
+	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
+	ACP_CLIENT_PACKAGE_DIR="$(ACP_CLIENT_DIR)/acp_client_v$${ACP_SPEC_VERSION}" ; \
+	ACP_ASYNC_CLIENT_PACKAGE_DIR="$(ACP_ASYNC_CLIENT_DIR)/acp_async_client_v$${ACP_SPEC_VERSION}" ; \
+	cp -pR "$${ACP_CLIENT_PACKAGE_DIR}/__init__.py" \
+		"$${ACP_CLIENT_PACKAGE_DIR}/exceptions.py" \
+		"$${ACP_CLIENT_PACKAGE_DIR}/configuration.py" \
+		"$${ACP_CLIENT_PACKAGE_DIR}/api_response.py" \
+		"$${ACP_CLIENT_PACKAGE_DIR}/models" \
+		"acp-sdk/acp_sdk/v$${ACP_SPEC_VERSION}/" && \
+	cp -pR "$${ACP_CLIENT_PACKAGE_DIR}/api" \
+		"$${ACP_CLIENT_PACKAGE_DIR}/api_client.py" \
+		"$${ACP_CLIENT_PACKAGE_DIR}/rest.py" \
+		"acp-sdk/acp_sdk/v$${ACP_SPEC_VERSION}/acp_client/" && \
+	cp -pR "$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/api" \
+		"$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/api_client.py" \
+		"$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/rest.py" \
+		"acp-sdk/acp_sdk/v$${ACP_SPEC_VERSION}/acp_async_client/"
 
 
 generate: generate_acp_client generate_acp_server
