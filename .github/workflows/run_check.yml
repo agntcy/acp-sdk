@@ -29,14 +29,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    
-    - name: Checkout ACP Spec 
-      uses: actions/checkout@v4
       with:
-        repository: agntcy/acp-spec
-        path: acp-sdk/acp_sdk/acp-spec
-        ssh-key: ${{ secrets.ACP_SPEC_PULL_KEY }}
-        persist-credentials: false
+        submodules: true
 
     - name: Set up python ${{ env.PYTHON_VERSION }}
       id: setup-python
