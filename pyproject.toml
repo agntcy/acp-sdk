@@ -17,6 +17,7 @@ pydantic = ">= 2"
 typing-extensions = ">= 4.7.1"
 aiohttp = ">= 3.8.4"
 aiohttp-retry = ">= 2.8.3"
+langgraph = "^0.3.5"
 
 [tool.poetry.group.generate_server.dependencies]
 fastapi-code-generator = "^0.5.2"
