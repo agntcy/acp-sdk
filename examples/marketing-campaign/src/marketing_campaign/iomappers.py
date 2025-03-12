@@ -15,7 +15,8 @@ class IoMapper1:
 
     def __call__(self, s: Any) -> Any:
         s.acp__ = {}
-        s.acp__['mailcomposer']={'input': mailcomposer.Input(messages=[HumanMessage(content=s.description)], is_completed=False)}
+        s.acp__['mailcomposer']={'input': mailcomposer.Input(messages=s.messages, is_completed=(s.has_composer_completed==True))}
+
         return s
 
 class IoMapper2:
@@ -27,5 +28,7 @@ class IoMapper2:
         return self._name
 
     def __call__(self, s: Any) -> Any:
-        s.operation_logs = [s.acp['mc1']['output'].final_email]
+        if s.acp__['mailcomposer']['output'].final_email:
+            s.operation_logs = [s.acp__['mailcomposer']['output'].final_email]
+        s.messages = s.acp__['mailcomposer']['output'].messages
         return s

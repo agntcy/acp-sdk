@@ -9,6 +9,16 @@ from acp_sdk import Configuration
 from agntcy_iomapper.langgraph import create_langraph_iomapper, LangGraphIOMapperConfig, io_mapper_node
 from agntcy_iomapper import AgentIOMapperInput
 
+def process_inputs(state: state.OverallState) -> state.OverallState:
+    user_message = state.messages[-1].content
+    
+    if user_message.upper() == "OK":
+        state.has_composer_completed = True
+
+    return state
+
+def check_inputs(state: state.OverallState):
+    return "mailcomposer"
 
 def build_graph()->StateGraph:
     # Fill in client configuration for the remote agent
@@ -26,8 +36,12 @@ def build_graph()->StateGraph:
 
     # Create the state graph
     # State must inherith ACPState
-    sg =  StateGraph(state.State, input=state.InputState, output=state.OutputState)
+    sg =  StateGraph(state.OverallState)# input=state.InputState, output=state.OutputState)
 
+    sg.add_node(
+        "process_inputs",
+        process_inputs
+    )
     # Add
     sg.add_node(
         acp_mailcomposer.name,
@@ -39,35 +53,11 @@ def build_graph()->StateGraph:
     iom2 = iomappers.IoMapper2("iom2")
     sg.add_node("iom2", iom2)
 
-    sg.add_edge(START, "iom1")
+    sg.add_edge(START, "process_inputs")
+    sg.add_conditional_edges("process_inputs", check_inputs, path_map={"mailcomposer": "iom1", "done": "iom2"})
     sg.add_edge("iom1", acp_mailcomposer.name)
     sg.add_edge(acp_mailcomposer.name, "iom2")
     sg.add_edge("iom2",END)
-
-    # sg.add_node(
-    #     "mailcomposer",
-    #     sdk.acp_node,
-    #     metadata={
-    #
-    #     }
-    # )
-    #
-    #
-    # sg.add_node(
-    #     "iom1",
-    #     io_mapper_node,
-    #     metadata={
-    #         "input_fields": ["description"],
-    #         "output_fields": [f"{mc.statekey}.input"],
-    #     },
-    # )
-    # iom2 = iomappers.IoMapper2("iom2")
-    # sg.add_node(iom2.name, iom2)
-    #
-    #
-    # sg.add_edge("iom1", mc.name)
-    # sg.add_edge(mc.name, iom2.name)
-    # sg.add_edge(iom2.name, END)
 
     g = sg.compile()
     g.name = "Marketing Campaign Manager"

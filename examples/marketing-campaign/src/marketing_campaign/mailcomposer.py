@@ -10,8 +10,8 @@ class Input(BaseModel):
     messages: list[HumanMessage|AIMessage]
     is_completed: bool
 
-class Output(BaseModel):
-    final_email: str
+class Output(Input):
+    final_email: str|None = None
 
 class State(BaseModel):
     input: Input|None = None

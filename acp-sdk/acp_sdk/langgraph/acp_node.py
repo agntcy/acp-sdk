@@ -60,7 +60,7 @@ class ACPNode():
         return acp_state, acp_input
 
     def __set_output(self, acp_state: Any, output: Any):
-        acp_state[OUTPUT_KEY] = output
+        acp_state[self.name][OUTPUT_KEY] = output
 
 
     def invoke(self, state: Any, config: RunnableConfig)->Any:
@@ -79,9 +79,14 @@ class ACPNode():
         run: Run = acp_client.create_run(run_create)
 
         # Block and wait
-        run_result:RunResult = acp_client.get_run_output(run_id=run.run_id, block_timeout=120)
+        run_output = acp_client.get_run_output(run_id=run.run_id, block_timeout=120)
+        if isinstance(run_output.actual_instance, RunResult):
+            run_result:RunResult = run_output.actual_instance
+            self.__set_output(acp_state, self.outputModel.model_validate(run_result.result))
+        else:
+            pass
+            # TODO: handle other cases
 
-        self.__set_output(acp_state, self.outputModel.model_validate(run_result.result))
         return state
 
     async def ainvoke(self, state: Any, config: RunnableConfig)->Any:
