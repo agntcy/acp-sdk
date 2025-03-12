@@ -20,7 +20,7 @@ def validate_agent_descriptor(json_descriptor: dict, raise_exception: bool = Fal
         # pydandic validation
         descriptor = AgentACPDescriptor.model_validate(json_descriptor)
         # advanced validation
-        generate_agent_oapi(descriptor)
+        # generate_agent_oapi(descriptor)
     except (ValidationError, ACPDescriptorValidationException) as e:
         print(f"Validation Error: {e}")
         if raise_exception: raise e

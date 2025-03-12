@@ -1,11 +1,20 @@
+from codecs import namereplace_errors
+
+from acp_sdk.acp_v0 import AgentMetadata, AgentRef
 from agntcy_iomapper.langgraph import LangGraphIOMapperConfig
 from langchain_core.messages import HumanMessage
+from sqlalchemy.orm.base import state_str
 
-from maa import graph
-from src.marketing_campaign.sdk import ACPState
-from state import InputState, OutputState, OverallState
+from app import graph
+from src.marketing_campaign.state import MailComposerState
+import state
+from state import InputState, OutputState, OverallState, ConfigModel
 from langchain_openai.chat_models.azure import AzureChatOpenAI
 from dotenv import load_dotenv, find_dotenv
+from acp_sdk.descriptor import generator
+import mailcomposer
+from pydantic import BaseModel, create_model
+
 
 
 
@@ -17,15 +26,35 @@ def get_azure():
         temperature=0,
     )
 
+
 def main():
     load_dotenv(dotenv_path=find_dotenv(usecwd=True))
+    agent_metadata = AgentMetadata(
+    ref=AgentRef(name="org.agntcy.marketing-campaign", version="0.0.1"),
+    description="Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign")
+    generator.generate_agent_descriptor(agent_metadata, InputState, OutputState, ConfigModel, "___test.json")
+
+
+    #agent_metadata = AgentMetadata(
+    #ref=AgentRef(name="org.agntcy.apibridge.sendgrid", version="0.0.1"),
+    #description="Offer a natural language interface based on api bridge agent to send emails through sendgrid")
+    #generator.generate_agent_descriptor(agent_metadata, state.SendGridInput, state.SendGridOutput, ConfigModel, "sendgrid.json")
 
     print("What marketing campaign do you want to create?")
-    inputState = OverallState(messages=[])
+    inputState = OverallState(messages=[] )
     while True:
         usermsg = input()
-        inputState.messages.append(HumanMessage(usermsg))
-        output = graph.invoke(inputState, {"configurable": {"thread_id": "foo", "llm": get_azure()}})
+        inputState.messages.append(mailcomposer.Message(content=usermsg, type=mailcomposer.Type.human))
+        output = graph.invoke(inputState, {
+            "configurable": {
+                    "thread_id": "foo",
+                    "llm": get_azure(),
+                    "config": state.ConfigModel(
+                        recipient_email_address="Alessandro Duminuco <aduminuc@cisco.com>",
+                        sender_email_address="casey.agntcy.demo@gmail.com"
+                    ).model_dump(),
+            }
+        })
         outputState = OverallState.model_validate(output)
         if len(outputState.operation_logs)>0:
             print(outputState.operation_logs)

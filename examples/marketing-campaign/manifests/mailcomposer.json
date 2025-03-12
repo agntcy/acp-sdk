@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.mailcomposer",
+      "version": "0.0.1"
+    },
+    "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"
+  },
+  "specs": {
+    "input": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "description": "A list of messages in a chat. Messages can be either from human or from an AI assistant.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "indicates the originator of the message, a human or an assistant",
+                "enum": [
+                  "human",
+                  "assistant",
+                  "ai"
+                ]
+              },
+              "content": {
+                "type": "string",
+                "description": "the content of the message"
+              }
+            },
+            "required": [
+              "type",
+              "content"
+            ]
+          }
+        },
+        "is_completed": {
+          "description": "Flag indicating if the conversation in the chat is completed, because the email composed is accepted by the user",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "messages",
+        "is_completed"
+      ]
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "description": "A list of messages in a chat. Messages can be either from human or from an AI assistant.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "indicates the originator of the message, a human or an assistant",
+                "enum": [
+                  "human",
+                  "assistant",
+                  "ai"
+                ]
+              },
+              "content": {
+                "type": "string",
+                "description": "the content of the message"
+              }
+            },
+            "required": [
+              "type",
+              "content"
+            ]
+          }
+        },
+        "is_completed": {
+          "description": "Flag indicating if the conversation in the chat is completed, because the email composed is accepted by the user",
+          "type": "boolean"
+        },
+        "final_email": {
+          "type": "string",
+          "description": "final email created by the email composer"
+        }
+      },
+      "required": [
+        "messages",
+        "is_completed"
+      ]
+    },
+    "config": {
+      "type": "object",
+      "description": "The configuration of the agent",
+      "properties": {
+        "test": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "test"
+      ]
+    },
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "interrupts": []
+  },
+  "dependencies": [],
+  "deployments": [
+    {
+      "type": "source_code",
+      "name": "src",
+      "url": "file://.",
+      "framework_config": {
+        "framework_type": "langgraph",
+        "graph": "./mailcomposer/mailcomposer.py:graph"
+      }
+    }
+  ]
+}

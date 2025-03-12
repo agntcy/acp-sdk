@@ -1,0 +1,90 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.mailcomposer",
+      "version": "0.0.1"
+    },
+    "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"
+  },
+  "specs": {
+    "input": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "human",
+                  "assistant"
+                ]
+              },
+              "content": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "is_completed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "messages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "human",
+                  "assistant"
+                ]
+              },
+              "final_email": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "is_completed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "config": {
+      "type": "object",
+      "description": "The configuration of the agent",
+      "properties": {
+        "test": {
+          "type": "boolean"
+        }
+      }
+    },
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "interrupts": []
+  },
+  "dependencies": [],
+  "deployments": [
+    {
+      "type": "source_code",
+      "name": "src",
+      "url": "file://.",
+      "framework_config": {
+        "framework_type": "langgraph",
+        "graph": "./mailcomposer/mailcomposer.py:graph"
+      }
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.apibridge.sendgrid",
+      "version": "0.0.1",
+      "url": null
+    },
+    "description": "Offer a natural language interface based on api bridge agent to send emails through sendgrid"
+  },
+  "specs": {
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false,
+      "streaming": null
+    },
+    "input": {
+      "properties": {
+        "query": {
+          "description": "A prompt asking to send an email. It specifies the email address of the sender, the email address of the recipient and the content of the email.",
+          "examples": [
+            "Please send an email from master@info.com to xxx@acme.com: The content of the email should be:\n Dear xxx, I am writing to you the say hello. Best Regards. Alessandro\n",
+            "Write an email from alessandro@company.com  to the reipient 'someone@company.com' : The content of the email should be:\n Hello someone, How are you? Bye. Frank\n"
+          ],
+          "title": "Query",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "title": "SendGridInput",
+      "type": "object"
+    },
+    "output": {
+      "properties": {
+        "result": {
+          "description": "Response from sendgrid describing the operation performed",
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "SendGridOutput",
+      "type": "object"
+    },
+    "custom_streaming_update": null,
+    "thread_state": null,
+    "config": {
+      "properties": {
+        "test": {
+          "default": false,
+          "description": "Flag indicating if the agent is in test mode",
+          "title": "Test",
+          "type": "boolean"
+        }
+      },
+      "title": "ConfigModel",
+      "type": "object"
+    },
+    "interrupts": null
+  }
+}
