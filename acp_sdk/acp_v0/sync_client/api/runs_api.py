@@ -27,9 +27,9 @@ from acp_sdk.acp_v0.models.run_output import RunOutput
 from acp_sdk.acp_v0.models.run_output_stream import RunOutputStream
 from acp_sdk.acp_v0.models.run_search_request import RunSearchRequest
 
-from acp_sdk.acp_v0.acp_async_client.api_client import ApiClient, RequestSerialized
+from acp_sdk.acp_v0.sync_client.api_client import ApiClient, RequestSerialized
 from acp_sdk.acp_v0.api_response import ApiResponse
-from acp_sdk.acp_v0.acp_async_client.rest import RESTResponseType
+from acp_sdk.acp_v0.sync_client.rest import RESTResponseType
 
 
 class RunsApi:
@@ -46,7 +46,7 @@ class RunsApi:
 
 
     @validate_call
-    async def create_run(
+    def create_run(
         self,
         run_create: RunCreate,
         _request_timeout: Union[
@@ -104,11 +104,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -116,7 +116,7 @@ class RunsApi:
 
 
     @validate_call
-    async def create_run_with_http_info(
+    def create_run_with_http_info(
         self,
         run_create: RunCreate,
         _request_timeout: Union[
@@ -174,11 +174,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -186,7 +186,7 @@ class RunsApi:
 
 
     @validate_call
-    async def create_run_without_preload_content(
+    def create_run_without_preload_content(
         self,
         run_create: RunCreate,
         _request_timeout: Union[
@@ -244,7 +244,7 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -328,7 +328,7 @@ class RunsApi:
 
 
     @validate_call
-    async def delete_run(
+    def delete_run(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -386,11 +386,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -398,7 +398,7 @@ class RunsApi:
 
 
     @validate_call
-    async def delete_run_with_http_info(
+    def delete_run_with_http_info(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -456,11 +456,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -468,7 +468,7 @@ class RunsApi:
 
 
     @validate_call
-    async def delete_run_without_preload_content(
+    def delete_run_without_preload_content(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -526,7 +526,7 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -597,7 +597,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run(
+    def get_run(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -655,11 +655,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -667,7 +667,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_with_http_info(
+    def get_run_with_http_info(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -725,11 +725,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -737,7 +737,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_without_preload_content(
+    def get_run_without_preload_content(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -795,7 +795,7 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -866,7 +866,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_output(
+    def get_run_output(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the run.")],
         block_timeout: Optional[StrictInt] = None,
@@ -929,11 +929,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -941,7 +941,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_output_with_http_info(
+    def get_run_output_with_http_info(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the run.")],
         block_timeout: Optional[StrictInt] = None,
@@ -1004,11 +1004,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -1016,7 +1016,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_output_without_preload_content(
+    def get_run_output_without_preload_content(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the run.")],
         block_timeout: Optional[StrictInt] = None,
@@ -1079,7 +1079,7 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -1155,7 +1155,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_stream(
+    def get_run_stream(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the run.")],
         _request_timeout: Union[
@@ -1214,11 +1214,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -1226,7 +1226,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_stream_with_http_info(
+    def get_run_stream_with_http_info(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the run.")],
         _request_timeout: Union[
@@ -1285,11 +1285,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -1297,7 +1297,7 @@ class RunsApi:
 
 
     @validate_call
-    async def get_run_stream_without_preload_content(
+    def get_run_stream_without_preload_content(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the run.")],
         _request_timeout: Union[
@@ -1356,7 +1356,7 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -1428,7 +1428,7 @@ class RunsApi:
 
 
     @validate_call
-    async def resume_run(
+    def resume_run(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         body: Dict[str, Any],
@@ -1490,11 +1490,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -1502,7 +1502,7 @@ class RunsApi:
 
 
     @validate_call
-    async def resume_run_with_http_info(
+    def resume_run_with_http_info(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         body: Dict[str, Any],
@@ -1564,11 +1564,11 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -1576,7 +1576,7 @@ class RunsApi:
 
 
     @validate_call
-    async def resume_run_without_preload_content(
+    def resume_run_without_preload_content(
         self,
         run_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         body: Dict[str, Any],
@@ -1638,7 +1638,7 @@ class RunsApi:
             '409': "str",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -1725,7 +1725,7 @@ class RunsApi:
 
 
     @validate_call
-    async def search_runs(
+    def search_runs(
         self,
         run_search_request: RunSearchRequest,
         _request_timeout: Union[
@@ -1781,11 +1781,11 @@ class RunsApi:
             '200': "List[Run]",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -1793,7 +1793,7 @@ class RunsApi:
 
 
     @validate_call
-    async def search_runs_with_http_info(
+    def search_runs_with_http_info(
         self,
         run_search_request: RunSearchRequest,
         _request_timeout: Union[
@@ -1849,11 +1849,11 @@ class RunsApi:
             '200': "List[Run]",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
+        response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -1861,7 +1861,7 @@ class RunsApi:
 
 
     @validate_call
-    async def search_runs_without_preload_content(
+    def search_runs_without_preload_content(
         self,
         run_search_request: RunSearchRequest,
         _request_timeout: Union[
@@ -1917,7 +1917,7 @@ class RunsApi:
             '200': "List[Run]",
             '422': "str",
         }
-        response_data = await self.api_client.call_api(
+        response_data = self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )

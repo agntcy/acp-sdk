@@ -19,13 +19,13 @@
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from acp_sdk.acp_v0.acp_client.api.agents_api import AgentsApi
-from acp_sdk.acp_v0.acp_client.api.runs_api import RunsApi
-from acp_sdk.acp_v0.acp_client.api.threads_api import ThreadsApi
+from acp_sdk.acp_v0.sync_client.api.agents_api import AgentsApi
+from acp_sdk.acp_v0.sync_client.api.runs_api import RunsApi
+from acp_sdk.acp_v0.sync_client.api.threads_api import ThreadsApi
 
 # import ApiClient
 from acp_sdk.acp_v0.api_response import ApiResponse
-from acp_sdk.acp_v0.acp_client.api_client import ApiClient
+from acp_sdk.acp_v0.sync_client.api_client import ApiClient
 from acp_sdk.acp_v0.configuration import Configuration
 from acp_sdk.acp_v0.exceptions import OpenApiException
 from acp_sdk.acp_v0.exceptions import ApiTypeError

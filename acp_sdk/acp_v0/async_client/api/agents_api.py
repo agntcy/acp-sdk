@@ -25,9 +25,9 @@ from acp_sdk.acp_v0.models.agent import Agent
 from acp_sdk.acp_v0.models.agent_acp_descriptor import AgentACPDescriptor
 from acp_sdk.acp_v0.models.agent_search_request import AgentSearchRequest
 
-from acp_sdk.acp_v0.acp_client.api_client import ApiClient, RequestSerialized
+from acp_sdk.acp_v0.async_client.api_client import ApiClient, RequestSerialized
 from acp_sdk.acp_v0.api_response import ApiResponse
-from acp_sdk.acp_v0.acp_client.rest import RESTResponseType
+from acp_sdk.acp_v0.async_client.rest import RESTResponseType
 
 
 class AgentsApi:
@@ -44,7 +44,7 @@ class AgentsApi:
 
 
     @validate_call
-    def get_acp_descriptor_by_id(
+    async def get_acp_descriptor_by_id(
         self,
         agent_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -101,11 +101,11 @@ class AgentsApi:
             '404': "str",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        response_data.read()
+        await response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -113,7 +113,7 @@ class AgentsApi:
 
 
     @validate_call
-    def get_acp_descriptor_by_id_with_http_info(
+    async def get_acp_descriptor_by_id_with_http_info(
         self,
         agent_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -170,11 +170,11 @@ class AgentsApi:
             '404': "str",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        response_data.read()
+        await response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -182,7 +182,7 @@ class AgentsApi:
 
 
     @validate_call
-    def get_acp_descriptor_by_id_without_preload_content(
+    async def get_acp_descriptor_by_id_without_preload_content(
         self,
         agent_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -239,7 +239,7 @@ class AgentsApi:
             '404': "str",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -310,7 +310,7 @@ class AgentsApi:
 
 
     @validate_call
-    def get_agent_by_id(
+    async def get_agent_by_id(
         self,
         agent_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -367,11 +367,11 @@ class AgentsApi:
             '404': "str",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        response_data.read()
+        await response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -379,7 +379,7 @@ class AgentsApi:
 
 
     @validate_call
-    def get_agent_by_id_with_http_info(
+    async def get_agent_by_id_with_http_info(
         self,
         agent_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -436,11 +436,11 @@ class AgentsApi:
             '404': "str",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        response_data.read()
+        await response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -448,7 +448,7 @@ class AgentsApi:
 
 
     @validate_call
-    def get_agent_by_id_without_preload_content(
+    async def get_agent_by_id_without_preload_content(
         self,
         agent_id: Annotated[StrictStr, Field(description="The ID of the agent.")],
         _request_timeout: Union[
@@ -505,7 +505,7 @@ class AgentsApi:
             '404': "str",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
@@ -576,7 +576,7 @@ class AgentsApi:
 
 
     @validate_call
-    def search_agents(
+    async def search_agents(
         self,
         agent_search_request: AgentSearchRequest,
         _request_timeout: Union[
@@ -632,11 +632,11 @@ class AgentsApi:
             '200': "List[Agent]",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        response_data.read()
+        await response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -644,7 +644,7 @@ class AgentsApi:
 
 
     @validate_call
-    def search_agents_with_http_info(
+    async def search_agents_with_http_info(
         self,
         agent_search_request: AgentSearchRequest,
         _request_timeout: Union[
@@ -700,11 +700,11 @@ class AgentsApi:
             '200': "List[Agent]",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )
-        response_data.read()
+        await response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
@@ -712,7 +712,7 @@ class AgentsApi:
 
 
     @validate_call
-    def search_agents_without_preload_content(
+    async def search_agents_without_preload_content(
         self,
         agent_search_request: AgentSearchRequest,
         _request_timeout: Union[
@@ -768,7 +768,7 @@ class AgentsApi:
             '200': "List[Agent]",
             '422': "str",
         }
-        response_data = self.api_client.call_api(
+        response_data = await self.api_client.call_api(
             *_param,
             _request_timeout=_request_timeout
         )

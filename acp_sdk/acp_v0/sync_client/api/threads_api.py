@@ -26,9 +26,9 @@ from acp_sdk.acp_v0.models.thread import Thread
 from acp_sdk.acp_v0.models.thread_create import ThreadCreate
 from acp_sdk.acp_v0.models.thread_search_request import ThreadSearchRequest
 
-from acp_sdk.acp_v0.acp_client.api_client import ApiClient, RequestSerialized
+from acp_sdk.acp_v0.sync_client.api_client import ApiClient, RequestSerialized
 from acp_sdk.acp_v0.api_response import ApiResponse
-from acp_sdk.acp_v0.acp_client.rest import RESTResponseType
+from acp_sdk.acp_v0.sync_client.rest import RESTResponseType
 
 
 class ThreadsApi:

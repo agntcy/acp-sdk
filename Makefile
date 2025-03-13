@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ACP_SPEC_RELEASE?=main
 ACP_SPEC_DIR?=acp-spec
-ACP_CLIENT_DIR=acp-client-generated
+ACP_CLIENT_DIR=acp-sync-client-generated
 ACP_ASYNC_CLIENT_DIR=acp-async-client-generated
 
 ACP_SUBPACKAGE_PREFIX=acp_v
@@ -22,7 +22,7 @@ $(ACP_SPEC_DIR)/openapi.yaml:
 generate_acp_client $(ACP_CLIENT_DIR)/README.md : $(ACP_SPEC_DIR)/openapi.yaml
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
 	ACP_PACKAGE_NAME="acp_client_v$${ACP_SPEC_VERSION}" ; \
-	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}.acp_client" ; \
+	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}.sync_client" ; \
 	ACP_CLIENT_PACKAGE_DIR="$(ACP_CLIENT_DIR)/acp_client_v$${ACP_SPEC_VERSION}" ; \
 	docker run --rm \
 	-v ${PWD}:/local openapitools/openapi-generator-cli generate \
@@ -48,7 +48,7 @@ generate_acp_client $(ACP_CLIENT_DIR)/README.md : $(ACP_SPEC_DIR)/openapi.yaml
 generate_acp_async_client $(ACP_ASYNC_CLIENT_DIR)/README.md : $(ACP_SPEC_DIR)/openapi.yaml
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_DIR)/openapi.yaml) ; \
 	ACP_PACKAGE_NAME="acp_async_client_v$${ACP_SPEC_VERSION}" ; \
-	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}.acp_async_client" ; \
+	ACP_SDK_SUBPACKAGE_NAME="acp_sdk.$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}.async_client" ; \
 	ACP_ASYNC_CLIENT_PACKAGE_DIR="$(ACP_ASYNC_CLIENT_DIR)/acp_async_client_v$${ACP_SPEC_VERSION}" ; \
 	docker run --rm \
 	-v ${PWD}:/local openapitools/openapi-generator-cli generate \
@@ -91,11 +91,11 @@ update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/RE
 	cp -pR "$${ACP_CLIENT_PACKAGE_DIR}/api" \
 		"$${ACP_CLIENT_PACKAGE_DIR}/api_client.py" \
 		"$${ACP_CLIENT_PACKAGE_DIR}/rest.py" \
-		"acp_sdk/$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}/acp_client/" && \
+		"acp_sdk/$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}/sync_client/" && \
 	cp -pR "$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/api" \
 		"$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/api_client.py" \
 		"$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/rest.py" \
-		"acp_sdk/$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}/acp_async_client/"
+		"acp_sdk/$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}/async_client/"
 
 
 generate: generate_acp_client generate_acp_server
