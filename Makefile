@@ -7,7 +7,7 @@ ACP_CLIENT_DIR=acp-client-generated
 ACP_ASYNC_CLIENT_DIR=acp-async-client-generated
 
 .PHONY: default install generate_acp_client \
-	generate_acp_server generate install_test test check all \
+	generate_acp_server generate install_test test setup_test check all \
 	generate_async_acp_client update_python_subpackage
 
 default: test
@@ -103,8 +103,13 @@ generate: generate_acp_client generate_acp_server
 install_test: 
 	cd acp-sdk && poetry sync --with test --without generate_server
 
-test: install_test
-	make -C acp-sdk test
+setup_test:
+	poetry sync --with test --without generate_server
+
+test: setup_test
+	@poetry run pytest --exitfirst -q tests/test_descriptor_validator.py::test_descriptor_validator
+	@poetry run pytest --exitfirst -q tests/test_descriptor_validator.py::test_oas_generator
+	poetry run pytest -vv tests/test_acp_client.py tests/test_acp_async_client.py
 
 check: test
 	scripts/check-models.sh
