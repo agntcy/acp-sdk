@@ -12,6 +12,7 @@ from .v0.acp_async_client.api import RunsApi as AsyncRunsApi
 from .v0.acp_async_client.api import ThreadsApi as AsyncThreadsApi
 from .v0.acp_async_client import ApiClient as AsyncApiClient
 from .v0 import ApiResponse, Configuration
+from .v0.spec_version import ACP_VERSION, ACP_MAJOR_VERSION, ACP_MINOR_VERSION
 
 class ACPClient(AgentsApi, RunsApi, ThreadsApi):
     def __init__(self, api_client: ApiClient | None = None):

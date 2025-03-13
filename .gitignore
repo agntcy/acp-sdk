@@ -9,6 +9,6 @@ ___*
 .env
 venv
 .venv
-acp-client
-acp-async-client
+/acp-client-generated
+/acp-async-client-generated
 acp-server-stub
