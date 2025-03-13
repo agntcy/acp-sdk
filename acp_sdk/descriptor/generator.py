@@ -14,8 +14,8 @@ import subprocess
 import shutil
 from .exceptions import ACPDescriptorValidationException
 
-ACP_SPEC_PATH = os.path.join(os.path.dirname(__file__), "../acp-spec/openapi.yaml")
-CLIENT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "../scripts/create_acp_client.sh")
+ACP_SPEC_PATH = os.getenv("ACP_SPEC_PATH", "acp-spec/openapi.yaml")
+CLIENT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "scripts/create_acp_client.sh")
 
 
 def _gen_oas_thread_runs(descriptor: AgentACPDescriptor, spec_dict):

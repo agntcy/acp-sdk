@@ -4,7 +4,8 @@
 # Use this to regenerate the reference oas for tests.
 # You can also copy and paste the output in test_descriptor_validator.py file
 regenerate_tests:
-	for m in descriptor_ok*.json; do\
+	export ACP_SPEC_PATH="../../acp-spec/openapi.yaml" ; \
+	for m in descriptor_ok*.json ; do\
 		poetry run python3 -m acp_sdk generate-agent-oapi $${m} > "$${m}.oas.yml" ;\
-		echo "(\"$${m}\", \"$${m}.oas.yml\"),";\
+		echo "(\"$${m}\", \"$${m}.oas.yml\")," ;\
 	done
