@@ -38,29 +38,5 @@ def generate_agent_oapi(agent_descriptor_path, output):
         print(yaml.dump(oas, default_flow_style=False))
 
 
-@cli.command()
-@click.argument("agent_descriptor_path", required=True)
-@click.option("--output-dir", type=str, required=True,
-              help="Pydantic models for specific agent based on provided agent descriptor")
-def generate_agent_models(agent_descriptor_path, output_dir):
-    """
-    Generate pydantic models for an agent based on its ACP descriptor
-    """
-    descriptor = validate_agent_descriptor_file(agent_descriptor_path)
-    generator.generate_agent_models(descriptor, output_dir)
-
-
-@cli.command()
-@click.argument("agent_descriptor_path", required=True)
-@click.option("--output-dir", type=str, required=True,
-              help="Pydantic client for specific agent based on provided agent descriptor")
-def generate_agent_client(agent_descriptor_path, output_dir):
-    """
-    Generate python client to interact through ACP with an agent based on its ACP descriptor
-    """
-    descriptor = validate_agent_descriptor_file(agent_descriptor_path)
-    generator.generate_agent_client(descriptor, output_dir)
-
-
 if __name__ == "__main__":
     cli()
