@@ -1,10 +1,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
-from .acp_v0.sync_client.api import AgentsApi, RunsApi, ThreadsApi
-from .acp_v0.sync_client import ApiClient
-from .acp_v0.async_client.api import AgentsApi as AsyncAgentsApi
-from .acp_v0.async_client.api import RunsApi as AsyncRunsApi
-from .acp_v0.async_client.api import ThreadsApi as AsyncThreadsApi
+from .acp_v0.sync_client import ApiClient, AgentsApi, RunsApi, ThreadsApi
+from .acp_v0.async_client import AgentsApi as AsyncAgentsApi
+from .acp_v0.async_client import RunsApi as AsyncRunsApi
+from .acp_v0.async_client import ThreadsApi as AsyncThreadsApi
 from .acp_v0.async_client import ApiClient as AsyncApiClient
 from .acp_v0 import ApiResponse
 from .acp_v0 import Configuration
