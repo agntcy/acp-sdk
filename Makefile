@@ -85,8 +85,8 @@ AGENT_WORKFLOW_DIR:=agent-workflow-cli
 AGENT_WORKFLOW_CLIENT_DIR?=agent-workflow-client
 GEN_AGENT_WORKFLOW_PACKAGE_PREFIX:=agent_workflow_v
 SDK_AGENT_WORKFLOW_SUBPACKAGE_PREFIX:=agws_v
-AGNT_WKFW_SPEC_FILE:=$(AGENT_WORKFLOW_DIR)/acpilot/spec/manifest.yaml
-AGNT_WKFW_ACP_SPEC_FILE:=$(AGENT_WORKFLOW_DIR)/acpilot/spec/acp-spec/openapi.yaml
+AGNT_WKFW_SPEC_FILE:=$(AGENT_WORKFLOW_DIR)/wfsm/spec/manifest.yaml
+AGNT_WKFW_ACP_SPEC_FILE:=$(AGENT_WORKFLOW_DIR)/wfsm/spec/acp-spec/openapi.yaml
 
 $(AGNT_WKFW_SPEC_FILE):
 	git submodule update $(AGENT_WORKFLOW_DIR)
