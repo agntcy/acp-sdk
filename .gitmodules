@@ -4,3 +4,6 @@
 [submodule "agent-workflow-cli"]
 	path = agent-workflow-cli
 	url = https://github.com/cisco-eti/agent-workflow-cli.git
+[submodule "workflow-srv-mgr"]
+	path = workflow-srv-mgr
+	url = https://github.com/agntcy/workflow-srv-mgr.git
