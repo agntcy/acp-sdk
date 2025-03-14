@@ -12,3 +12,4 @@ venv
 /acp-sync-client-generated
 /acp-async-client-generated
 acp-server-stub
+/agent-workflow-client
