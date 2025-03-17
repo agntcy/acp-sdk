@@ -41,21 +41,21 @@ def build_graph() -> StateGraph:
     # Instantiate the local ACP node for the remote agent
     acp_mailcomposer = ACPNode(
         name="mailcomposer",
-        inputPath="mailcomposer_state.input",
-        inputType=mailcomposer.InputSchema,
-        outputPath="mailcomposer_state.output",
-        outputType=mailcomposer.OutputSchema,
-        clientConfig=mailcomposer_client_config,
-        agentConfig=mailcomposer.ConfigSchema(test=False))
-
+        agent_id="dummy_id", # TODO: Receive it as config
+        client_config=mailcomposer_client_config,
+        input_path="mailcomposer_state.input",
+        input_type=mailcomposer.InputSchema,
+        output_path="mailcomposer_state.output",
+        output_type=mailcomposer.OutputSchema
+    )
     # Instantiate APIBridge Agent Node
     sendgrid_api_key = os.environ.get("SENDGRID_API_KEY")
     send_email = APIBridgeAgentNode(
         name="sendgrid",
-        inputPath="sendgrid_state.input",
-        inputType=sendgrid.InputSchema,
-        outputPath="sendgrid_state.output",
-        outputType=sendgrid.OutputSchema,
+        input_path="sendgrid_state.input",
+        input_type=sendgrid.InputSchema,
+        output_path="sendgrid_state.output",
+        output_type=sendgrid.OutputSchema,
         service_api_key=sendgrid_api_key,
         hostname="http://localhost:8080",
         service_name="sendgrid/v3/mail/send"
@@ -63,9 +63,13 @@ def build_graph() -> StateGraph:
 
     # Create the state graph
     sg = StateGraph(state.OverallState)
+
+    # Add nodes
     sg.add_node("process_inputs", process_inputs)
-    sg.add_node(send_email)
     sg.add_node(acp_mailcomposer)
+    sg.add_node(send_email)
+
+    # Add edges
     sg.add_edge(START, "process_inputs")
 
     # Add edge between process_inputs and mailcomposer adding iomapper between them

@@ -16,15 +16,15 @@ class APIBridgeOutput(BaseModel):
     result: str = Field(..., description="API response from API bridge agent")
 
 class APIBridgeAgentNode(acp_node.ACPNode):
-    def __init__(self, name: str, hostname: str, service_name: str, inputPath: str, inputType, outputPath: str, outputType, service_api_key: str, apikey: str = None):
+    def __init__(self, name: str, hostname: str, service_name: str, input_path: str, input_type, output_path: str, output_type, service_api_key: str, apikey: str = None):
         self.__name__ = name
         self.hostname = hostname
         self.apikey = apikey
         self.service_name = service_name
-        self.inputType = inputType
-        self.outputType = outputType
-        self.inputPath = inputPath
-        self.outputPath = outputPath
+        self.inputType = input_type
+        self.outputType = output_type
+        self.inputPath = input_path
+        self.outputPath = output_path
         self.service_api_key = service_api_key
 
 
