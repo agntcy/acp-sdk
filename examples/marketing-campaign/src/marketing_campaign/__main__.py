@@ -1,19 +1,15 @@
 from codecs import namereplace_errors
 
-from acp_sdk.acp_v0 import AgentMetadata, AgentRef
-from agntcy_iomapper.langgraph import LangGraphIOMapperConfig
-from langchain_core.messages import HumanMessage
-from sqlalchemy.orm.base import state_str
+from acp_sdk.acp_v0.models.agent_ref import AgentRef
+from acp_sdk.acp_v0.models.agent_metadata import AgentMetadata
 
 from app import graph
-from src.marketing_campaign.state import MailComposerState
 import state
 from state import InputState, OutputState, OverallState, ConfigModel
 from langchain_openai.chat_models.azure import AzureChatOpenAI
 from dotenv import load_dotenv, find_dotenv
 from acp_sdk.descriptor import generator
 import mailcomposer
-from pydantic import BaseModel, create_model
 
 
 
@@ -41,7 +37,13 @@ def main():
     #generator.generate_agent_descriptor(agent_metadata, state.SendGridInput, state.SendGridOutput, ConfigModel, "sendgrid.json")
 
     print("What marketing campaign do you want to create?")
-    inputState = OverallState(messages=[] )
+    inputState = OverallState(
+        messages=[],
+        operation_logs=[],
+        has_composer_completed=False,
+        recipient_email_address="",
+        sender_email_address=""
+    )
     while True:
         usermsg = input()
         inputState.messages.append(mailcomposer.Message(content=usermsg, type=mailcomposer.Type.human))

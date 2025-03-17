@@ -1,25 +1,23 @@
 import os
 
 from acp_sdk.langgraph.api_bridge import APIBridgeAgentNode
-from acp_sdk.langgraph.io_mapper import IOMapperNode, add_io_mapped_edge, add_io_mapped_conditional_edge
+from acp_sdk.langgraph.io_mapper import add_io_mapped_edge, add_io_mapped_conditional_edge
 from langgraph.graph import StateGraph, START, END
-from pydantic import BaseModel, Field
-from typing import List
+from langgraph.graph.state import CompiledStateGraph
 import mailcomposer
 import state
-from acp_sdk.langgraph import ACPNode, APIBridgeAgentNode
-from acp_sdk import Configuration
-from agntcy_iomapper.langgraph import create_langraph_iomapper, LangGraphIOMapperConfig, io_mapper_node
-from agntcy_iomapper import AgentIOMapperInput
-from langchain_core.runnables.graph import CurveStyle, MermaidDrawMethod, NodeStyles
+from acp_sdk.langgraph.acp_node import ACPNode
+from acp_sdk.acp_v0.configuration import Configuration
+from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_core.runnables import RunnableConfig
 import sendgrid
 
 
 def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.OverallState:
     user_message = state.messages[-1].content
-    state.recipient_email_address = config['configurable']['config']['recipient_email_address']
-    state.sender_email_address = config['configurable']['config']['sender_email_address']
+    configurable = config.get('configurable', {})
+    state.recipient_email_address = configurable.get('config', {}).get('recipient_email_address', '')
+    state.sender_email_address = config.get('configurable', {}).get('config', {}).get('sender_email_address', '')
     if user_message.upper() == "OK":
         state.has_composer_completed = True
     else:
@@ -29,10 +27,13 @@ def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.O
 
 
 def check_final_email(state: state.OverallState):
-    return "done" if state.mailcomposer_state.output.final_email else "user"
+    return "done" if (state.mailcomposer_state
+                      and state.mailcomposer_state.output
+                      and state.mailcomposer_state.output.final_email
+                      ) else "user"
 
 
-def build_graph() -> StateGraph:
+def build_graph() -> CompiledStateGraph:
     # Fill in client configuration for the remote agent
     mailcomposer_client_config = Configuration(
         # api_key={"api_key":"test_api_key"},
@@ -50,6 +51,9 @@ def build_graph() -> StateGraph:
     )
     # Instantiate APIBridge Agent Node
     sendgrid_api_key = os.environ.get("SENDGRID_API_KEY")
+    if sendgrid_api_key is None:
+        raise ValueError("SENDGRID_API_KEY environment variable is not set")
+
     send_email = APIBridgeAgentNode(
         name="sendgrid",
         input_path="sendgrid_state.input",
