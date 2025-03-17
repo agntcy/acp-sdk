@@ -131,9 +131,7 @@ setup_test:
 	poetry sync --with test --without generate_server
 
 test: setup_test
-	@poetry run pytest --exitfirst -q tests/test_descriptor_validator.py::test_descriptor_validator
-	@ACP_SPEC_PATH="$(ACP_SPEC_DIR)/openapi.yaml" poetry run pytest --exitfirst -q tests/test_descriptor_validator.py::test_oas_generator
-	poetry run pytest -vv tests/test_acp_client.py tests/test_acp_async_client.py
+	ACP_SPEC_PATH="$(ACP_SPEC_DIR)/openapi.yaml" poetry run pytest --exitfirst -vv tests/
 
 check: test
 	scripts/check-models.sh
