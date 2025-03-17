@@ -1,9 +1,11 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 Cisco and/or its affiliates.
+# SPDX-License-Identifier: Apache-2.0
 from typing import Any
 from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
 from acp_sdk import ACPClient, ApiClient, AsyncACPClient, AsyncApiClient, Configuration
-from acp_sdk.acp_v0 import RunOutput
-from acp_sdk.models import RunCreate, Run, RunResult
+from acp_sdk.models import RunCreate, Run, RunResult, RunOutput, RunError
+from acp_sdk.exceptions import ACPRunException
 import logging
 
 logger = logging.getLogger(__name__)
@@ -104,9 +106,11 @@ class ACPNode():
         if isinstance(run_output.actual_instance, RunResult):
             run_result: RunResult = run_output.actual_instance
             self._set_output(state, run_result.result)
+        elif isinstance(run_output.actual_instance, RunError):
+            run_error: RunError = run_output.actual_instance
+            raise ACPRunException(f"Run Failed: {run_error}")
         else:
-            pass
-            # TODO: handle other cases
+            raise ACPRunException(f"ACP Server returned a unsupporteed response: {run_output}")
 
         return state
 

@@ -8,12 +8,11 @@ import yaml
 from openapi_spec_validator import validate
 from openapi_spec_validator.readers import read_from_filename
 import datamodel_code_generator
-import copy
 import json
 from pathlib import Path
 import subprocess
 import shutil
-from .exceptions import ACPDescriptorValidationException
+from acp_sdk.exceptions import ACPDescriptorValidationException
 
 ACP_SPEC_PATH = os.getenv("ACP_SPEC_PATH", "acp-spec/openapi.yaml")
 CLIENT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "scripts/create_acp_client.sh")

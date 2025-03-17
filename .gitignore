@@ -1,6 +1,6 @@
 .idea
 ___*
-.idea
+.vscode
 .DS_STORE
 __pycache__
 ___*
@@ -12,3 +12,4 @@ venv
 /acp-sync-client-generated
 /acp-async-client-generated
 acp-server-stub
+pyrightconfig.json

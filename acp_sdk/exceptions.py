@@ -4,3 +4,6 @@
 
 class ACPDescriptorValidationException(Exception):
     pass
+
+class ACPRunException(Exception):
+    pass
