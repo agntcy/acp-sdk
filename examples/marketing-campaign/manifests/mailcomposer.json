@@ -108,16 +108,18 @@
     },
     "interrupts": []
   },
-  "dependencies": [],
-  "deployments": [
-    {
-      "type": "source_code",
-      "name": "src",
-      "url": "file://.",
-      "framework_config": {
-        "framework_type": "langgraph",
-        "graph": "./mailcomposer/mailcomposer.py:graph"
+  "deployment": {
+    "dependencies": [],
+    "deployment_options": [
+      {
+        "type": "source_code",
+        "name": "src",
+        "url": "file://../../mailcomposer",
+        "framework_config": {
+          "framework_type": "langgraph",
+          "graph": "mailcomposer.mailcomposer:graph"
+        }
       }
-    }
-  ]
+    ]
+  }
 }

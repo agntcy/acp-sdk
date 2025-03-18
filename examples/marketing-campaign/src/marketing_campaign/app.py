@@ -35,9 +35,12 @@ def check_final_email(state: state.OverallState):
 
 def build_graph() -> CompiledStateGraph:
     # Fill in client configuration for the remote agent
+    mailcomposer_host = os.environ.get("MAILCOMPOSER_HOST")
+    mailcomposer_api_key = os.environ.get("MAILCOMPOSER_API_KEY", None)
+
     mailcomposer_client_config = Configuration(
-        # api_key={"api_key":"test_api_key"},
-        host="http://localhost:8000")
+        api_key=mailcomposer_api_key,
+        host=mailcomposer_host)
 
     # Instantiate the local ACP node for the remote agent
     acp_mailcomposer = ACPNode(

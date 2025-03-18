@@ -5,8 +5,6 @@ from langchain_core.messages import  AIMessage, HumanMessage
 import mailcomposer
 import sendgrid
 
-
-
 class InputState(BaseModel):
     messages: List[mailcomposer.Message]  = Field([], description="Chat messages")
 

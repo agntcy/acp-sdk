@@ -4,9 +4,8 @@ import json
 
 from pydantic import ValidationError
 
-from ..models import AgentACPDescriptor
-from .generator import generate_agent_oapi
-from .exceptions import ACPDescriptorValidationException
+from acp_sdk.models import AgentACPDescriptor
+from acp_sdk.exceptions import ACPDescriptorValidationException
 
 
 def validate_agent_descriptor_file(descriptor_file_path: str, raise_exception: bool = False) -> AgentACPDescriptor:
