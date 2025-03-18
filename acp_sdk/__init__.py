@@ -58,9 +58,9 @@ class ApiClientConfiguration(Configuration):
                          ca_cert_data, debug=debug)
     
     @classmethod
-    def fromEnv(
+    def fromEnvPrefix(
         cls,
-        env_var_prefix,
+        env_var_prefix: str,
         host = None, 
         api_key = None, 
         api_key_prefix = None, 
@@ -76,6 +76,7 @@ class ApiClientConfiguration(Configuration):
         debug = None,
     ) -> "ApiClientConfiguration":
         prefix = env_var_prefix.upper()
+
         return ApiClientConfiguration(
             _get_envvar_param(prefix, "host", host),
             _get_envvar_param(prefix, "api_key", api_key), 

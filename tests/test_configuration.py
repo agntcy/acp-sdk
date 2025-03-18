@@ -8,7 +8,7 @@ def test_client_config(monkeypatch):
     password = "testpass"
 
     monkeypatch.setenv("TEST_HOST", host)
-    config = ApiClientConfiguration.fromEnv("TEST_", username=username, password=password)
+    config = ApiClientConfiguration.fromEnvPrefix("TEST_", username=username, password=password)
     assert config is not None
     assert config.host == host
     assert config.password == password
