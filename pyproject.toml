@@ -5,10 +5,10 @@ license = "Apache-2.0"
 description = "Agent Connect Protocol SDK"
 readme = "README.md"
 authors = [
-    { name = "Alessandro Duminuco", email = "aduminuc@cisco.com" },
+    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 maintainers = [
-    { name = "Alessandro Duminuco", email = "aduminuc@cisco.com" },
+    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 
 [tool.poetry.dependencies]
