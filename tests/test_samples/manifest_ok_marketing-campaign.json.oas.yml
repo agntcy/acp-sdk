@@ -1,0 +1,1099 @@
+components:
+  schemas:
+    Agent:
+      description: A description of an agent supported by this server
+      properties:
+        agent_id:
+          description: Unique identifier of the agent in this server.
+          format: uuid
+          title: Agent Id
+          type: string
+        metadata:
+          $ref: '#/components/schemas/AgentMetadata'
+      required:
+      - agent_id
+      - metadata
+      title: Agent
+      type: object
+    AgentACPDescriptor:
+      description: Describe all the ACP specs of an agent, including schemas and protocol
+        features.
+      properties:
+        metadata:
+          $ref: '#/components/schemas/AgentMetadata'
+        specs:
+          $ref: '#/components/schemas/AgentACPSpec'
+      required:
+      - metadata
+      - specs
+      title: Agent ACP Descriptor
+      type: object
+    AgentACPSpec:
+      description: Specification of agent capabilities, config, input, output, and
+        interrupts
+      properties:
+        capabilities:
+          description: Declares what invocation features this agent is capable of.
+          properties:
+            callbacks:
+              default: false
+              description: This is `true` if the agent supports a webhook to report
+                run results. If this is `false`, providing a `webhook` at run creation
+                has no effect. If missing, it means `false`
+              title: Callback Support
+              type: boolean
+            interrupts:
+              default: false
+              description: This is `true` if the agent runs can interrupt to request
+                additional input and can be subsequently resumed. If missing, it means
+                `false`
+              title: Interrupt Support
+              type: boolean
+            streaming:
+              description: Supported streaming modes. If missing, streaming is not
+                supported.  If no mode is supported attempts to stream output will
+                result in an error.
+              properties:
+                custom:
+                  description: This is `true` if the agent supports custom objects
+                    streaming. If `false` or missing, custom streaming is not supported.
+                    Custom Objects streaming consists of a stream of object whose
+                    schema is specified by the agent ACP descriptor under `specs.custom_streaming_update`.
+                  title: Custom Objects Streaming
+                  type: boolean
+                result:
+                  description: This is `true` if the agent supports result streaming.
+                    If `false` or missing, result streaming is not supported. Result
+                    streaming consists of a stream of objects of type `RunResult`,
+                    where each one sent over the stream fully replace the previous
+                    one.
+                  title: Result Streaming
+                  type: boolean
+              title: Streaming Modes
+              type: object
+            threads:
+              default: false
+              description: This is `true` if the agent supports run threads. If this
+                is `false`, then the threads tagged with `Threads` are not available.
+                If missing, it means `false`
+              title: Thread Support
+              type: boolean
+          title: Agent Capabilities
+          type: object
+        config:
+          description: 'This object contains an instance of an OpenAPI schema object,
+            formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+          examples:
+          - address:
+              type: string
+            age:
+              format: int32
+              minimum: 0
+              type: integer
+            name:
+              type: string
+            properties: null
+            required:
+            - name
+            type: object
+          type: object
+        custom_streaming_update:
+          description: 'This describes the format of an Update in the streaming.  Must
+            be specified if `streaming.custom` capability is true and cannot be specified
+            otherwise. Format follows: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+          examples:
+          - address:
+              type: string
+            age:
+              format: int32
+              minimum: 0
+              type: integer
+            name:
+              type: string
+            properties: null
+            required:
+            - name
+            type: object
+          type: object
+        input:
+          description: 'This object contains an instance of an OpenAPI schema object,
+            formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+          examples:
+          - properties:
+              address:
+                type: string
+              age:
+                format: int32
+                minimum: 0
+                type: integer
+              name:
+                type: string
+            required:
+            - name
+            type: object
+          type: object
+        interrupts:
+          description: List of possible interrupts that can be provided by the agent.
+            If `interrupts` capability is true, this needs to have at least one item.
+          items:
+            properties:
+              interrupt_payload:
+                description: 'This object contains an instance of an OpenAPI schema
+                  object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+                examples:
+                - address:
+                    type: string
+                  age:
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  name:
+                    type: string
+                  properties: null
+                  required:
+                  - name
+                  type: object
+                type: object
+              interrupt_type:
+                description: Name of this interrupt type. Needs to be unique in the
+                  list of interrupts.
+                title: Interrupt Type Name
+                type: string
+              resume_payload:
+                description: 'This object contains an instance of an OpenAPI schema
+                  object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+                examples:
+                - address:
+                    type: string
+                  age:
+                    format: int32
+                    minimum: 0
+                    type: integer
+                  name:
+                    type: string
+                  properties: null
+                  required:
+                  - name
+                  type: object
+                type: object
+            required:
+            - interrupt_type
+            - resume_payload
+            - interrupt_payload
+            type: object
+          type: array
+        output:
+          description: 'This object contains an instance of an OpenAPI schema object,
+            formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+          examples:
+          - address:
+              type: string
+            age:
+              format: int32
+              minimum: 0
+              type: integer
+            name:
+              type: string
+            properties: null
+            required:
+            - name
+            type: object
+          type: object
+        thread_state:
+          description: 'This describes the format of ThreadState.  Cannot be specified
+            if `threads` capability is false. If not specified, when `threads` capability
+            is true, then the API to retrieve ThreadState from a Thread or a Run is
+            not available. This object contains an instance of an OpenAPI schema object,
+            formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+          examples:
+          - address:
+              type: string
+            age:
+              format: int32
+              minimum: 0
+              type: integer
+            name:
+              type: string
+            properties: null
+            required:
+            - name
+            type: object
+          type: object
+      required:
+      - capabilities
+      - input
+      - output
+      - config
+      title: Agent ACP Specs
+      type: object
+    AgentMetadata:
+      description: Basic information associated to the agent
+      properties:
+        description:
+          description: Description of this agent, which should include what the intended
+            use is, what tasks it accomplishes and how uses input and configs to produce
+            the output and any other side effect
+          title: Description
+          type: string
+        ref:
+          $ref: '#/components/schemas/AgentRef'
+      required:
+      - ref
+      - description
+      title: Agent Metadata
+      type: object
+    AgentRef:
+      description: Reference to an Agent Record in the Agent Directory, it includes
+        name, version and a locator.
+      properties:
+        name:
+          description: Name of the agent that identifies the agent in its record
+          title: Name
+          type: string
+        url:
+          description: URL of the record. Can be a network location or a file.
+          format: uri
+          title: Agent Record URL
+          type: string
+        version:
+          description: Version of the agent in its record. Should be formatted according
+            to semantic versioning (https://semver.org)
+          title: Version
+          type: string
+      required:
+      - name
+      - version
+      title: Agent Reference
+      type: object
+    AgentSearchRequest:
+      description: Payload for listing agents.
+      properties:
+        limit:
+          default: 10
+          description: Maximum number to return.
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        name:
+          description: Match all agents with the name specified.
+          title: Name
+          type: string
+        offset:
+          default: 0
+          description: Offset to start from.
+          minimum: 0
+          title: Offset
+          type: integer
+        version:
+          description: Match all agents with the version specified. Formatted according
+            to semantic versioning (https://semver.org)
+          title: Version
+          type: string
+      title: AgentSearchRequest
+      type: object
+    ConfigSchema:
+      properties:
+        recipient_email_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Email address of the email recipient
+          title: Recipient Email Address
+        sender_email_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Email address of the email sender
+          title: Sender Email Address
+      title: ConfigModel
+      type: object
+    CustomRunResultUpdate:
+      description: Object holding a custom defined update of the agent result during
+        streaming.
+      properties:
+        run_id:
+          description: The ID of the run.
+          format: uuid
+          title: Run Id
+          type: string
+        status:
+          $ref: '#/components/schemas/RunStatus'
+          description: Status of the Run when this result was generated
+          title: Run Status
+        type:
+          enum:
+          - custom
+          title: Output Type
+          type: string
+        update:
+          $ref: '#/components/schemas/StreamUpdateSchema'
+      required:
+      - type
+      - run_id
+      - status
+      - update
+      title: Custom Run Result Update
+      type: object
+    ErrorResponse:
+      description: Error message returned from the server
+      title: ErrorResponse
+      type: string
+    InputSchema:
+      $defs:
+        Message:
+          properties:
+            content:
+              description: the content of the message
+              title: Content
+              type: string
+            type:
+              $ref: '#/components/schemas/InputSchema/$defs/Type'
+              description: indicates the originator of the message, a human or an
+                assistant
+          required:
+          - type
+          - content
+          title: Message
+          type: object
+        Type:
+          enum:
+          - human
+          - assistant
+          - ai
+          title: Type
+          type: string
+      properties:
+        messages:
+          default: []
+          description: Chat messages
+          items:
+            $ref: '#/components/schemas/InputSchema/$defs/Message'
+          title: Messages
+          type: array
+      title: InputState
+      type: object
+    InterruptPayloadSchema:
+      description: "This schema describes the interrupt payload. Actual schema describes\
+        \ a polimorphic object, which means a schema structured with `oneOf` and `discriminator`.\
+        \ The discriminator is the `interrupt_type`, while the schemas will be the\
+        \ ones defined in the agent spec under `interrupts`/`interrupt_payload` For\
+        \ example:          oneOf:\n  - $ref: '#/components/schemas/ApprovalInterruptPayload'\n\
+        \  - $ref: '#/components/schemas/QuestionInterruptPayload'\ndiscriminator:\n\
+        \  propertyName: interruput_type\n  mapping:\n    approval: '#/components/schemas/ApprovalInterruptPayload'\n\
+        \    question: '#/components/schemas/QuestionInterruptPayload'"
+      title: Interrupt Payload
+      type: object
+    OutputSchema:
+      $defs:
+        Message:
+          properties:
+            content:
+              description: the content of the message
+              title: Content
+              type: string
+            type:
+              $ref: '#/components/schemas/OutputSchema/$defs/Type'
+              description: indicates the originator of the message, a human or an
+                assistant
+          required:
+          - type
+          - content
+          title: Message
+          type: object
+        Type:
+          enum:
+          - human
+          - assistant
+          - ai
+          title: Type
+          type: string
+      properties:
+        messages:
+          default: []
+          description: Chat messages
+          items:
+            $ref: '#/components/schemas/OutputSchema/$defs/Message'
+          title: Messages
+          type: array
+        operation_logs:
+          default: []
+          description: An array containing all the operations performed and their
+            result. Each operation is appended to this array with a timestamp.
+          examples:
+          - - 'Mar 15 18:10:39 Operation performed: email sent Result: OK'
+            - Mar 19 18:13:39 Operation X failed
+          items:
+            type: string
+          title: Operation Logs
+          type: array
+      title: OutputState
+      type: object
+    ResumePayloadSchema:
+      description: "This schema describes the resume payload after an interrupt. Actual\
+        \ schema describes a polimorphic object, which means a schema structured with\
+        \ `oneOf` and `discriminator`. The discriminator is the `interrupt_type`,\
+        \ while the schemas will be those defined in the agent spec under `interrupts`/`resume_payload`\
+        \ For example:          oneOf:\n  - $ref: '#/components/schemas/ApprovalResumePayload'\n\
+        \  - $ref: '#/components/schemas/QuestionResumePayload'\ndiscriminator:\n\
+        \  propertyName: interrupt_type\n  mapping:\n    approval: '#/components/schemas/ApprovalResumePayload'\n\
+        \    question: '#/components/schemas/QuestionResumePayload'"
+      title: Resume Payload Schema
+      type: object
+    Run:
+      description: Holds all the information of a run
+      properties:
+        agent_id:
+          description: The agent that was used for this run.
+          format: uuid
+          title: Agent Id
+          type: string
+        created_at:
+          description: The time the run was created.
+          format: date-time
+          title: Created At
+          type: string
+        creation:
+          $ref: '#/components/schemas/RunCreate'
+        run_id:
+          description: The ID of the run.
+          format: uuid
+          title: Run Id
+          type: string
+        status:
+          $ref: '#/components/schemas/RunStatus'
+          description: The status of the run. One of 'pending', 'error', 'success',
+            'timeout', 'interrupted'.
+          title: Status
+        thread_id:
+          description: Optional Thread ID wher the Run belongs to. This is populated
+            only for runs on agents agents supporting Threads.
+          format: uuid
+          title: Agent ID
+          type: string
+        updated_at:
+          description: The last time the run was updated.
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - creation
+      - run_id
+      - agent_id
+      - created_at
+      - updated_at
+      - status
+      title: Agent Run
+    RunCreate:
+      description: Payload for creating a run.
+      properties:
+        agent_id:
+          description: The ID of the agent.
+          format: uuid
+          title: Agent Id
+          type: string
+        config:
+          $ref: '#/components/schemas/ConfigSchema'
+        input:
+          $ref: '#/components/schemas/InputSchema'
+        metadata:
+          description: Metadata to assign to the run. Optional free format metadata
+            to attach to the run.
+          title: Metadata
+          type: object
+        thread_id:
+          description: Optional Thread ID wher the Run belongs to. This can be used
+            only for agents supporting Threads.
+          format: uuid
+          title: Agent ID
+          type: string
+      required:
+      - agent_id
+      title: Agent Run Creation
+      type: object
+    RunError:
+      description: Run terminated with an error
+      properties:
+        description:
+          description: description of the error
+          title: Error Description
+          type: string
+        errcode:
+          description: code of the error
+          title: Error Code
+          type: integer
+        run_id:
+          description: The ID of the run.
+          format: uuid
+          title: Run Id
+          type: string
+        type:
+          enum:
+          - error
+          title: Output Type
+          type: string
+      required:
+      - type
+      - run_id
+      - errcode
+      - description
+      title: Run Error
+      type: object
+    RunInterrupt:
+      description: Interrupt occurred during a Run
+      properties:
+        interrupt:
+          $ref: '#/components/schemas/InterruptPayloadSchema'
+        type:
+          enum:
+          - interrupt
+          title: Output Type
+          type: string
+      required:
+      - type
+      - interrupt
+      title: Run Interrupt
+      type: object
+    RunOutput:
+      description: Output of a Run. Can be the final result or an interrupt.
+      discriminator:
+        mapping:
+          error: '#/components/schemas/RunError'
+          result: '#/components/schemas/RunResult'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/RunResult'
+      - $ref: '#/components/schemas/RunError'
+      title: Run Output
+    RunOutputStream:
+      description: Server-sent event containing one agent output event. Actual event
+        type is carried inside the data.
+      properties:
+        data:
+          description: A serialized JSON data structure carried in the SSE event data
+            field. The event can carry either a full `RunResult`, if streaming mode
+            is `result` or an custom update if streaming mode is `custom`
+          discriminator:
+            mapping:
+              custom: '#/components/schemas/CustomRunResultUpdate'
+              result: '#/components/schemas/RunResult'
+            propertyName: type
+          oneOf:
+          - $ref: '#/components/schemas/RunResult'
+          - $ref: '#/components/schemas/CustomRunResultUpdate'
+          title: Stream Event Payload
+        event:
+          description: Event type. This is the constant string `agent_event` to be
+            compatible with SSE spec. The actual type differentiation is done in the
+            event itself.
+          enum:
+          - agent_event
+          type: string
+        id:
+          description: Unique identifier of the event
+          title: Event ID
+          type: string
+      required:
+      - id
+      - event
+      - data
+      title: Run Output Stream Event
+      type: object
+    RunResult:
+      description: Final result of a Run.
+      properties:
+        result:
+          $ref: '#/components/schemas/OutputSchema'
+        run_id:
+          description: The ID of the run.
+          format: uuid
+          title: Run Id
+          type: string
+        status:
+          $ref: '#/components/schemas/RunStatus'
+          description: Status of the Run when this result was generated. This is particurarly
+            useful when this data structure is used for streaming results. As the
+            server can indicate an interrupt or an error condition while streaming
+            the result.
+          title: Run Status
+        type:
+          enum:
+          - result
+          title: Output Type
+          type: string
+      required:
+      - type
+      - run_id
+      - status
+      - result
+      title: Run Result
+      type: object
+    RunSearchRequest:
+      description: Payload for listing runs.
+      properties:
+        agent_id:
+          description: Matches all the Runs associated with the specified Agent ID.
+          format: uuid
+          title: Agent Id
+          type: string
+        limit:
+          default: 10
+          description: Maximum number to return.
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        metadata:
+          description: Matches all threads for which metadata has  keys and values
+            equal to those specified in this object.
+          title: Metadata Filter
+          type: object
+        offset:
+          default: 0
+          description: Offset to start from.
+          minimum: 0
+          title: Offset
+          type: integer
+        status:
+          $ref: '#/components/schemas/RunStatus'
+          description: Matches all the Runs associated with the specified status.
+            One of 'pending', 'error', 'success', 'timeout', 'interrupted'.
+          title: Status
+      title: Run Search Request
+      type: object
+    RunStatus:
+      enum:
+      - pending
+      - error
+      - success
+      - timeout
+      - interrupted
+      type: string
+    StreamUpdateSchema:
+      description: An update in the SSE event streaming where streaming mode is set
+        to custom. The schema is described in agent ACP descriptor under 'spec.custom_streaming_update'.
+      title: Stream Update Schema
+      type: object
+    StreamingMode:
+      enum:
+      - result
+      - custom
+      type: string
+    Thread:
+      description: Represents a collection of consecutive runs on an agent. Thread
+        is associated with a state
+      properties:
+        agent_id:
+          description: Identifier of the agent this thread is executed on
+          title: Agent ID
+          type: string
+        metadata:
+          description: Free form metadata for this thread
+          title: Metadata
+          type: object
+        thread_id:
+          description: unique identifier of a thread
+          title: Thread ID
+          type: string
+      required:
+      - thread_id
+      - agent_id
+      title: Thread
+      type: object
+    ThreadCreate:
+      description: Detail of an empty thread to be created.
+      properties:
+        agent_id:
+          description: Identifier of the agent this thread is executed on
+          title: Agent ID
+          type: string
+        metadata:
+          description: Free form metadata for this thread
+          title: Metadata
+          type: object
+      required:
+      - agent_id
+      title: Thread
+      type: object
+    ThreadSearchRequest:
+      description: Payload for listing runs.
+      properties:
+        agent_id:
+          description: Matches all threads associated with the specified agent ID.
+          format: uuid
+          title: Agent Id
+          type: string
+        limit:
+          default: 10
+          description: Maximum number to return.
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        metadata:
+          description: Matches all threads for which metadata has  keys and values
+            equal to those specified in this object.
+          title: Metadata Filter
+          type: object
+        offset:
+          default: 0
+          description: Offset to start from.
+          minimum: 0
+          title: Offset
+          type: integer
+      title: Thread Search Request
+      type: object
+    ThreadStateSchema:
+      description: The thread state. The schema is described in agent ACP descriptor
+        under 'spec.thread_state'.
+      title: Thread State Schema
+      type: object
+info:
+  title: ACP Spec for org.agntcy.marketing-campaign:0.0.1
+  version: '0.1'
+openapi: 3.1.1
+paths:
+  /agents/search:
+    post:
+      description: 'Returns a list of agents matching the criteria provided in the
+        request.
+
+
+        This endpoint also functions as the endpoint to list all agents.'
+      operationId: search_agents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentSearchRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Agent'
+                title: Matching Agent List
+                type: array
+          description: Success
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Search Agents
+      tags:
+      - Agents
+  /agents/{agent_id}:
+    get:
+      description: Get an agent by ID.
+      operationId: get_agent_by_ID
+      parameters:
+      - description: The ID of the agent.
+        in: path
+        name: agent_id
+        required: true
+        schema:
+          description: The ID of the agent.
+          format: uuid
+          title: Agent Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+          description: Success
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Get Agent
+      tags:
+      - Agents
+  /agents/{agent_id}/descriptor:
+    get:
+      description: Get agent ACP descriptor by agent ID.
+      operationId: get_acp_descriptor_by_id
+      parameters:
+      - description: The ID of the agent.
+        in: path
+        name: agent_id
+        required: true
+        schema:
+          description: The ID of the agent.
+          format: uuid
+          title: Agent Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentACPDescriptor'
+          description: Success
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Get Agent ACP Descriptor from its id
+      tags:
+      - Agents
+  /runs:
+    post:
+      callbacks:
+        runstatuschange:
+          '{$request.body#/webhook}':
+            post:
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Run'
+                required: true
+              responses:
+                '200':
+                  description: Your server returns this code if it accepts the callback
+      description: Create a run, return the run descriptor immediately. Don't wait
+        for the final run output.
+      operationId: create_run
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunCreate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+          description: Success
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Create Background Run
+      tags:
+      - Runs
+  /runs/search:
+    post:
+      description: 'Search for runs.
+
+
+        This endpoint also functions as the endpoint to list all runs.'
+      operationId: search_runs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunSearchRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Run'
+                title: Response Search Agents Agents Search Post
+                type: array
+          description: Success
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Search Runs
+      tags:
+      - Runs
+  /runs/{run_id}:
+    delete:
+      description: Cancel a run.
+      operationId: delete_run
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+          description: Success
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Delete a run. If running, cancel and then delete.
+      tags:
+      - Runs
+    get:
+      description: Get a run from its ID. Don't wait for the final run output.
+      operationId: get_run
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+          description: Success
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Get a previously created Run
+      tags:
+      - Runs
+    parameters:
+    - description: The ID of the agent.
+      in: path
+      name: run_id
+      required: true
+      schema:
+        description: The ID of the run.
+        format: uuid
+        title: Run Id
+        type: string
+  /runs/{run_id}/output:
+    get:
+      description: "Retrieve the last output of the run.  The output can be:\n  *\
+        \ an interrupt, this happens when the agent run status is `interrupted`\n\
+        \  * the final result of the run, this happens when the agent run status is\
+        \ `success`\n  * an error, this happens when the agent run status is `error`\
+        \ or `timeout`\n\n\nIf the block timeout is provided and the current run status\
+        \ is `pending`, this call blocks until the state changes or the timeout expires.\
+        \ \nIf no timeout is provided or the timeout has expired and  run status is\
+        \ `pending`, this call returns `204` with no content."
+      operationId: get_run_output
+      parameters:
+      - description: The ID of the run.
+        in: path
+        name: run_id
+        required: true
+        schema:
+          description: The ID of the run.
+          format: uuid
+          title: Run Id
+          type: string
+      - in: query
+        name: block_timeout
+        required: false
+        schema:
+          description: In case the run status is `pending`, this call blocks until
+            the status change or `timeout` seconds have passed.
+          title: Block Timeout
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunOutput'
+          description: Success
+        '204':
+          description: No Output Available
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Retrieve last output of a run if available
+      tags:
+      - Runs
+tags:
+- description: "Agents are AI workflows that can be configured and/or executed on\
+    \ this server.  This means that a client of this server can start a Run on any\
+    \ of the Agents supported by this server.\nEach agent may support different features\
+    \ of ACP, also each agent specifies the schemas of the objects carried by ACP\
+    \ for  configuration, input, output, interrupts and state. \nDetails of the ACP\
+    \ features and the schemas are kept in the ACP descriptor of the specific agent.\
+    \  This object can be retrieved through this ACP interface or is found in the\
+    \ ACP extension of the agent record in the agent directory.\nSee `Agent` and `AgentACPDescriptor`\
+    \ models below for more info."
+  name: Agents
+- description: 'A Run represents an execution of an agent.
+
+    The output of a Run can be a final result or an interrupt.
+
+    Result from a run can be retrieved by polling or by blocking and waiting for the
+    result.
+
+    See `Run`  and `RunOutput` models below for more info.'
+  name: Runs
+
