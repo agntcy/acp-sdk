@@ -6,12 +6,16 @@ authors = ["Giovanni Conte <giconte@cisco.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = "^3.12"
 langchain = "^0.3.17"
-langgraph = "^0.2.69"
+langgraph = "^0.3.5"
 langchain-openai = "^0.3.3"
 jinja2 = "^3.1.5"
 python-dotenv = "^1.0.1"
+
+[tool.poetry.group.manifest.dependencies]
+acp-sdk = { path = "../../../acp-sdk", develop = true}
+
 
 [build-system]
 requires = ["poetry-core"]

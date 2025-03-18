@@ -6,6 +6,7 @@ from langgraph.graph.message import add_messages
 from langchain_openai import AzureChatOpenAI
 from typing_extensions import TypedDict
 from langchain.prompts import PromptTemplate
+from mailcomposer.state import OutputState, AgentState
 
 
 # Initialize the Azure OpenAI model
@@ -50,13 +51,6 @@ EMPTY_MSG_ERROR = ("Oops! It seems like you're trying to start a conversation wi
 
 SEPARATOR = "**************"
 
-# Define the state structures
-class AgentState(TypedDict, total=False):
-    messages: list[BaseMessage]
-    is_completed: bool
-
-class OutputState(AgentState):
-    final_email: str
 
 def extract_mail(messages) -> str:
     for m in reversed(messages):

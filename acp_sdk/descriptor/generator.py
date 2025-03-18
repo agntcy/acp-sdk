@@ -17,6 +17,7 @@ from acp_sdk.exceptions import ACPDescriptorValidationException
 ACP_SPEC_PATH = os.getenv("ACP_SPEC_PATH", "acp-spec/openapi.yaml")
 CLIENT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "scripts/create_acp_client.sh")
 
+
 def _convert_descriptor_schema(schema_name, schema):
     return json.loads(
         json.dumps(schema).replace("#/$defs/", f"#/components/schemas/{schema_name}/$defs/"))
@@ -27,7 +28,8 @@ def _gen_oas_thread_runs(descriptor: AgentACPDescriptor, spec_dict):
 
     if descriptor.specs.capabilities.threads:
         if descriptor.specs.thread_state:
-            spec_dict['components']['schemas']["ThreadStateSchema"] = _convert_descriptor_schema("ThreadStateSchema", descriptor.specs.thread_state)
+            spec_dict['components']['schemas']["ThreadStateSchema"] = _convert_descriptor_schema("ThreadStateSchema",
+                                                                                                 descriptor.specs.thread_state)
         else:
             # No thread schema defined, hence no support to retrieve thread state
             del spec_dict['paths']['/threads/{thread_id}/state']
@@ -53,7 +55,8 @@ def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
 
     if descriptor.specs.capabilities.interrupts:
         if not descriptor.specs.interrupts or len(descriptor.specs.interrupts) == 0:
-            raise ACPDescriptorValidationException("Missing interrupt definitions with `spec.capabilities.interrupts=true`")
+            raise ACPDescriptorValidationException(
+                "Missing interrupt definitions with `spec.capabilities.interrupts=true`")
 
         # Add the interrupt payload and resume payload types for the schemas declared in the descriptor
         spec_dict['components']['schemas']['InterruptPayloadSchema'] = {
@@ -85,7 +88,8 @@ def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
             )
             spec_dict['components']['schemas']['InterruptPayloadSchema']['discriminator']['mapping'][
                 interrupt.interrupt_type] = f'#/components/schemas/{interrupt_payload_schema_name}'
-            spec_dict['components']['schemas'][interrupt_payload_schema_name] = _convert_descriptor_schema(interrupt_payload_schema_name, interrupt.interrupt_payload)
+            spec_dict['components']['schemas'][interrupt_payload_schema_name] = _convert_descriptor_schema(
+                interrupt_payload_schema_name, interrupt.interrupt_payload)
 
             resume_payload_schema_name = f"{interrupt.interrupt_type}ResumePayload"
             interrupt.resume_payload['properties']['interrupt_type'] = interrupt.interrupt_payload['properties'][
@@ -96,7 +100,8 @@ def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
             )
             spec_dict['components']['schemas']['ResumePayloadSchema']['discriminator']['mapping'][
                 interrupt.interrupt_type] = f'#/components/schemas/{resume_payload_schema_name}'
-            spec_dict['components']['schemas'][resume_payload_schema_name] = _convert_descriptor_schema(resume_payload_schema_name, interrupt.resume_payload)
+            spec_dict['components']['schemas'][resume_payload_schema_name] = _convert_descriptor_schema(
+                resume_payload_schema_name, interrupt.resume_payload)
     else:
         # Interrupts are not supported 
 
@@ -145,8 +150,8 @@ def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
     supported_mode = streaming_modes[0].value
     spec_dict['components']['schemas']['StreamingMode']['enum'] = [supported_mode]
     spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['$ref'] = \
-    spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][
-        supported_mode]
+        spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][
+            supported_mode]
     del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['oneOf']
     del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping']
 
@@ -156,6 +161,7 @@ def _gen_oas_callback(descriptor: AgentACPDescriptor, spec_dict):
     if not descriptor.specs.capabilities.callbacks:
         # No streaming is supported. Removing callback option from RunCreate
         del spec_dict['components']['schemas']['RunCreate']['properties']['webhook']
+
 
 def generate_agent_oapi_for_schemas(descriptor: AgentACPDescriptor):
     spec_dict = {
@@ -169,9 +175,12 @@ def generate_agent_oapi_for_schemas(descriptor: AgentACPDescriptor):
         }
     }
 
-    spec_dict['components']['schemas']["InputSchema"] = _convert_descriptor_schema("InputSchema", descriptor.specs.input)
-    spec_dict['components']['schemas']["OutputSchema"] = _convert_descriptor_schema("OutputSchema", descriptor.specs.output)
-    spec_dict['components']['schemas']["ConfigSchema"] = _convert_descriptor_schema("ConfigSchema", descriptor.specs.config)
+    spec_dict['components']['schemas']["InputSchema"] = _convert_descriptor_schema("InputSchema",
+                                                                                   descriptor.specs.input)
+    spec_dict['components']['schemas']["OutputSchema"] = _convert_descriptor_schema("OutputSchema",
+                                                                                    descriptor.specs.output)
+    spec_dict['components']['schemas']["ConfigSchema"] = _convert_descriptor_schema("ConfigSchema",
+                                                                                    descriptor.specs.config)
     validate(spec_dict)
     return spec_dict
 
@@ -184,9 +193,12 @@ def generate_agent_oapi(descriptor: AgentACPDescriptor):
 
     spec_dict['info']['title'] = f"ACP Spec for {descriptor.metadata.ref.name}:{descriptor.metadata.ref.version}"
 
-    spec_dict['components']['schemas']["InputSchema"] = _convert_descriptor_schema("InputSchema", descriptor.specs.input)
-    spec_dict['components']['schemas']["OutputSchema"] = _convert_descriptor_schema("OutputSchema", descriptor.specs.output)
-    spec_dict['components']['schemas']["ConfigSchema"] = _convert_descriptor_schema("ConfigSchema", descriptor.specs.config)
+    spec_dict['components']['schemas']["InputSchema"] = _convert_descriptor_schema("InputSchema",
+                                                                                   descriptor.specs.input)
+    spec_dict['components']['schemas']["OutputSchema"] = _convert_descriptor_schema("OutputSchema",
+                                                                                    descriptor.specs.output)
+    spec_dict['components']['schemas']["ConfigSchema"] = _convert_descriptor_schema("ConfigSchema",
+                                                                                    descriptor.specs.config)
 
     _gen_oas_thread_runs(descriptor, spec_dict)
     _gen_oas_interrupts(descriptor, spec_dict)
@@ -197,9 +209,9 @@ def generate_agent_oapi(descriptor: AgentACPDescriptor):
     return spec_dict
 
 
-def generate_agent_models(descriptor: AgentACPDescriptor, path: str, model_file_name:str = "models.py"):
+def generate_agent_models(descriptor: AgentACPDescriptor, path: str, model_file_name: str = "models.py"):
     agent_spec = generate_agent_oapi_for_schemas(descriptor)
-    agent_sdk_path = path # os.path.join(path, f'{descriptor.metadata.ref.name}')
+    agent_sdk_path = path  # os.path.join(path, f'{descriptor.metadata.ref.name}')
     agent_models_dir = agent_sdk_path
     tmp_dir = tempfile.TemporaryDirectory()
     specpath = os.path.join(tmp_dir.name, f'openapi.yaml')
@@ -217,26 +229,6 @@ def generate_agent_models(descriptor: AgentACPDescriptor, path: str, model_file_
         output_model_type=datamodel_code_generator.DataModelType.PydanticV2BaseModel,
         output=Path(modelspath)
     )
-
-def generate_agent_descriptor(metadata:AgentMetadata, inputModel, outputModel, configModel, path):
-    input_oapi = inputModel.model_json_schema()
-    output_oapi= outputModel.model_json_schema()
-    config_oapi = configModel.model_json_schema()
-    descriptor = AgentACPDescriptor(
-        metadata=metadata,
-        specs=AgentACPSpec(
-            input=input_oapi,
-            output=output_oapi,
-            config=config_oapi,
-            capabilities=AgentCapabilities()
-        )
-
-    )
-    with open(path, "w") as f:
-        f.write(descriptor.model_dump_json())
-
-
-
 
 
 def generate_agent_client(descriptor: AgentACPDescriptor, path: str):

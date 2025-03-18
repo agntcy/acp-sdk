@@ -37,6 +37,7 @@ def build_graph() -> CompiledStateGraph:
     # Fill in client configuration for the remote agent
     mailcomposer_host = os.environ.get("MAILCOMPOSER_HOST")
     mailcomposer_api_key = os.environ.get("MAILCOMPOSER_API_KEY", None)
+    mailcomposer_agent_id = os.environ.get("MAILCOMPOSER_AGENT_ID")
 
     mailcomposer_client_config = Configuration(
         api_key=mailcomposer_api_key,
@@ -45,7 +46,7 @@ def build_graph() -> CompiledStateGraph:
     # Instantiate the local ACP node for the remote agent
     acp_mailcomposer = ACPNode(
         name="mailcomposer",
-        agent_id="dummy_id", # TODO: Receive it as config
+        agent_id=mailcomposer_agent_id,
         client_config=mailcomposer_client_config,
         input_path="mailcomposer_state.input",
         input_type=mailcomposer.InputSchema,
