@@ -12,4 +12,5 @@ venv
 /acp-sync-client-generated
 /acp-async-client-generated
 /workflow-srv-mgr-client-generated
-acp-server-stub
+/acp-server-stub
+/dist
