@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import datetime
 import io
-from acp_sdk import AsyncACPClient, ApiResponse, Configuration, AsyncApiClient
-from acp_sdk.models import RunCreate, RunSearchRequest, Run, RunStatus
+from agntcy_acp import AsyncACPClient, ApiResponse, Configuration, AsyncApiClient
+from agntcy_acp.models import RunCreate, RunSearchRequest, Run, RunStatus
 
 class RESTResponse(io.IOBase):
     def __init__(self, status, body) -> None:

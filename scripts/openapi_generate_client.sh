@@ -31,7 +31,7 @@ echo MINOR_VERSION="\""$(yq '.info.version | sub("\d+\.", "")' "${SPEC_FILE}")"\
 
 echo "Modifying documentation files..."
 for genfile in $(find "${CLIENT_DIR}/docs" -name '*.md'); do
-    sed -i '' -E -e "s/${GEN_PACKAGE_NAME}/acp_sdk.${SDK_SUBPACKAGE_NAME}/" ${genfile}
+    sed -i '' -E -e "s/${GEN_PACKAGE_NAME}/${SDK_SUBPACKAGE_NAME}/" ${genfile}
 done
 
 echo "Done."

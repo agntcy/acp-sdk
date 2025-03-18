@@ -11,6 +11,6 @@ setup:
 regenerate_tests: setup
 	export ACP_SPEC_PATH="../../acp-spec/openapi.yaml" ; \
 	for m in descriptor_ok*.json ; do\
-		poetry run python3 -m acp_sdk generate-agent-oapi $${m} > "$${m}.oas.yml" ;\
+		poetry run python3 -m agntcy_acp generate-agent-oapi $${m} > "$${m}.oas.yml" ;\
 		echo "(\"$${m}\", \"$${m}.oas.yml\")," ;\
 	done

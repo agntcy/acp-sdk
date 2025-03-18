@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "acp-sdk"
+name = "agntcy-acp"
 version = "0.1.0"
 description = ""
 authors = ["Alessandro Duminuco <aduminuc@cisco.com>"]
@@ -31,7 +31,7 @@ pythonpath = ["."]
 asyncio_mode = "auto"
 
 [tool.poetry.scripts]
-acp = "acp_sdk.__main__:cli"
+acp = "agntcy_acp.__main__:cli"
 
 [build-system]
 requires = ["poetry-core"]
