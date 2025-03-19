@@ -5,7 +5,7 @@ import pytest
 from agntcy_acp.descriptor.validator import validate_agent_descriptor_file
 from agntcy_acp.descriptor.generator import generate_agent_models
 import tempfile
-import subprocess
+import difflib
 
 
 @pytest.mark.parametrize(
@@ -21,7 +21,7 @@ import subprocess
 
     ],
 )
-def test_oas_generator(test_filename, model_ref_filename):
+def test_models_generator(test_filename, model_ref_filename):
     curpwd = os.path.dirname(os.path.realpath(__file__))
 
     ref_models = os.path.join(curpwd, "test_samples", model_ref_filename)
@@ -30,9 +30,26 @@ def test_oas_generator(test_filename, model_ref_filename):
     tmp_dir = tempfile.TemporaryDirectory()
     generate_agent_models(descriptor, tmp_dir.name, "models.py")
 
-    result = subprocess.run(args=["diff", os.path.join(tmp_dir.name, "models.py"), ref_models], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    diff = _diff_files(os.path.join(tmp_dir.name, "models.py"), ref_models)
 
-    if result.returncode != 0:
+    if diff:
         raise AssertionError(
-            f"Generated Models and ref '{ref_models}' are not identical. Differences:\n{result.stdout.decode()}")
+            f"Generated Models and ref '{ref_models}' are not identical. Differences:\n{'\n'.join(diff)}")
 
+
+def _diff_files(test_file, ref_file):
+    with open(test_file, 'r') as f:
+        test_lines = f.readlines()
+
+    with open(ref_file, 'r') as f:
+        ref_lines = f.readlines()
+
+    diff = difflib.unified_diff(
+        test_lines,
+        ref_lines,
+        fromfile='generated',
+        tofile='reference',
+        lineterm=''
+    )
+
+    return list(diff)
