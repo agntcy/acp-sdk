@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.email_reviewer",
+      "version": "0.0.1"
+    },
+    "description": "In charge of reviewing and correcting emails addressed to a specific audience"
+  },
+  "specs": {
+    "input": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "audience": {
+          "type": "string",
+          "enum": [
+            "general",
+            "technical",
+            "business",
+            "academic"
+          ]
+        }
+      },
+      "required": [
+        "email",
+        "audience"
+      ]
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "correct": {
+          "type": "boolean"
+        },
+        "corrected_email": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "correct"
+      ]
+    },
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "config": {},
+    "interrupts": []
+  },
+  "dependencies": [],
+  "deployments": [
+    {
+      "type": "source_code",
+      "name": "src",
+      "url": "file://.",
+      "framework_config": {
+        "framework_type": "llamaindex",
+        "name": "./workflows",
+        "path": "workflows:email_reviewer"
+      }
+    }
+  ]
+}
