@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/
+      url: https://pypi.org/p/agntcy-acp
     permissions:
       id-token: write
       contents: read
@@ -47,10 +47,6 @@ jobs:
       - name: Build package
         run: |
           poetry build
-
-      - name: Add artifacts to GH release
-        run: |
-          gh release upload "${{ github.ref_name }}" dist/**
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
