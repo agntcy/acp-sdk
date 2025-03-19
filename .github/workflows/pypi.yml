@@ -1,20 +1,16 @@
 name: Publish Python Package
 
 on:
-  push:
-    branches:
-      - main
-    tags:
-      # Only publish subset of Python package tags PEP 440
-      - 'v[0-9]+.[0-9]+.[0-9]+' # release
-      - 'v[0-9]+.[0-9]+.[0-9]+a[0-9]+' # alpha-release
+  release:
+    types: [created]
+
 env:
   POETRY_VERSION: "2.1.1"
   POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
 jobs:
   pypi-publish:
-    name: Upload release to PyPI
+    name: Publish release to PyPI
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -51,6 +47,10 @@ jobs:
       - name: Build package
         run: |
           poetry build
+
+      - name: Add artifacts to GH release
+        run: |
+          gh release upload "${{ github.ref_name }}" dist/**
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
