@@ -13,8 +13,8 @@ langchain-openai = "^0.3.3"
 jinja2 = "^3.1.5"
 python-dotenv = "^1.0.1"
 
-[tool.poetry.group.manifest.dependencies]
-agntcy_acp = { path = "../../../acp-sdk", develop = true}
+#[tool.poetry.group.manifest.dependencies]
+#agntcy_acp = { path = "../../../acp-sdk", develop = true}
 
 
 [build-system]
