@@ -5,7 +5,8 @@ import json
 
 from pydantic import ValidationError
 
-from agntcy_acp.models import AgentACPDescriptor, AgentManifest
+from agntcy_acp.models import AgentACPDescriptor
+from . import AgentManifest
 from agntcy_acp.exceptions import ACPDescriptorValidationException
 
 

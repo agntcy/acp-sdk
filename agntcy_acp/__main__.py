@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import click
 
-from agntcy_acp.descriptor.validator import  validate_agent_manifest_file, validate_agent_descriptor_file
-from agntcy_acp.descriptor import generator
+from agntcy_acp.manifest.validator import  validate_agent_manifest_file, validate_agent_descriptor_file
+from agntcy_acp.manifest import generator
 import yaml
 
 
