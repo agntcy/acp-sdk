@@ -6,7 +6,7 @@
 
 default: test
 install: 
-	poetry sync --without generate_server
+	poetry sync
 
 ACP_SPEC_DIR=acp-spec
 ACP_CLIENT_DIR:=acp-sync-client-generated
@@ -56,16 +56,6 @@ generate_acp_async_client $(ACP_ASYNC_CLIENT_DIR)/README.md : $(ACP_SPEC_FILE)
 	    	-e "s/$${GEN_PACKAGE_NAME}.api\\./$${SDK_ASYNC_SUBPACKAGE_NAME}.api./" \
 	    	-e "s/$${GEN_PACKAGE_NAME}/$${SDK_SUBPACKAGE_NAME}/" $${genfile} ; \
 	done
-
-generate_acp_server: $(ACP_SPEC_FILE)
-	poetry new acp-server-stub
-	cd acp-server-stub && poetry add fastapi
-	poetry sync --with generate_server && \
-	poetry run fastapi-codegen --input $(ACP_SPEC_FILE) \
-	--output-model-type pydantic_v2.BaseModel \
-	--output acp-server-stub/acp_server_stub \
-	--generate-routers \
-	--disable-timestamp
 
 AGENT_WORKFLOW_DIR:=workflow-srv-mgr
 AGENT_WORKFLOW_CLIENT_DIR?=workflow-srv-mgr-client-generated
@@ -128,7 +118,7 @@ update_docs: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/README.md $(AGE
 generate: generate_acp_client generate_acp_server
 
 setup_test:
-	poetry sync --with test --without generate_server
+	poetry sync --with test
 
 test: setup_test
 	ACP_SPEC_PATH="$(ACP_SPEC_DIR)/openapi.yaml" poetry run pytest --exitfirst -vv tests/

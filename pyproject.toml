@@ -24,9 +24,6 @@ typing-extensions = ">= 4.7.1"
 aiohttp = ">= 3.8.4"
 aiohttp-retry = ">= 2.8.3"
 
-[tool.poetry.group.generate_server.dependencies]
-fastapi-code-generator = "^0.5.2"
-
 [tool.poetry.group.test.dependencies]
 pytest = "*"
 deepdiff = "^8.1.1"

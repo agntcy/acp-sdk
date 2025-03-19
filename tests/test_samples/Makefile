@@ -4,7 +4,7 @@ default: regenerate_tests
 .PHONY: regenerate_tests setup
 
 setup:
-	poetry sync --without generate_server
+	poetry sync
 
 # Use this to regenerate the reference oas for tests.
 # You can also copy and paste the output in test_descriptor_validator.py file
