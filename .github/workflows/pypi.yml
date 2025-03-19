@@ -5,7 +5,9 @@ on:
     branches:
       - main
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+*' # Only publish semver (started) tags
+      # Only publish subset of Python package tags PEP 440
+      - 'v[0-9]+.[0-9]+.[0-9]+' # release
+      - 'v[0-9]+.[0-9]+.[0-9]+a[0-9]+' # alpha-release
 env:
   POETRY_VERSION: "2.1.1"
   POETRY_VIRTUALENVS_IN_PROJECT: "true"
@@ -34,11 +36,23 @@ jobs:
         run: |
           pipx install poetry==${{ env.POETRY_VERSION }}
 
+      - name: Validate version
+        run: |
+          TAG="${${{ github.ref_name }}##v}" ## Remove the version tag prefix
+          PYPROJECT_VERSION=$(awk '/version/ { gsub("\"", ""); print $3; exit; }' pyproject.toml)
+      
+          if [ ! "${PYPROJECT_VERSION}" = "${TAG}" ]; then
+              echo "You created the \"${{ github.ref_name }}\"" git tag; it's fine, BUT it does not match the pyproject.toml file"
+              exit 1
+          fi
+
+          echo "Building and publishing version: ${PYPROJECT_VERSION}" >> $GITHUB_STEP_SUMMARY
+
       - name: Build package
         run: |
           poetry build
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        #with:
-        #  password: ${{ secrets.PYPI_API_TOKEN }}
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
