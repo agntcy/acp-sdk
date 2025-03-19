@@ -23,6 +23,8 @@ pydantic = ">= 2"
 typing-extensions = ">= 4.7.1"
 aiohttp = ">= 3.8.4"
 aiohttp-retry = ">= 2.8.3"
+agntcy-iomapper = { path = "../iomapper-agnt", develop = true}
+langgraph = "^0.3.16"
 
 [tool.poetry.group.test.dependencies]
 pytest = "*"

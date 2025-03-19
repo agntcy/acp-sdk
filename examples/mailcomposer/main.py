@@ -4,7 +4,7 @@ from langchain_core.messages import AIMessage, HumanMessage
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(dotenv_path=find_dotenv(usecwd=True))
-from mailcomposer import graph, AgentState, OutputState
+from mailcomposer.mailcomposer import graph, AgentState, OutputState
 
 def main():
     output = OutputState(

@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.marketing-campaign",
+      "version": "0.0.1",
+      "url": null
+    },
+    "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"
+  },
+  "specs": {
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false,
+      "streaming": null
+    },
+    "input": {
+      "$defs": {
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "messages": {
+          "default": [],
+          "description": "Chat messages",
+          "items": {
+            "$ref": "#/$defs/Message"
+          },
+          "title": "Messages",
+          "type": "array"
+        }
+      },
+      "title": "InputState",
+      "type": "object"
+    },
+    "output": {
+      "$defs": {
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "messages": {
+          "default": [],
+          "description": "Chat messages",
+          "items": {
+            "$ref": "#/$defs/Message"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "operation_logs": {
+          "default": [],
+          "description": "An array containing all the operations performed and their result. Each operation is appended to this array with a timestamp.",
+          "examples": [
+            [
+              "Mar 15 18:10:39 Operation performed: email sent Result: OK",
+              "Mar 19 18:13:39 Operation X failed"
+            ]
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Operation Logs",
+          "type": "array"
+        }
+      },
+      "title": "OutputState",
+      "type": "object"
+    },
+    "custom_streaming_update": null,
+    "thread_state": null,
+    "config": {
+      "properties": {
+        "recipient_email_address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Email address of the email recipient",
+          "title": "Recipient Email Address"
+        },
+        "sender_email_address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Email address of the email sender",
+          "title": "Sender Email Address"
+        }
+      },
+      "title": "ConfigModel",
+      "type": "object"
+    },
+    "interrupts": null
+  },
+  "deployment": {
+    "dependencies": [
+      {
+        "name": "mailcomposer1",
+        "ref": {
+          "name": "org.agntcy.mailcomposer",
+          "version": "0.0.1",
+          "url": "file://mailcomposer.json"
+        }
+      },
+      {
+        "ref": {
+          "name": "org.agntcy.mailcomposer",
+          "version": "0.0.1",
+          "url": "file://mailcomposer.json"
+        }
+      }
+    ],
+    "deployment_options": [
+      {
+        "type": "source_code",
+        "name": "src",
+        "url": "file://../",
+        "framework_config": {
+          "framework_type": "langgraph",
+          "graph": "src.marketing_campaign.app:graph"
+        }
+      }
+    ]
+  }
+}

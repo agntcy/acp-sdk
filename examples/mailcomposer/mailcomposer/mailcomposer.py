@@ -6,7 +6,7 @@ from langgraph.graph.message import add_messages
 from langchain_openai import AzureChatOpenAI
 from typing_extensions import TypedDict
 from langchain.prompts import PromptTemplate
-from state import OutputState, AgentState
+from .state import OutputState, AgentState
 
 
 # Initialize the Azure OpenAI model
