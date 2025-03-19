@@ -20,8 +20,8 @@ jobs:
       name: pypi
       url: https://pypi.org/p/
     permissions:
-      # IMPORTANT: this permission is mandatory for Trusted Publishing
       id-token: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
