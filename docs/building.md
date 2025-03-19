@@ -47,3 +47,17 @@ For a major release, follow these steps:
       * `agntcy_acp/models/__init__.py`
   3. Check for any irregularities: `git diff`
   4. Run: `make test`
+
+## Publishing
+
+Publishing the package uses a GitHub action triggered by 
+[creating a release in GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release).
+
+The following steps are required to create a release:
+  1. Push a properly formatted tag (vX.Y.Z or vX.Y.Z.aN). This tag must 
+  correspond to the version in the `pyproject.toml` file.
+  2. Use the specified tag to create a release
+
+When the release is created, it will trigger the GitHub action that 
+adds the built package to the GitHub release and pushed the (tagged) 
+package to PyPi.
