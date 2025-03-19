@@ -9,6 +9,7 @@ relevant specification changes, but delays can happen.
 
 This repo uses the following tools to build (or update) the packages:
   * yq: to parse OpenAPI yaml
+  * poetry: to manage Python dependencies
   * make: to store command recipes
   * docker: to run the 
   [openapi-generator-cli](https://github.com/OpenAPITools/openapi-generator-cli) tool
