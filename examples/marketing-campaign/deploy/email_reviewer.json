@@ -1,66 +1,72 @@
 {
-    "metadata": {
-      "ref": {
-        "name": "org.agntcy.email_reviewer",
-        "version": "0.0.1"
-      },
-      "description": "In charge of reviewing and correcting emails addressed to a specific audience"
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.email_reviewer",
+      "version": "0.0.1"
     },
-    "specs": {
-      "input": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "audience": {
-            "type": "string",
-            "enum": [
-              "general",
-              "technical",
-              "business",
-              "academic"
-            ]
-          }
+    "description": "Agent in charge of reviewing and correcting emails addressed to a specific audience"
+  },
+  "specs": {
+    "input": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The email content to be reviewed and corrected"
         },
-        "required": [
-          "email",
-          "audience"
-        ]
-      },
-      "output": {
-        "type": "object",
-        "properties": {
-          "correct": {
-            "type": "boolean"
-          },
-          "corrected_email": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "correct"
-        ]
-      },
-      "capabilities": {
-        "threads": false,
-        "interrupts": false,
-        "callbacks": false
-      },
-      "config": {},
-      "interrupts": []
-    },
-    "dependencies": [],
-    "deployments": [
-      {
-        "type": "source_code",
-        "name": "src",
-        "url": "file://.",
-        "framework_config": {
-          "framework_type": "llamaindex",
-          "name": "./workflows",
-          "path": "workflows:email_reviewer"
+        "target_audience": {
+          "type": "string",
+          "enum": [
+            "general",
+            "technical",
+            "business",
+            "academic"
+          ],
+          "description": "The target audience for the email, affecting the style of review"
         }
+      },
+      "required": [
+        "email",
+        "target_audience"
+      ],
+      "description": "Input schema for the email reviewer, including email content and audience"
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "correct": {
+          "type": "boolean",
+          "description": "Indicates whether the email is correct and requires no changes"
+        },
+        "corrected_email": {
+          "type": "string",
+          "description": "The corrected version of the email, if changes were necessary"
+        }
+      },
+      "required": [
+        "correct"
+      ],
+      "description": "Output schema for the email reviewer, including review status and corrected email"
+    },
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "config": {},
+    "interrupts": []
+  },
+  "dependencies": [],
+  "deployments": [
+    {
+      "type": "source_code",
+      "name": "src",
+      "url": "file://.",
+      "framework_config": {
+        "framework_type": "llamaindex",
+        "name": "./workflows",
+        "path": "workflows:email_reviewer"
       }
-    ]
-  }
+    }
+  ]
+}

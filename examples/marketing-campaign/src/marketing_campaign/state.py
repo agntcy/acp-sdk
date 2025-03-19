@@ -3,11 +3,13 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
 from langchain_core.messages import  AIMessage, HumanMessage
 import mailcomposer
+import email_reviewer
 import sendgrid
 
 class ConfigModel(BaseModel):
     recipient_email_address: Optional[str] = Field(None, description="Email address of the email recipient")
     sender_email_address: Optional[str] = Field(None, description="Email address of the email sender")
+    target_audience: Optional[str] = Field(None, description="Target audience of the email")
 
 class MailComposerState(BaseModel):
     input: Optional[mailcomposer.InputSchema] = None
@@ -16,6 +18,10 @@ class MailComposerState(BaseModel):
 class SendGridState(BaseModel):
     input: Optional[sendgrid.InputSchema] = None
     output: Optional[sendgrid.OutputSchema]= None
+
+class EmailReviewerState(BaseModel):
+    input: Optional[email_reviewer.InputSchema] = None
+    output: Optional[email_reviewer.OutputSchema] = None
 
 class OverallState(BaseModel):
     messages: List[mailcomposer.Message] = Field([], description="Chat messages")
@@ -30,7 +36,8 @@ class OverallState(BaseModel):
     recipient_email_address: Optional[str] = Field(None, description="Email address of the email recipient")
     sender_email_address: Optional[str] = Field(None, description="Email address of the email sender")
     mailcomposer_state: Optional[MailComposerState] = None
+    email_reviewer_state: Optional[EmailReviewerState] = None
     sendgrid_state: Optional[SendGridState] = None
-
+    target_audience: Optional[str] = None
 
 

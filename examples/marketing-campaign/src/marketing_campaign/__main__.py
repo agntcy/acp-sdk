@@ -1,11 +1,7 @@
-from acp_sdk.models import AgentRef, AgentMetadata
-
 from app import graph
 import state
-from state import InputState, OutputState, OverallState, ConfigModel
+from state import OverallState
 from langchain_openai.chat_models.azure import AzureChatOpenAI
-from dotenv import load_dotenv, find_dotenv
-from acp_sdk.descriptor import generator
 import mailcomposer
 
 
@@ -36,7 +32,8 @@ def main():
                 "llm": get_azure(),
                 "config": state.ConfigModel(
                     recipient_email_address="Alessandro Duminuco <aduminuc@cisco.com>",
-                    sender_email_address="casey.agntcy.demo@gmail.com"
+                    sender_email_address="casey.agntcy.demo@gmail.com",
+                    target_audience="business"
                 ).model_dump(),
             }
         })
