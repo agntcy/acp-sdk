@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.mail_reviewer",
+      "version": "0.0.1"
+    },
+    "description": "Review emails"
+  },
+  "specs": {
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "input": {
+      "properties": {},
+      "title": "InputSchema",
+      "type": "object"
+    },
+    "output": {
+      "properties": {},
+      "title": "OutputSchema",
+      "type": "object"
+    },
+    "config": {
+      "properties": {},
+      "title": "ConfigSchema",
+      "type": "object"
+    }
+  },
+  "deployment": {
+    "deployment_options": [
+      {
+        "type": "source_code",
+        "name": "source_code_local",
+        "url": "file://../",
+        "framework_config": {
+          "framework_type": "llamaindex",
+          "path": "email_reviewer:email_reviewer_workflow"
+        }
+      }
+    ],
+    "dependencies": []
+  }
+}
