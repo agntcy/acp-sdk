@@ -11,7 +11,7 @@ class TargetAudience(Enum):
     academic = 'academic'
 
 
-class InputSchema(BaseModel):
+class EmailReviewerInput(BaseModel):
     email: str = Field(
         ..., description='The email content to be reviewed and corrected'
     )
@@ -21,7 +21,7 @@ class InputSchema(BaseModel):
     )
 
 
-class OutputSchema(BaseModel):
+class EmailReview(BaseModel):
     correct: bool = Field(
         ...,
         description='Indicates whether the email is correct and requires no changes',

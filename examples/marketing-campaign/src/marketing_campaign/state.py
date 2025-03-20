@@ -1,21 +1,27 @@
 import agntcy_acp.langgraph.acp_node
+from agntcy_acp.langgraph.api_bridge import APIBridgeOutput, APIBridgeInput
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
 from langchain_core.messages import  AIMessage, HumanMessage
 import mailcomposer
-import sendgrid
+import email_reviewer
 
 class ConfigModel(BaseModel):
-    recipient_email_address: Optional[str] = Field(None, description="Email address of the email recipient")
-    sender_email_address: Optional[str] = Field(None, description="Email address of the email sender")
+    recipient_email_address: str = Field(..., description="Email address of the email recipient")
+    sender_email_address: str = Field(..., description="Email address of the email sender")
+    target_audience: str = Field(..., description="Target audience for the marketing campaign")
 
 class MailComposerState(BaseModel):
     input: Optional[mailcomposer.InputSchema] = None
     output: Optional[mailcomposer.OutputSchema] = None
 
+class MailReviewerState(BaseModel):
+    input: Optional[email_reviewer.InputSchema] = None
+    output: Optional[email_reviewer.OutputSchema] = None
+
 class SendGridState(BaseModel):
-    input: Optional[sendgrid.InputSchema] = None
-    output: Optional[sendgrid.OutputSchema]= None
+    input: Optional[APIBridgeInput] = None
+    output: Optional[APIBridgeOutput]= None
 
 class OverallState(BaseModel):
     messages: List[mailcomposer.Message] = Field([], description="Chat messages")
@@ -27,9 +33,9 @@ class OverallState(BaseModel):
     has_composer_completed: Optional[bool] = Field(None, description="Flag indicating if the mail composer has succesfully completed its task")
     has_reviewer_completed: Optional[bool] = None
     has_sender_completed: Optional[bool] = None
-    recipient_email_address: Optional[str] = Field(None, description="Email address of the email recipient")
-    sender_email_address: Optional[str] = Field(None, description="Email address of the email sender")
     mailcomposer_state: Optional[MailComposerState] = None
+    email_reviewer_state: Optional[MailReviewerState] = None
+    target_audience: Optional[email_reviewer.TargetAudience] = None
     sendgrid_state: Optional[SendGridState] = None
 
 

@@ -2,8 +2,8 @@ import asyncio
 from typing import Any, Optional
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
-from .models import OutputSchema as EmailReview
 from llama_index.core.agent.react import ReActChatFormatter, ReActOutputParser
+from .state import EmailReviewerInput, EmailReview, ConfigSchema
 
 from llama_index.core.llms.llm import LLM
 from llama_index.core.memory import ChatMemoryBuffer
