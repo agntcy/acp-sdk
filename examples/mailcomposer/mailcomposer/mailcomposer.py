@@ -82,32 +82,32 @@ def convert_messages(messages:list)->list[BaseMessage]:
     return converted
 
 # Define mail_agent function
-def email_agent(state: AgentState):
+def email_agent(state: OutputState):
     """This agent is a skilled writer for a marketing company, creating formal and professional emails for publicity campaigns.
     It interacts with users to gather the necessary details.
     Once the user approves by sending "is_completed": true, the agent outputs the finalized email in "final_email"."""
 
     # Check if the first message is empty
-    #if not state.get("messages", []) or state["messages"][-1].content == EMPTY_MSG_ERROR:
+    #if not state.get("messages", []) or state.messages[-1].content == EMPTY_MSG_ERROR:
     #    state["is_completed"] = False
     #    return {"messages": [AIMessage(
     #        content=EMPTY_MSG_ERROR
     #        )]}
 
     # Check subsequent messages and handle completion
-    if state.get("is_completed", False):
-        final_mail = extract_mail(state["messages"])
-        state["final_email"] = final_mail
+    if state.is_completed:
+        final_mail = extract_mail(state.messages)
+        state.final_email = final_mail
         return state
         #return {"messages": [AIMessage(content=final_mail)]}
 
     # Generate the email
     llm_messages = [
         Message(type=MsgType.human, content= MARKETING_EMAIL_PROMPT_TEMPLATE.format(separator=SEPARATOR)),
-    ] + state["messages"]
+    ] + state.messages
 
 
-    state["messages"] = state["messages"] + [Message(type=MsgType.ai, content=llm.invoke(convert_messages(llm_messages)).content)]
+    state.messages = state.messages + [Message(type=MsgType.ai, content=llm.invoke(convert_messages(llm_messages)).content)]
     return state
 
 # Create the graph and add the agent node

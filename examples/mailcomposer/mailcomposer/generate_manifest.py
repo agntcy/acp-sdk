@@ -8,9 +8,9 @@ manifest = AgentManifest(
         ref=AgentRef(name="org.agntcy.mailcomposer", version="0.0.1"),
         description="Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"),
     specs=AgentACPSpec(
-        input=TypeAdapter(AgentState).json_schema(),
-        output=TypeAdapter(OutputState).json_schema(),
-        config=TypeAdapter(ConfigSchema).json_schema(),
+        input=AgentState.model_json_schema(),
+        output=OutputState.model_json_schema(),
+        config=ConfigSchema.model_json_schema(),
         capabilities=Capabilities(
             threads=False,
             callbacks=False,

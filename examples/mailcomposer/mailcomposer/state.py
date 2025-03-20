@@ -25,9 +25,9 @@ class ConfigSchema(BaseModel):
 
 
 
-class AgentState(TypedDict, total=False):
-    messages: list[Message]
-    is_completed: bool
+class AgentState(BaseModel):
+    messages: Optional[list[Message]] = None
+    is_completed: Optional[bool] = None
 
 class OutputState(AgentState):
     final_email: Optional[str] = Field(None, description="Final email produced by the mail composer")
