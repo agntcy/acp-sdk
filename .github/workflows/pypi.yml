@@ -6,7 +6,6 @@ on:
 
 env:
   POETRY_VERSION: "2.1.1"
-  POETRY_VIRTUALENVS_IN_PROJECT: "true"
 
 jobs:
   pypi-publish:
@@ -45,12 +44,10 @@ jobs:
           echo "Building and publishing version: ${PYPROJECT_VERSION}" >> $GITHUB_STEP_SUMMARY
 
       - name: Build package
+        env:
+          POETRY_VIRTUALENVS_IN_PROJECT: "true"
         run: |
           poetry build
-
-      - name: Add artifacts to GH release
-        run: |
-          gh release upload "${{ github.ref_name }}" dist/**
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
