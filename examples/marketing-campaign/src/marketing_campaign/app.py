@@ -41,7 +41,8 @@ def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.O
     return state
 
 def prepare_output(state: state.OverallState, config:RunnableConfig) -> state.OverallState:
-    state.messages = [mailcomposer.Message.model_validate(json.loads(m.model_dump_json())) for m in state.mailcomposer_state.output.messages]
+    # state.messages = [mailcomposer.Message.model_validate(json.loads(m.model_dump_json())) for m in state.mailcomposer_state.output.messages]
+    state.messages = copy.deepcopy(state.mailcomposer_state.output.messages)
     if state.sendgrid_state and state.sendgrid_state.output and state.sendgrid_state.output.result:
         state.operation_logs.append(f"Email Send Operation: {state.sendgrid_state.output.result}")
 

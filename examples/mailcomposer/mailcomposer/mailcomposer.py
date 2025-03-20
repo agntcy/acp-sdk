@@ -1,12 +1,14 @@
 import os
 from typing import Annotated
-from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
+
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langchain_openai import AzureChatOpenAI
 from typing_extensions import TypedDict
 from langchain.prompts import PromptTemplate
-from .state import OutputState, AgentState
+
+from .state import OutputState, AgentState, Message, Type as MsgType
 
 # Initialize the Azure OpenAI model
 api_key = os.getenv("AZURE_OPENAI_API_KEY")
@@ -54,8 +56,8 @@ SEPARATOR = "**************"
 def extract_mail(messages) -> str:
     for m in reversed(messages):
         splits: list[str] = []
-        if isinstance(m, BaseMessage):
-            if m.type == "human": continue
+        if isinstance(m, Message):
+            if m.type == MsgType.human: continue
             splits = m.content.split(SEPARATOR)
         if isinstance(m, dict):
             if m.get("type", "") == "human": continue
@@ -65,6 +67,12 @@ def extract_mail(messages) -> str:
         elif len(splits) == 2:
             return splits[1].strip()
     return ""
+
+def convert_messages(messages = list[Message])->list[BaseMessage]:
+    converted = [
+        HumanMessage(content=m.content) if m.type == MsgType.human else AIMessage(content=m.content) for m in messages
+    ]
+    return converted
 
 # Define mail_agent function
 def email_agent(state: AgentState):
@@ -88,11 +96,11 @@ def email_agent(state: AgentState):
 
     # Generate the email
     llm_messages = [
-        HumanMessage(content = MARKETING_EMAIL_PROMPT_TEMPLATE.format(separator=SEPARATOR)),
+        Message(type=MsgType.human, content= MARKETING_EMAIL_PROMPT_TEMPLATE.format(separator=SEPARATOR)),
     ] + state["messages"]
 
 
-    state["messages"] = state["messages"] + [AIMessage(content=llm.invoke(llm_messages).content)]
+    state["messages"] = state["messages"] + [Message(type=MsgType.ai, content=llm.invoke(convert_messages(llm_messages)).content)]
     return state
 
 # Create the graph and add the agent node

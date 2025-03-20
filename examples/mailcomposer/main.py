@@ -1,10 +1,10 @@
 import json
 
-from langchain_core.messages import AIMessage, HumanMessage
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(dotenv_path=find_dotenv(usecwd=True))
 from mailcomposer.mailcomposer import graph, AgentState, OutputState
+from mailcomposer.state import Message, Type as MsgType
 
 def main():
     output = OutputState(
@@ -20,7 +20,7 @@ def main():
         message = input("YOU [Type OK when you are happy with the email proposed] >>> ")
 
         nextinput = AgentState(
-            messages = output["messages"] + [HumanMessage(content=message)]
+            messages = output["messages"] + [Message(content=message, type=MsgType.human)]
         )
         if message == "OK":
             nextinput["is_completed"] = True
