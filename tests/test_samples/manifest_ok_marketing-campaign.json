@@ -158,15 +158,21 @@
   "deployment": {
     "dependencies": [
       {
-        "name": "org.agntcy.mailcomposer",
-        "version": "0.0.1",
-        "url": "file://mailcomposer.json"
+        "name": "mailcomposer",
+        "ref": {
+          "name": "org.agntcy.mailcomposer",
+          "version": "0.0.1",
+          "url": "file://mailcomposer.json"
+        }
       },
       {
-        "name": "org.agntcy.mailcomposer",
-        "version": "0.0.2",
-        "url": "file://mailcomposer2.json"
+        "name": "emailreviewer",
+        "ref": {
+          "name": "org.agntcy.mailcomposer",
+          "version": "0.0.2",
+          "url": "file://mailcomposer2.json"
       }
+    }
     ],
     "deployment_options": [
       {

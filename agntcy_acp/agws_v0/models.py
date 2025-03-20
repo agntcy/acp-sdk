@@ -345,6 +345,13 @@ class Thread(BaseModel):
     )
 
 
+class EnvVar(BaseModel):
+    desc: str
+    name: str
+    required: Optional[bool] = None
+    defaultValue: Optional[str] = None
+
+
 class Type4(Enum):
     source_code = 'source_code'
 
@@ -492,7 +499,7 @@ class SourceCodeDeployment(BaseModel):
     )
     url: AnyUrl = Field(
         ...,
-        description='Location of the source code. E.g. path to code root, github repo url etc.',
+        description='Location of the source code.              Can be a local path to a directory or a tar/gz/zip file containing sources,  e.g., /path/to/your/local/folder or file:///path/to/your/local/folder. Can point to a GitHub repository, e.g., github.com/cisco-eti/agent-connect-protocol.git//examples/agents/mailcomposer  or https://github.com/cisco-eti/agent-connect-protocol.git//examples/agents/mailcomposer,  which indicates that source files can be found in the /examples/agents/mailcomposer subfolder in the repository.  You can also specify a branch, e.g., github.com/cisco-eti/agent-connect-protocol.git?ref=branch_name.',
         title='Source Code Locator',
     )
     framework_config: Union[LangGraphConfig, LlamaIndexConfig] = Field(
@@ -538,11 +545,21 @@ class RunOutputStream(BaseModel):
 
 class RemoteServiceDeployment(BaseModel):
     type: Literal['remote_service']
+    name: Optional[str] = Field(
+        None,
+        description='Name this deployment option is referred to within this agent. This is needed to indicate which one is preferred when this manifest is referred. Can be omitted, in such case selection is not possible.            -',
+        title='Deployment Option Name',
+    )
     protocol: AgentConnectProtocol
 
 
 class DockerDeployment(BaseModel):
     type: Literal['docker']
+    name: Optional[str] = Field(
+        None,
+        description='Name this deployment option is referred to within this agent. This is needed to indicate which one is preferred when this manifest is referred. Can be omitted, in such case selection is not possible.            -',
+        title='Deployment Option Name',
+    )
     image: AnyUrl = Field(
         ..., description='Container image for the agent', title='Agent Docker image'
     )
@@ -557,20 +574,62 @@ class DeploymentOptions(
     )
 
 
+class AgentManifest(BaseModel):
+    metadata: AgentMetadata
+    specs: AgentACPSpec
+    deployment: Optional[AgentDeployment] = None
+
+
 class AgentDeployment(BaseModel):
     deployment_options: List[DeploymentOptions] = Field(
         ...,
         description='List of possible methods to instantiate or consume the agent.  Any of the available option could be used.\nEvery option could be associated with a unique name within this agent. If present, when another manifest refers to this manifest, it can also select the preferred deployment option.',
         title='Deployment Options',
     )
-    dependencies: List[AgentRef] = Field(
-        ...,
+    env_vars: Optional[List[EnvVar]] = Field(
+        None,
+        description='List of possible environment variables that the agent may require to be set before it can be used.',
+        title='Environment Variables',
+    )
+    dependencies: Optional[List[AgentDependency]] = Field(
+        None,
         description='List of all other agents this agent depends on',
         title='Agent Dependencies',
     )
 
 
-class AgentManifest(BaseModel):
-    metadata: AgentMetadata
-    specs: AgentACPSpec
-    deployment: Optional[AgentDeployment] = None
+class AgentDependency(BaseModel):
+    name: str = Field(..., description='Name of the agent dependency', title='Name')
+    ref: AgentRef = Field(
+        ...,
+        description='Reference to the agent in the agent directory. It includes the version and the locator.',
+    )
+    deployment_option: Optional[str] = Field(
+        None,
+        description='Selected deployment option for this agent. ',
+        title='Deployment Option',
+    )
+    env_var_values: Optional[EnvVarValues] = Field(
+        None,
+        description='Environment variable values to be set for this agent.',
+        title='Environment Variable Values',
+    )
+
+
+class Dependency(BaseModel):
+    name: Optional[str] = Field(
+        None,
+        description='name of the agent dependency these environment variables are for',
+    )
+    values: Optional[EnvVarValues] = None
+
+
+class EnvVarValues(BaseModel):
+    values: Optional[Dict[str, str]] = None
+    dependencies: Optional[List[Dependency]] = None
+
+
+AgentManifest.model_rebuild()
+AgentDeployment.model_rebuild()
+AgentDependency.model_rebuild()
+Dependency.model_rebuild()
