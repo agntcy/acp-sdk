@@ -68,10 +68,17 @@ def extract_mail(messages) -> str:
             return splits[1].strip()
     return ""
 
-def convert_messages(messages = list[Message])->list[BaseMessage]:
-    converted = [
-        HumanMessage(content=m.content) if m.type == MsgType.human else AIMessage(content=m.content) for m in messages
-    ]
+def convert_messages(messages:list)->list[BaseMessage]:
+    converted = []
+    for m in messages:
+        if isinstance(m, Message):
+            mdict = m.model_dump()
+        else:
+            mdict = m
+        if mdict["type"]=="human":
+            converted.append(HumanMessage(content=mdict["content"]))
+        else: converted.append(AIMessage(content=mdict["content"]))
+
     return converted
 
 # Define mail_agent function

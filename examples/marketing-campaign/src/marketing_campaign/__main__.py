@@ -32,17 +32,22 @@ def main():
             }
         })
 
+
         # TODO : FIX this!
-        mcstate = output["mailcomposer_state"]
+        mcstate = output.get("mailcomposer_state", None)
+        sgstate = output.get("sendgrid_state", None)
         output["mailcomposer_state"] = None
+        output["sendgrid_state"] = None
         outputState = OverallState.model_validate(output)
         outputState.mailcomposer_state = mcstate
+        outputState.sendgrid_state = sgstate
         if len(outputState.operation_logs) > 0:
             print(outputState.operation_logs)
             break
         else:
             print(outputState.messages[-1].content)
         inputState = outputState
+
 
 
 main()

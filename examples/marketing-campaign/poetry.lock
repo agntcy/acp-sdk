@@ -2,59 +2,55 @@
 
 [[package]]
 name = "agntcy-acp"
-version = "0.1.0a0"
+version = "0.1.0a0.dev0"
 description = "Agent Connect Protocol SDK"
 optional = false
-python-versions = ">=3.9.0,<4.0"
+python-versions = "<4.0,>=3.9.0"
 groups = ["main"]
-files = []
-develop = true
+files = [
+    {file = "agntcy_acp-0.1.0a0.dev0-py3-none-any.whl", hash = "sha256:dfdf069203fa1ffabe8c4254aa8b3d544a0b1c917fa2ef38ac5c8b1475d38d9e"},
+    {file = "agntcy_acp-0.1.0a0.dev0.tar.gz", hash = "sha256:d0994a4dbf595b6bcf2761e6f5070de492338f31e792665480b4555e290bae49"},
+]
 
 [package.dependencies]
-agntcy-iomapper = {path = "../iomapper-agnt", develop = true}
-aiohttp = ">= 3.8.4"
-aiohttp-retry = ">= 2.8.3"
-click = "^8.1.8"
-datamodel-code-generator = "^0.25.6"
-langgraph = "^0.3.16"
-openapi-spec-validator = "^0.7.1"
-pydantic = ">= 2"
-python-dateutil = ">= 2.8.2"
-typing-extensions = ">= 4.7.1"
-urllib3 = ">= 1.25.3, < 3.0.0"
-
-[package.source]
-type = "directory"
-url = "../.."
+agntcy-iomapper = "v0.2.0a0"
+aiohttp = ">=3.8.4"
+aiohttp-retry = ">=2.8.3"
+click = ">=8.1.8,<9.0.0"
+datamodel-code-generator = ">=0.25.6,<0.26.0"
+langgraph = ">=0.3.16,<0.4.0"
+openapi-spec-validator = ">=0.7.1,<0.8.0"
+pydantic = ">=2"
+python-dateutil = ">=2.8.2"
+typing-extensions = ">=4.7.1"
+urllib3 = ">=1.25.3,<3.0.0"
 
 [[package]]
 name = "agntcy-iomapper"
-version = "0.2.0"
+version = "0.2.0a0"
 description = "A tool to transform output from one agent to the input of another."
 optional = false
-python-versions = ">=3.9.0,<4.0"
+python-versions = "<4.0,>=3.9.0"
 groups = ["main"]
-files = []
-develop = true
+files = [
+    {file = "agntcy_iomapper-0.2.0a0-py3-none-any.whl", hash = "sha256:1839a8d5b32530a240376ebce296ba0b6b1687e88a1c33dae8d0d43977a234f1"},
+    {file = "agntcy_iomapper-0.2.0a0.tar.gz", hash = "sha256:6113214af3715182fdac4ec6468176e90f10843d867ff9c1a1e0798bc512ecfb"},
+]
 
 [package.dependencies]
-aiofiles = "^24.1.0"
-jinja2 = "^3.1.5"
-jsonpath-ng = "^1.7.0"
-jsonref = "^1.1.0"
-jsonschema = {version = "^4.23.0", extras = ["format"]}
-llama-index = "^0.12.20"
-openapi-pydantic = "^0.5.1"
-pydantic = "^2.10.6"
-python-dotenv = "^1.0.1"
+aiofiles = ">=24.1.0,<25.0.0"
+jinja2 = ">=3.1.5,<4.0.0"
+jsonpath-ng = ">=1.7.0,<2.0.0"
+jsonref = ">=1.1.0,<2.0.0"
+jsonschema = {version = ">=4.23.0,<5.0.0", extras = ["format"]}
+llama-index = ">=0.12.20,<0.13.0"
+openapi-pydantic = ">=0.5.1,<0.6.0"
+pydantic = ">=2.10.6,<3.0.0"
+python-dotenv = ">=1.0.1,<2.0.0"
 
 [package.extras]
 langgraph = ["langchain (>=0.3.19,<0.4.0)", "langchain-openai (>=0.3.6,<0.4.0)", "langgraph (>=0.2.73,<0.3.0)"]
 pydantic-ai = ["pydantic-ai (>=0.0.23,<0.0.24)"]
-
-[package.source]
-type = "directory"
-url = "../../../iomapper-agnt"
 
 [[package]]
 name = "aiofiles"
@@ -4170,4 +4166,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9.0,<4.0"
-content-hash = "50a2f0746f4891a587860b760c95d02721a93e06ab78fe4e68042970fb2e1db4"
+content-hash = "1f061a3ea08b8727715a71e90742a399f87d451911a7fae741b2003d11250011"

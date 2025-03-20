@@ -30,4 +30,4 @@ class AgentState(TypedDict, total=False):
     is_completed: bool
 
 class OutputState(AgentState):
-    final_email: str
+    final_email: Optional[str] = Field(None, description="Final email produced by the mail composer")
