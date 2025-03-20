@@ -1,6 +1,6 @@
-from state import AgentState, OutputState
 from agntcy_acp.manifest import *
 from pydantic import TypeAdapter
+from state import AgentState, OutputState, ConfigSchema
 
 
 manifest = AgentManifest(
@@ -10,7 +10,7 @@ manifest = AgentManifest(
     specs=AgentACPSpec(
         input=TypeAdapter(AgentState).json_schema(),
         output=TypeAdapter(OutputState).json_schema(),
-        config=TypeAdapter(OutputState).json_schema(),
+        config=TypeAdapter(ConfigSchema).json_schema(),
         capabilities=Capabilities(
             threads=False,
             callbacks=False,
