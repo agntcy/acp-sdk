@@ -1,16 +1,16 @@
-from models import InputSchema, OutputSchema, ConfigSchema
+
 from agntcy_acp.manifest import *
 from pydantic import TypeAdapter
-
+from state import EmailReviewerInput, EmailReview,ConfigSchema
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
         ref=AgentRef(name="org.agntcy.mail_reviewer", version="0.0.1"),
         description="Review emails"),
     specs=AgentACPSpec(
-        input=TypeAdapter(InputSchema).json_schema(),
-        output=TypeAdapter(OutputSchema).json_schema(),
-        config=TypeAdapter(ConfigSchema).json_schema(),
+        input=EmailReviewerInput.model_json_schema(),
+        output=EmailReview.model_json_schema(),
+        config=ConfigSchema.model_json_schema(),
         capabilities=Capabilities(
             threads=False,
             callbacks=False,

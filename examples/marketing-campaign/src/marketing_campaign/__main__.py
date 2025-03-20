@@ -2,6 +2,7 @@ from agntcy_acp.models import AgentRef, AgentMetadata
 
 from app import graph
 import state
+from marketing_campaign.state import MailComposerState
 from state import OverallState, ConfigModel
 from dotenv import load_dotenv, find_dotenv
 import mailcomposer
@@ -25,11 +26,17 @@ def main():
                 "thread_id": "foo",
                 "config": state.ConfigModel(
                     recipient_email_address="Alessandro Duminuco <aduminuc@cisco.com>",
-                    sender_email_address="casey.agntcy.demo@gmail.com"
+                    sender_email_address="casey.agntcy.demo@gmail.com",
+                    target_audience="academic"
                 ).model_dump(),
             }
         })
+
+        # TODO : FIX this!
+        mcstate = output["mailcomposer_state"]
+        output["mailcomposer_state"] = None
         outputState = OverallState.model_validate(output)
+        outputState.mailcomposer_state = mcstate
         if len(outputState.operation_logs) > 0:
             print(outputState.operation_logs)
             break

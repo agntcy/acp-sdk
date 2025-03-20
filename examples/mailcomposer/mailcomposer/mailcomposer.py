@@ -8,7 +8,6 @@ from typing_extensions import TypedDict
 from langchain.prompts import PromptTemplate
 from .state import OutputState, AgentState
 
-
 # Initialize the Azure OpenAI model
 api_key = os.getenv("AZURE_OPENAI_API_KEY")
 if not api_key:

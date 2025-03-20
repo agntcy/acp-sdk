@@ -56,18 +56,24 @@ def add_io_mapped_conditional_edge(g: StateGraph, start: Union[str, acp_node.ACP
             end_key = v["end"].get_name()
             end_node = v["end"]
 
-        if start_node and "input_fields" not in v["metadata"]:
-            v["metadata"]["input_fields"] = [start_node.outputPath]
-        if end_node and "output_fields" not in v["metadata"]:
-            v["metadata"]["output_fields"] = [end_node.inputPath]
+        if v["metadata"] is None:
+            # No IO Mapper is needed
+            condition_map[map_key] = end_key
+        else:
+            if start_node and "input_fields" not in v["metadata"]:
+                v["metadata"]["input_fields"] = [start_node.outputPath]
+            if end_node and "output_fields" not in v["metadata"]:
+                v["metadata"]["output_fields"] = [end_node.inputPath]
 
-        mapping_agent = IOMappingAgent(metadata=v["metadata"], llm=llm)
+            mapping_agent = IOMappingAgent(metadata=v["metadata"], llm=llm)
 
-        iom_name = f"{start_key}_{end_key}"
-        g.add_node(iom_name, mapping_agent.langgraph_node)
-        g.add_edge(iom_name, end_key)
-        iom_map[end_key] = mapping_agent
-        condition_map[map_key] = iom_name
+            iom_name = f"{start_key}_{end_key}"
+            g.add_node(iom_name, mapping_agent.langgraph_node)
+            g.add_edge(iom_name, end_key)
+            iom_map[end_key] = mapping_agent
+            condition_map[map_key] = iom_name
+
+
 
     g.add_conditional_edges(start_key, path, condition_map)
     return iom_map
