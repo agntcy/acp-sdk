@@ -36,8 +36,10 @@ jobs:
 
       - name: Validate version if tag
         if: github.event_name == 'push' && github.ref_type == 'tag'
+        env:
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          TAG="${${{ github.ref_name }}##v}" ## Remove the version tag prefix
+          TAG="${TAG_NAME##v}" ## Remove the version tag prefix
           PYPROJECT_VERSION=$(awk '/version/ { gsub("\"", ""); print $3; exit; }' pyproject.toml)
       
           if [ ! "${PYPROJECT_VERSION}" = "${TAG}" ]; then
