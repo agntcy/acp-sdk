@@ -825,7 +825,7 @@
         "url": "file://../",
         "framework_config": {
           "framework_type": "langgraph",
-          "graph": "src.marketing_campaign.app:graph"
+          "graph": "marketing_campaign.app:graph"
         }
       }
     ],

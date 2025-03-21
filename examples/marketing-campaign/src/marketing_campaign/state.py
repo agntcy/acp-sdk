@@ -3,8 +3,8 @@ from agntcy_acp.langgraph.api_bridge import APIBridgeOutput, APIBridgeInput
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
 from langchain_core.messages import  AIMessage, HumanMessage
-import mailcomposer
-import email_reviewer
+from marketing_campaign import mailcomposer
+from marketing_campaign import email_reviewer
 
 class ConfigModel(BaseModel):
     recipient_email_address: str = Field(..., description="Email address of the email recipient")
@@ -37,6 +37,4 @@ class OverallState(BaseModel):
     email_reviewer_state: Optional[MailReviewerState] = None
     target_audience: Optional[email_reviewer.TargetAudience] = None
     sendgrid_state: Optional[SendGridState] = None
-
-
-
+    

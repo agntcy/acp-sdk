@@ -43,7 +43,7 @@ manifest = AgentManifest(
                     url=AnyUrl("file://../"),
                     framework_config=LangGraphConfig(
                         framework_type="langgraph",
-                        graph="src.marketing_campaign.app:graph"
+                        graph="marketing_campaign.app:graph"
                     )
                 )
             )

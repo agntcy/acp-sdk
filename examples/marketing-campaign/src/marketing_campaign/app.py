@@ -5,8 +5,8 @@ from agntcy_acp.langgraph.api_bridge import APIBridgeAgentNode, APIBridgeInput, 
 from agntcy_acp.langgraph.io_mapper import add_io_mapped_edge, add_io_mapped_conditional_edge
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.state import CompiledStateGraph
-import mailcomposer
-import state
+from marketing_campaign import mailcomposer
+from  marketing_campaign import state
 from agntcy_acp.langgraph.acp_node import ACPNode
 from agntcy_acp.acp_v0.configuration import Configuration
 from langchain_core.runnables.graph import MermaidDrawMethod
@@ -14,7 +14,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai.chat_models.azure import AzureChatOpenAI
 import jinja2
 import json
-import email_reviewer
+from marketing_campaign import email_reviewer
 from marketing_campaign.state import SendGridState, MailComposerState
 
 
