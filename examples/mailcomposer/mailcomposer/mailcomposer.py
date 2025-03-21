@@ -1,11 +1,8 @@
 import os
-from typing import Annotated
-
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from langgraph.graph import StateGraph, START, END
-from langgraph.graph.message import add_messages
 from langchain_openai import AzureChatOpenAI
-from typing_extensions import TypedDict
+from pydantic import SecretStr
 from langchain.prompts import PromptTemplate
 
 from .state import OutputState, AgentState, Message, Type as MsgType
@@ -15,10 +12,14 @@ api_key = os.getenv("AZURE_OPENAI_API_KEY")
 if not api_key:
     raise ValueError("AZURE_OPENAI_API_KEY must be set as an environment variable.")
 
+azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+if not azure_endpoint:
+    raise ValueError("AZURE_OPENAI_ENDPOINT must be set as an environment variable.")
+
 llm = AzureChatOpenAI(
-    api_key=api_key,
-    azure_endpoint="https://smith-project-agents.openai.azure.com",
-    model_name="gpt-4o",
+    api_key=SecretStr(api_key),
+    azure_endpoint=azure_endpoint,
+    model="gpt-4o",
     openai_api_type="azure_openai",
     api_version="2024-07-01-preview",
     temperature=0,
@@ -81,33 +82,28 @@ def convert_messages(messages:list)->list[BaseMessage]:
 
     return converted
 
+
 # Define mail_agent function
-def email_agent(state: OutputState):
+def email_agent(state: AgentState) -> OutputState | AgentState:
     """This agent is a skilled writer for a marketing company, creating formal and professional emails for publicity campaigns.
     It interacts with users to gather the necessary details.
     Once the user approves by sending "is_completed": true, the agent outputs the finalized email in "final_email"."""
 
-    # Check if the first message is empty
-    #if not state.get("messages", []) or state.messages[-1].content == EMPTY_MSG_ERROR:
-    #    state["is_completed"] = False
-    #    return {"messages": [AIMessage(
-    #        content=EMPTY_MSG_ERROR
-    #        )]}
-
     # Check subsequent messages and handle completion
     if state.is_completed:
         final_mail = extract_mail(state.messages)
-        state.final_email = final_mail
-        return state
-        #return {"messages": [AIMessage(content=final_mail)]}
+        output_state: OutputState = OutputState(
+            messages=state.messages,
+            is_completed=state.is_completed,
+            final_email=final_mail)
+        return output_state
 
     # Generate the email
     llm_messages = [
         Message(type=MsgType.human, content= MARKETING_EMAIL_PROMPT_TEMPLATE.format(separator=SEPARATOR)),
-    ] + state.messages
+    ] + (state.messages or [])
 
-
-    state.messages = state.messages + [Message(type=MsgType.ai, content=llm.invoke(convert_messages(llm_messages)).content)]
+    state.messages = (state.messages or []) + [Message(type=MsgType.ai, content=str(llm.invoke(convert_messages(llm_messages)).content))]
     return state
 
 # Create the graph and add the agent node

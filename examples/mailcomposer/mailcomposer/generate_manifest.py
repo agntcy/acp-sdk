@@ -1,11 +1,23 @@
-from agntcy_acp.manifest import *
-from pydantic import TypeAdapter
+from pathlib import Path
+from pydantic import AnyUrl
 from state import AgentState, OutputState, ConfigSchema
+from agntcy_acp.manifest import (
+    AgentManifest,
+    AgentMetadata,
+    AgentACPSpec,
+    Capabilities,
+    AgentRef,
+    AgentDeployment,
+    DeploymentOptions,
+    SourceCodeDeployment,
+    LangGraphConfig,
+    EnvVar,
+)
 
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.mailcomposer", version="0.0.1"),
+        ref=AgentRef(name="org.agntcy.mailcomposer", version="0.0.1", url=None),
         description="Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"),
     specs=AgentACPSpec(
         input=AgentState.model_json_schema(),
@@ -14,26 +26,36 @@ manifest = AgentManifest(
         capabilities=Capabilities(
             threads=False,
             callbacks=False,
-            interrupts=False
-        )
+            interrupts=False,
+            streaming=None
+        ),
+        custom_streaming_update=None,
+        thread_state=None,
+        interrupts=None
     ),
     deployment=AgentDeployment(
         deployment_options=[
-            SourceCodeDeployment(
-                type="source_code",
-                name="source_code_local",
-                url="file://../",
-                framework_config=LangGraphConfig(
-                    framework_type="langgraph",
-                    graph="mailcomposer.mailcomposer:graph"
+            DeploymentOptions(
+                root = SourceCodeDeployment(
+                    type="source_code",
+                    name="source_code_local",
+                    url=AnyUrl("file://../"),
+                    framework_config=LangGraphConfig(
+                        framework_type="langgraph",
+                        graph="mailcomposer.mailcomposer:graph"
+                    )
                 )
             )
         ],
+        env_vars=[
+            EnvVar(name="AZURE_OPENAI_API_KEY", desc="Azure key for the OpenAI service"),
+            EnvVar(name="AZURE_OPENAI_ENDPOINT", desc="Azure endpoint for the OpenAI service")
+            ],
         dependencies=[]
     )
 )
 
-with open("../deploy/mailcomposer.json", "w") as f:
+with open(f"{Path(__file__).parent}/../deploy/mailcomposer.json", "w") as f:
     f.write(manifest.model_dump_json(
         exclude_unset=True,
         exclude_none=True,

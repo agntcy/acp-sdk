@@ -1,6 +1,6 @@
 .idea
 ___*
-.idea
+.vscode
 .DS_STORE
 __pycache__
 ___*
@@ -13,3 +13,4 @@ venv
 /acp-async-client-generated
 /workflow-srv-mgr-client-generated
 /dist
+wfsm

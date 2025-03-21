@@ -45,15 +45,31 @@
       },
       "properties": {
         "messages": {
-          "items": {
-            "$ref": "#/$defs/Message"
-          },
-          "title": "Messages",
-          "type": "array"
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Message"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Messages"
         },
         "is_completed": {
-          "title": "Is Completed",
-          "type": "boolean"
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Is Completed"
         }
       },
       "title": "AgentState",
@@ -92,15 +108,31 @@
       },
       "properties": {
         "messages": {
-          "items": {
-            "$ref": "#/$defs/Message"
-          },
-          "title": "Messages",
-          "type": "array"
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Message"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Messages"
         },
         "is_completed": {
-          "title": "Is Completed",
-          "type": "boolean"
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Is Completed"
         },
         "final_email": {
           "anyOf": [
@@ -111,12 +143,11 @@
               "type": "null"
             }
           ],
+          "default": null,
+          "description": "Final email produced by the mail composer",
           "title": "Final Email"
         }
       },
-      "required": [
-        "final_email"
-      ],
       "title": "OutputState",
       "type": "object"
     },
@@ -144,6 +175,16 @@
           "framework_type": "langgraph",
           "graph": "mailcomposer.mailcomposer:graph"
         }
+      }
+    ],
+    "env_vars": [
+      {
+        "desc": "Azure key for the OpenAI service",
+        "name": "AZURE_OPENAI_API_KEY"
+      },
+      {
+        "desc": "Azure endpoint for the OpenAI service",
+        "name": "AZURE_OPENAI_ENDPOINT"
       }
     ],
     "dependencies": []
