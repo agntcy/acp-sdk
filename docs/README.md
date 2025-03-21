@@ -2,11 +2,14 @@
 
 ## Getting Started
 
+Prerequisites:
+  * [poetry](https://python-poetry.org/docs/): for package management
+
 ## Usage
 
 Learn how to use the SDK here: [usage](usage#usage)
 
-## Generate genericeserver
+## Generate generic server
 
 `make generate_acp_server`
 
