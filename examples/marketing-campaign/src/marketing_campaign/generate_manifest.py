@@ -53,13 +53,13 @@ manifest = AgentManifest(
                   EnvVar(name="SENDGRID_API_KEY", desc="Sendgrid API key")],
         dependencies=[
             AgentDependency(
-                name="mailcomposer1",
+                name="mailcomposer",
                 ref=AgentRef(name="org.agntcy.mailcomposer", version="0.0.1", url=AnyUrl("file://mailcomposer.json")),
                 deployment_option = None,
                 env_var_values = None
             ),
            AgentDependency(
-                name="email_reviewer1",
+                name="email_reviewer",
                 ref=AgentRef(name="org.agntcy.email_reviewer", version="0.0.1", url=AnyUrl("file://email_reviewer.json")),
                 deployment_option = None,
                 env_var_values = None
