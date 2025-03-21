@@ -64,14 +64,19 @@ $(AGNT_WKFW_SPEC_FILE):
 	git submodule update $(AGENT_WORKFLOW_DIR)
 
 generate_manifest_models: $(AGNT_WKFW_SPEC_FILE)
-	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(AGNT_WKFW_SPEC_FILE)) ; \
+	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' "$(AGNT_WKFW_SPEC_FILE)") ; \
 	AGNT_WKFW_MODEL_PACKAGE_DIR="agntcy_acp/agws_v$${ACP_SPEC_VERSION}" ; \
+	{ mkdir "$${AGNT_WKFW_MODEL_PACKAGE_DIR}" || true ; } ; \
 	poetry run datamodel-codegen \
 		--input $(AGNT_WKFW_SPEC_FILE) \
 		--input-file-type openapi \
 		--output-model-type pydantic_v2.BaseModel \
 		--output "$${AGNT_WKFW_MODEL_PACKAGE_DIR}"/models.py \
-		--disable-timestamp
+		--disable-timestamp && \
+	cp .spdx_header "$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
+	echo VERSION="\""$$(yq '.info.version' "$(AGNT_WKFW_SPEC_FILE)")"\"" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
+	echo MAJOR_VERSION="\"$${ACP_SPEC_VERSION}\"" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
+	echo MINOR_VERSION="\""$$(yq '.info.version | sub("\d+\.", "")' "$(AGNT_WKFW_SPEC_FILE)")"\"" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py"
 
 update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/README.md
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_FILE)) ; \

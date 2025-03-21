@@ -54,7 +54,7 @@ Publishing the package uses a GitHub action triggered by
 [creating a release in GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release).
 
 The following steps are required to create a release:
-  1. Push a properly formatted tag (vX.Y.Z[.aN][.devN]). This tag must 
+  1. Push a properly formatted tag (vX.Y.Z[aN][.devN]). This tag must
   correspond to the version in the `pyproject.toml` file.
   2. Use the specified tag to create a release
 
