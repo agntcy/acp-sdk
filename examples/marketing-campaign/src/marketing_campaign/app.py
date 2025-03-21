@@ -92,6 +92,7 @@ def build_graph() -> CompiledStateGraph:
     email_reviewer_host = os.environ.get("EMAIL_REVIEWER_HOST")
     email_reviewer_api_key = os.environ.get("EMAIL_REVIEWER_API_KEY", None)
     email_reviewer_agent_id = os.environ.get("EMAIL_REVIEWER_AGENT_ID", "")
+    sendgrid_host = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
 
     mailcomposer_client_config = Configuration(
         api_key={"x-api-key": mailcomposer_api_key} if mailcomposer_api_key else None,
@@ -133,7 +134,7 @@ def build_graph() -> CompiledStateGraph:
         input_path="sendgrid_state.input",
         output_path="sendgrid_state.output",
         service_api_key=sendgrid_api_key,
-        hostname="http://localhost:8080",
+        hostname=sendgrid_host,
         service_name="sendgrid/v3/mail/send"
     )
 

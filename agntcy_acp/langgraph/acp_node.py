@@ -92,7 +92,7 @@ class ACPNode():
 
     def _prepare_run_create(self, state: Any, config: RunnableConfig):
         agent_input = self._extract_input(state)
-        agent_config = self._extract_config(state)
+        agent_config = self._extract_config(config)
 
         run_create = RunCreate(
             agent_id=self.agent_id,

@@ -1,12 +1,7 @@
-from agntcy_acp.models import AgentRef, AgentMetadata
-
-from app import graph
-import state
-from marketing_campaign.state import MailComposerState
-from state import OverallState, ConfigModel
-from dotenv import load_dotenv, find_dotenv
-import mailcomposer
-
+from marketing_campaign.app import graph
+from marketing_campaign.state import OverallState, ConfigModel
+from marketing_campaign import mailcomposer
+from marketing_campaign.email_reviewer import TargetAudience
 
 
 def main():
@@ -17,28 +12,20 @@ def main():
         has_composer_completed=False
     )
     while True:
-        usermsg = input()
+        usermsg = input("YOU [Type OK when you are happy with the email proposed] >>> ")
         inputState.messages.append(mailcomposer.Message(content=usermsg, type=mailcomposer.Type.human))
         output = graph.invoke(inputState, {
             "configurable": {
                 "thread_id": "foo",
-                "config": state.ConfigModel(
-                    recipient_email_address="Alessandro Duminuco <aduminuc@cisco.com>",
+                "config": ConfigModel(
+                    recipient_email_address="Giovanni Conte <giconte@cisco.com>",
                     sender_email_address="casey.agntcy.demo@gmail.com",
-                    target_audience="academic"
+                    target_audience=TargetAudience.academic
                 ).model_dump(),
             }
         })
 
-
-        # TODO : FIX this!
-        mcstate = output.get("mailcomposer_state", None)
-        sgstate = output.get("sendgrid_state", None)
-        output["mailcomposer_state"] = None
-        output["sendgrid_state"] = None
         outputState = OverallState.model_validate(output)
-        outputState.mailcomposer_state = mcstate
-        outputState.sendgrid_state = sgstate
         if len(outputState.operation_logs) > 0:
             print(outputState.operation_logs)
             break

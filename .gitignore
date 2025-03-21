@@ -6,7 +6,7 @@ __pycache__
 ___*
 *.code-workspace
 *_graph.png
-.env
+.*.env
 venv
 .venv
 /acp-sync-client-generated
