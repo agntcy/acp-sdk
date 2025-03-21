@@ -1,0 +1,27 @@
+{
+    "include": [
+        "examples/marketing-campaign/src/marketing_campaign",
+        "examples/mailcomposer",
+        "examples/email_reviewer"
+    ],
+    "executionEnvironments": [
+        {
+            "root": "examples/marketing-campaign/src/marketing_campaign",
+            "extraPaths": [
+                "examples/marketing-campaign/src/marketing_campaign"
+            ]
+        },
+        {
+            "root": "examples/mailcomposer",
+            "extraPaths": [
+                "examples/mailcomposer"
+            ]
+        },
+        {
+            "root": "examples/email_reviewer",
+            "extraPaths": [
+                "examples/email_reviewer"
+            ]
+        }
+    ]
+}

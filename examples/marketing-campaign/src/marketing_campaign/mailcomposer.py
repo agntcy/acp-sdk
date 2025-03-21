@@ -28,7 +28,11 @@ class Message(BaseModel):
 class OutputSchema(BaseModel):
     messages: Optional[List[Message]] = Field(None, title='Messages')
     is_completed: Optional[bool] = Field(None, title='Is Completed')
-    final_email: Optional[str] = Field(None, title='Final Email')
+    final_email: Optional[str] = Field(
+        None,
+        description='Final email produced by the mail composer',
+        title='Final Email',
+    )
 
 
 class Type(Enum):

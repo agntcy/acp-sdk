@@ -1,11 +1,24 @@
 
-from agntcy_acp.manifest import *
-from pydantic import TypeAdapter
+from pathlib import Path
+from pydantic import AnyUrl
 from state import EmailReviewerInput, EmailReview,ConfigSchema
+from agntcy_acp.manifest import (
+    AgentManifest,
+    AgentDeployment,
+    DeploymentOptions,
+    LlamaIndexConfig,
+    EnvVar,
+    AgentMetadata,
+    AgentACPSpec,
+    AgentRef,
+    Capabilities,
+    SourceCodeDeployment
+)
+
 
 manifest = AgentManifest(
     metadata=AgentMetadata(
-        ref=AgentRef(name="org.agntcy.mail_reviewer", version="0.0.1"),
+        ref=AgentRef(name="org.agntcy.mail_reviewer", version="0.0.1", url=None),
         description="Review emails"),
     specs=AgentACPSpec(
         input=EmailReviewerInput.model_json_schema(),
@@ -14,27 +27,33 @@ manifest = AgentManifest(
         capabilities=Capabilities(
             threads=False,
             callbacks=False,
-            interrupts=False
-        )
+            interrupts=False,
+            streaming=None
+        ),
+        custom_streaming_update=None,
+        thread_state=None,
+        interrupts=None
     ),
     deployment=AgentDeployment(
         deployment_options=[
-            SourceCodeDeployment(
-                type="source_code",
-                name="source_code_local",
-                url="file://../",
-                framework_config=LlamaIndexConfig(
-                    framework_type="llamaindex",
-                    name="./email_reviewer",
-                    path="email_reviewer:email_reviewer_workflow"
+            DeploymentOptions(
+                root = SourceCodeDeployment(
+                    type="source_code",
+                    name="source_code_local",
+                    url=AnyUrl("file://../"),
+                    framework_config=LlamaIndexConfig(
+                        framework_type="llamaindex",
+                        path="email_reviewer:email_reviewer_workflow"
+                    )
                 )
             )
         ],
+        env_vars=[EnvVar(name="AZURE_OPENAI_API_KEY", desc="Azure key for the OpenAI service")],
         dependencies=[]
     )
 )
 
-with open("../deploy/email_reviewer.json", "w") as f:
+with open(f"{Path(__file__).parent}/../deploy/email_reviewer.json", "w") as f:
     f.write(manifest.model_dump_json(
         exclude_unset=True,
         exclude_none=True,

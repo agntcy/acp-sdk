@@ -42,7 +42,12 @@ def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.O
 
 def prepare_output(state: state.OverallState, config:RunnableConfig) -> state.OverallState:
     # state.messages = [mailcomposer.Message.model_validate(json.loads(m.model_dump_json())) for m in state.mailcomposer_state.output.messages]
-    state.messages = copy.deepcopy(state.mailcomposer_state.output.messages)
+    state.messages = copy.deepcopy(
+        state.mailcomposer_state.output.messages if (state.mailcomposer_state
+            and state.mailcomposer_state.output
+            and state.mailcomposer_state.output.messages
+        ) else []
+    )
     if state.sendgrid_state and state.sendgrid_state.output and state.sendgrid_state.output.result:
         state.operation_logs.append(f"Email Send Operation: {state.sendgrid_state.output.result}")
 
@@ -64,7 +69,10 @@ def prepare_sendgrid_input(state: state.OverallState, config: RunnableConfig) ->
             query=f""
                   f"Please send an email to {cfg['recipient_email_address']} from {cfg['sender_email_address']}.\n"
                   f"Content of the email should be the following:\n"
-                  f"{state.email_reviewer_state.output.corrected_email}"
+                  f"{state.email_reviewer_state.output.corrected_email if (state.email_reviewer_state
+                    and state.email_reviewer_state.output
+                    and hasattr(state.email_reviewer_state.output, 'corrected_email')
+                    ) else ''}"
         )
     )
     return state
@@ -80,13 +88,13 @@ def build_graph() -> CompiledStateGraph:
     # Fill in client configuration for the remote agent
     mailcomposer_host = os.environ.get("MAILCOMPOSER_HOST")
     mailcomposer_api_key = os.environ.get("MAILCOMPOSER_API_KEY", None)
-    mailcomposer_agent_id = os.environ.get("MAILCOMPOSER_AGENT_ID")
+    mailcomposer_agent_id = os.environ.get("MAILCOMPOSER_AGENT_ID", "")
     email_reviewer_host = os.environ.get("EMAIL_REVIEWER_HOST")
     email_reviewer_api_key = os.environ.get("EMAIL_REVIEWER_API_KEY", None)
     email_reviewer_agent_id = os.environ.get("EMAIL_REVIEWER_AGENT_ID", "")
 
     mailcomposer_client_config = Configuration(
-        api_key=mailcomposer_api_key,
+        api_key={"x-api-key": mailcomposer_api_key} if mailcomposer_api_key else None,
         host=mailcomposer_host)
 
     # Instantiate the local ACP node for the remote agent
@@ -97,11 +105,11 @@ def build_graph() -> CompiledStateGraph:
         input_path="mailcomposer_state.input",
         input_type=mailcomposer.InputSchema,
         output_path="mailcomposer_state.output",
-        output_type=mailcomposer.OutputSchema
+        output_type=mailcomposer.OutputSchema,
     )
 
     email_reviewer_config = Configuration(
-        api_key={"apiKey": email_reviewer_api_key} if email_reviewer_api_key else None,
+        api_key={"x-api-key": email_reviewer_api_key} if email_reviewer_api_key else None,
         host=email_reviewer_host
     )
 

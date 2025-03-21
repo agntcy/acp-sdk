@@ -14,9 +14,7 @@ def main():
     inputState = OverallState(
         messages=[],
         operation_logs=[],
-        has_composer_completed=False,
-        recipient_email_address="",
-        sender_email_address=""
+        has_composer_completed=False
     )
     while True:
         usermsg = input()

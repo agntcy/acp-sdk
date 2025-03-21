@@ -12,15 +12,15 @@ def main():
         final_email=None
     )
     while(True) :
-        if len(output.messages) > 0:
+        if output.messages and len(output.messages) > 0:
             m = output.messages[-1]
             print(f"[Assistant] \t\t>>> {m.content}")
-        if "final_email" in output and output.final_email:
+        if output.final_email:
             break
         message = input("YOU [Type OK when you are happy with the email proposed] >>> ")
 
-        nextinput = OutputState(
-            messages = output.messages + [Message(content=message, type=MsgType.human)]
+        nextinput = AgentState(
+            messages = (output.messages or []) + [Message(content=message, type=MsgType.human)]
         )
         if message == "OK":
             nextinput.is_completed = True
@@ -31,4 +31,3 @@ def main():
     print(output.final_email)
 
 main()
-             
