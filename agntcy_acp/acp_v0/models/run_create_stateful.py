@@ -119,6 +119,11 @@ class RunCreateStateful(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of stream_mode
         if self.stream_mode:
             _dict['stream_mode'] = self.stream_mode.to_dict()
+        # set to None if stream_mode (nullable) is None
+        # and model_fields_set contains the field
+        if self.stream_mode is None and "stream_mode" in self.model_fields_set:
+            _dict['stream_mode'] = None
+
         return _dict
 
     @classmethod
