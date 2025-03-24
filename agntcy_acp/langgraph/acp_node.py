@@ -42,6 +42,7 @@ class ACPNode():
             output_type,
             config_path: str = None,
             config_type=None,
+            auth_header: dict = None
     ):
         """ Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -65,6 +66,7 @@ class ACPNode():
         self.outputType = output_type
         self.configPath = config_path
         self.configType = config_type
+        self.auth_header = auth_header
 
     def get_name(self):
         return self.__name__
@@ -118,7 +120,7 @@ class ACPNode():
 
         run_create = self._prepare_run_create(state, config)
 
-        api_client = ApiClient(configuration=self.clientConfig)
+        api_client = ApiClient(configuration=self.clientConfig, header_name=self.auth_header["name"], header_value=self.auth_header["value"]), 
         acp_client = ACPClient(api_client=api_client)
         run: Run = acp_client.create_run(run_create)
         run_output = acp_client.get_run_output(run_id=run.run_id, block_timeout=120)
@@ -127,7 +129,7 @@ class ACPNode():
 
     async def ainvoke(self, state: Any, config: RunnableConfig) -> Any:
         run_create = self._prepare_run_create(state, config)
-        api_client = AsyncApiClient(configuration=self.clientConfig)
+        api_client = AsyncApiClient(configuration=self.clientConfig, header_name=self.auth_header["name"], header_value=self.auth_header["value"])
         acp_client = AsyncACPClient(api_client=api_client)
 
         run: Run = await acp_client.create_run(run_create)
