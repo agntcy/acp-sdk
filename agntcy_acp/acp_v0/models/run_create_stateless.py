@@ -27,9 +27,9 @@ from agntcy_acp.acp_v0.models.stream_mode import StreamMode
 from typing import Optional, Set
 from typing_extensions import Self
 
-class RunCreate(BaseModel):
+class RunCreateStateless(BaseModel):
     """
-    Payload for creating a run.
+    Payload for creating a stateless run.
     """ # noqa: E501
     agent_id: Optional[StrictStr] = Field(default=None, description="The agent ID to run. If not provided will use the default agent for this service.")
     input: Optional[Dict[str, Any]] = Field(default=None, description="The input to the agent. The schema is described in agent ACP descriptor under 'spec.thread_state'.'input'.")
@@ -40,7 +40,8 @@ class RunCreate(BaseModel):
     on_disconnect: Optional[StrictStr] = Field(default='cancel', description="The disconnect mode to use. Must be one of 'cancel' or 'continue'.")
     multitask_strategy: Optional[StrictStr] = Field(default='reject', description="Multitask strategy to use. Must be one of 'reject', 'interrupt', 'rollback', or 'enqueue'.")
     after_seconds: Optional[StrictInt] = Field(default=None, description="The number of seconds to wait before starting the run. Use to schedule future runs.")
-    __properties: ClassVar[List[str]] = ["agent_id", "input", "metadata", "config", "webhook", "stream_mode", "on_disconnect", "multitask_strategy", "after_seconds"]
+    on_completion: Optional[StrictStr] = Field(default='delete', description="Whether to delete or keep the thread created for a stateless run. Must be one of 'delete' or 'keep'.")
+    __properties: ClassVar[List[str]] = ["agent_id", "input", "metadata", "config", "webhook", "stream_mode", "on_disconnect", "multitask_strategy", "after_seconds", "on_completion"]
 
     @field_validator('on_disconnect')
     def on_disconnect_validate_enum(cls, value):
@@ -62,6 +63,16 @@ class RunCreate(BaseModel):
             raise ValueError("must be one of enum values ('reject', 'rollback', 'interrupt', 'enqueue')")
         return value
 
+    @field_validator('on_completion')
+    def on_completion_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['delete', 'keep']):
+            raise ValueError("must be one of enum values ('delete', 'keep')")
+        return value
+
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
@@ -80,7 +91,7 @@ class RunCreate(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of RunCreate from a JSON string"""
+        """Create an instance of RunCreateStateless from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -111,7 +122,7 @@ class RunCreate(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of RunCreate from a dict"""
+        """Create an instance of RunCreateStateless from a dict"""
         if obj is None:
             return None
 
@@ -127,7 +138,8 @@ class RunCreate(BaseModel):
             "stream_mode": StreamMode.from_dict(obj["stream_mode"]) if obj.get("stream_mode") is not None else None,
             "on_disconnect": obj.get("on_disconnect") if obj.get("on_disconnect") is not None else 'cancel',
             "multitask_strategy": obj.get("multitask_strategy") if obj.get("multitask_strategy") is not None else 'reject',
-            "after_seconds": obj.get("after_seconds")
+            "after_seconds": obj.get("after_seconds"),
+            "on_completion": obj.get("on_completion") if obj.get("on_completion") is not None else 'delete'
         })
         return _obj
 

@@ -19,36 +19,29 @@ import json
 import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
 from typing import Any, List, Optional
-from agntcy_acp.acp_v0.models.run_error import RunError
-from agntcy_acp.acp_v0.models.run_interrupt import RunInterrupt
-from agntcy_acp.acp_v0.models.run_result import RunResult
+from agntcy_acp.acp_v0.models.content_one_of_inner import ContentOneOfInner
 from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self
 
-RUNOUTPUT_ONE_OF_SCHEMAS = ["RunError", "RunInterrupt", "RunResult"]
+CONTENT_ONE_OF_SCHEMAS = ["List[ContentOneOfInner]", "str"]
 
-class RunOutput(BaseModel):
+class Content(BaseModel):
     """
-    Output of a Run. Can be the final result or an interrupt.
+    The content of the message.
     """
-    # data type: RunResult
-    oneof_schema_1_validator: Optional[RunResult] = None
-    # data type: RunInterrupt
-    oneof_schema_2_validator: Optional[RunInterrupt] = None
-    # data type: RunError
-    oneof_schema_3_validator: Optional[RunError] = None
-    actual_instance: Optional[Union[RunError, RunInterrupt, RunResult]] = None
-    one_of_schemas: Set[str] = { "RunError", "RunInterrupt", "RunResult" }
+    # data type: str
+    oneof_schema_1_validator: Optional[StrictStr] = None
+    # data type: List[ContentOneOfInner]
+    oneof_schema_2_validator: Optional[List[ContentOneOfInner]] = None
+    actual_instance: Optional[Union[List[ContentOneOfInner], str]] = None
+    one_of_schemas: Set[str] = { "List[ContentOneOfInner]", "str" }
 
     model_config = ConfigDict(
         validate_assignment=True,
         protected_namespaces=(),
     )
 
-
-    discriminator_value_class_map: Dict[str, str] = {
-    }
 
     def __init__(self, *args, **kwargs) -> None:
         if args:
@@ -62,30 +55,27 @@ class RunOutput(BaseModel):
 
     @field_validator('actual_instance')
     def actual_instance_must_validate_oneof(cls, v):
-        instance = RunOutput.model_construct()
+        instance = Content.model_construct()
         error_messages = []
         match = 0
-        # validate data type: RunResult
-        if not isinstance(v, RunResult):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `RunResult`")
-        else:
+        # validate data type: str
+        try:
+            instance.oneof_schema_1_validator = v
             match += 1
-        # validate data type: RunInterrupt
-        if not isinstance(v, RunInterrupt):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `RunInterrupt`")
-        else:
+        except (ValidationError, ValueError) as e:
+            error_messages.append(str(e))
+        # validate data type: List[ContentOneOfInner]
+        try:
+            instance.oneof_schema_2_validator = v
             match += 1
-        # validate data type: RunError
-        if not isinstance(v, RunError):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `RunError`")
-        else:
-            match += 1
+        except (ValidationError, ValueError) as e:
+            error_messages.append(str(e))
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when setting `actual_instance` in Content with oneOf schemas: List[ContentOneOfInner], str. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when setting `actual_instance` in Content with oneOf schemas: List[ContentOneOfInner], str. Details: " + ", ".join(error_messages))
         else:
             return v
 
@@ -100,31 +90,31 @@ class RunOutput(BaseModel):
         error_messages = []
         match = 0
 
-        # deserialize data into RunResult
+        # deserialize data into str
         try:
-            instance.actual_instance = RunResult.from_json(json_str)
+            # validation
+            instance.oneof_schema_1_validator = json.loads(json_str)
+            # assign value to actual_instance
+            instance.actual_instance = instance.oneof_schema_1_validator
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into RunInterrupt
+        # deserialize data into List[ContentOneOfInner]
         try:
-            instance.actual_instance = RunInterrupt.from_json(json_str)
-            match += 1
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
-        # deserialize data into RunError
-        try:
-            instance.actual_instance = RunError.from_json(json_str)
+            # validation
+            instance.oneof_schema_2_validator = json.loads(json_str)
+            # assign value to actual_instance
+            instance.actual_instance = instance.oneof_schema_2_validator
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when deserializing the JSON string into Content with oneOf schemas: List[ContentOneOfInner], str. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when deserializing the JSON string into Content with oneOf schemas: List[ContentOneOfInner], str. Details: " + ", ".join(error_messages))
         else:
             return instance
 
@@ -138,7 +128,7 @@ class RunOutput(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Optional[Union[Dict[str, Any], RunError, RunInterrupt, RunResult]]:
+    def to_dict(self) -> Optional[Union[Dict[str, Any], List[ContentOneOfInner], str]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return None

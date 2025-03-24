@@ -20,18 +20,20 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
-from agntcy_acp.acp_v0.models.agent_ref import AgentRef
+from typing import Any, ClassVar, Dict, List, Optional
+from agntcy_acp.acp_v0.models.content import Content
 from typing import Optional, Set
 from typing_extensions import Self
 
-class AgentMetadata(BaseModel):
+class Message(BaseModel):
     """
-    Basic information associated to the agent
+    Message
     """ # noqa: E501
-    ref: AgentRef
-    description: StrictStr = Field(description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect")
-    __properties: ClassVar[List[str]] = ["ref", "description"]
+    role: StrictStr = Field(description="The role of the message.")
+    content: Content
+    id: Optional[StrictStr] = Field(default=None, description="The ID of the message.")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="The metadata of the message.")
+    __properties: ClassVar[List[str]] = ["role", "content", "id", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,7 +53,7 @@ class AgentMetadata(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a JSON string"""
+        """Create an instance of Message from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -72,14 +74,14 @@ class AgentMetadata(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of ref
-        if self.ref:
-            _dict['ref'] = self.ref.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of content
+        if self.content:
+            _dict['content'] = self.content.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a dict"""
+        """Create an instance of Message from a dict"""
         if obj is None:
             return None
 
@@ -87,8 +89,10 @@ class AgentMetadata(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "ref": AgentRef.from_dict(obj["ref"]) if obj.get("ref") is not None else None,
-            "description": obj.get("description")
+            "role": obj.get("role"),
+            "content": Content.from_dict(obj["content"]) if obj.get("content") is not None else None,
+            "id": obj.get("id"),
+            "metadata": obj.get("metadata")
         })
         return _obj
 
