@@ -10,7 +10,7 @@ from langgraph.graph.state import CompiledStateGraph
 from marketing_campaign import mailcomposer
 from  marketing_campaign import state
 from agntcy_acp.langgraph.acp_node import ACPNode
-from agntcy_acp.acp_v0.configuration import Configuration
+from agntcy_acp import ApiClientConfiguration
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_core.runnables import RunnableConfig
 from langchain_openai.chat_models.azure import AzureChatOpenAI
@@ -88,17 +88,11 @@ def build_graph() -> CompiledStateGraph:
         temperature=0,
     )
     # Fill in client configuration for the remote agent
-    mailcomposer_host = os.environ.get("MAILCOMPOSER_HOST")
-    mailcomposer_api_key = os.environ.get("MAILCOMPOSER_API_KEY", None)
     mailcomposer_agent_id = os.environ.get("MAILCOMPOSER_AGENT_ID", "")
-    email_reviewer_host = os.environ.get("EMAIL_REVIEWER_HOST")
-    email_reviewer_api_key = os.environ.get("EMAIL_REVIEWER_API_KEY", None)
     email_reviewer_agent_id = os.environ.get("EMAIL_REVIEWER_AGENT_ID", "")
     sendgrid_host = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
 
-    mailcomposer_client_config = Configuration(
-        api_key={"x-api-key": mailcomposer_api_key} if mailcomposer_api_key else None,
-        host=mailcomposer_host)
+    mailcomposer_client_config = ApiClientConfiguration.fromEnvPrefix("MAILCOMPOSER_")
 
     # Instantiate the local ACP node for the remote agent
     acp_mailcomposer = ACPNode(
@@ -111,10 +105,7 @@ def build_graph() -> CompiledStateGraph:
         output_type=mailcomposer.OutputSchema,
     )
 
-    email_reviewer_config = Configuration(
-        api_key={"x-api-key": email_reviewer_api_key} if email_reviewer_api_key else None,
-        host=email_reviewer_host
-    )
+    email_reviewer_config = ApiClientConfiguration.fromEnvPrefix("EMAIL_REVIEWER_")
 
     acp_email_reviewer = ACPNode(
         name="email_reviewer",
@@ -127,7 +118,7 @@ def build_graph() -> CompiledStateGraph:
     )
 
     # Instantiate APIBridge Agent Node
-    sendgrid_api_key = os.environ.get("SENDGRID_API_KEY")
+    sendgrid_api_key = os.environ.get("SENDGRID_API_KEY", None)
     if sendgrid_api_key is None:
         raise ValueError("SENDGRID_API_KEY environment variable is not set")
 
