@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import datetime
 import io
-from agntcy_acp import ACPClient, ApiResponse, Configuration, ApiClient
-from agntcy_acp.models import RunCreate, RunSearchRequest, Run, RunStatus
+from agntcy_acp import ACPClient, ApiResponse, ApiClientConfiguration, ApiClient
+from agntcy_acp.models import RunCreation, RunSearchRequest, Run, RunStatus, RunCreateStateless
 
 class RESTResponse(io.IOBase):
     def __init__(self, status, body) -> None:
@@ -25,9 +25,9 @@ class RESTResponse(io.IOBase):
 def test_acp_client_runs_api(monkeypatch):
     agent_id = "bogus-agent-id"
     init_run_id = "bugus-run-id"
-    run_create = RunCreate(agent_id=agent_id)
+    run_create = RunCreation(agent_id=agent_id)
 
-    api_client = ApiClient(Configuration(retries=2, api_key="bogus"))
+    api_client = ApiClient(ApiClientConfiguration(retries=2, api_key="bogus"))
     # Make sure apis return data
     def mock_call_api(
         method,
@@ -56,24 +56,24 @@ run_id: 1234-5678-90123
     monkeypatch.setattr(api_client, "response_deserialize", mock_response_deserialize)
     client = ACPClient(api_client)
 
-    response = client.create_run(run_create=run_create)
+    response = client.create_stateless_run(run_create_stateless=RunCreateStateless(agent_id=agent_id))
     assert response is not None
     run_id = response.run_id
 
-    response = client.get_run(run_id)
+    response = client.get_stateless_run(run_id)
     assert response is not None
 
-    response = client.get_run_output(run_id)
+    response = client.wait_for_stateless_run_output(run_id)
     assert response is not None
 
-    response = client.get_run_stream(run_id)
+    response = client.stream_stateless_run_output(run_id)
     assert response is not None
 
-    response = client.resume_run(run_id, {})
+    response = client.resume_stateless_run(run_id, {})
     assert response is not None
 
-    response = client.search_runs(RunSearchRequest(agent_id=agent_id))
+    response = client.search_stateless_runs(RunSearchRequest(agent_id=agent_id))
     assert response is not None
 
-    response = client.delete_run(run_id)
+    response = client.delete_stateless_run(run_id)
     assert response is not None

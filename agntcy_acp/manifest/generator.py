@@ -5,6 +5,7 @@ import tempfile
 
 from ..models import AgentACPDescriptor, StreamingMode, AgentMetadata, AgentACPSpec, AgentCapabilities
 import yaml
+from typing import Optional
 from openapi_spec_validator import validate
 from openapi_spec_validator.readers import read_from_filename
 import datamodel_code_generator
@@ -14,7 +15,6 @@ import subprocess
 import shutil
 from ..exceptions import ACPDescriptorValidationException
 
-ACP_SPEC_PATH = os.getenv("ACP_SPEC_PATH", "acp-spec/openapi.yaml")
 CLIENT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "scripts/create_acp_client.sh")
 
 
@@ -30,10 +30,9 @@ def _gen_oas_thread_runs(descriptor: AgentACPDescriptor, spec_dict):
         if descriptor.specs.thread_state:
             spec_dict['components']['schemas']["ThreadStateSchema"] = _convert_descriptor_schema("ThreadStateSchema",
                                                                                                  descriptor.specs.thread_state)
-        else:
-            # No thread schema defined, hence no support to retrieve thread state
-            del spec_dict['paths']['/threads/{thread_id}/state']
-            del spec_dict['paths']['/runs/{run_id}/threadstate']
+        #else:
+        #    # No thread schema defined, hence no support to retrieve thread state
+        #    del spec_dict['paths']['/threads/{thread_id}/state']
     else:
         # Threads are not enabled
         if descriptor.specs.thread_state:
@@ -42,12 +41,11 @@ def _gen_oas_thread_runs(descriptor: AgentACPDescriptor, spec_dict):
         else:
             # Remove all threads paths
             spec_dict['tags'] = [tag for tag in spec_dict['tags'] if tag['name'] != 'Threads']
-            del spec_dict['paths']['/threads']
-            del spec_dict['paths']['/threads/search']
-            del spec_dict['paths']['/threads/{thread_id}']
-            del spec_dict['paths']['/threads/{thread_id}/history']
-            del spec_dict['paths']['/threads/{thread_id}/state']
-            del spec_dict['paths']['/runs/{run_id}/threadstate']
+            spec_dict['paths'] = {
+                k: v
+                for k, v in spec_dict['paths'].items()
+                if not k.startswith('/threads')
+            }
 
 
 def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
@@ -122,7 +120,7 @@ def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
     streaming_modes = []
     if descriptor.specs.capabilities.streaming:
         if descriptor.specs.capabilities.streaming.custom: streaming_modes.append(StreamingMode.CUSTOM)
-        if descriptor.specs.capabilities.streaming.result: streaming_modes.append(StreamingMode.RESULT)
+        if descriptor.specs.capabilities.streaming.values: streaming_modes.append(StreamingMode.VALUES)
 
     # Perform the checks for custom_streaming_update
     if StreamingMode.CUSTOM not in streaming_modes and descriptor.specs.custom_streaming_update:
@@ -137,7 +135,7 @@ def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
         # No streaming is supported. Removing streaming method.
         del spec_dict['paths']['/runs/{run_id}/stream']
         # Removing streaming option from RunCreate
-        del spec_dict['components']['schemas']['RunCreate']['properties']['streaming']
+        del spec_dict['components']['schemas']['RunCreate']['properties']['stream_mode']
         return
 
     if len(streaming_modes) == 2:
@@ -153,7 +151,7 @@ def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
         spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping'][
             supported_mode]
     del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['oneOf']
-    del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']['mapping']
+    del spec_dict['components']['schemas']['RunOutputStream']['properties']['data']['discriminator']
 
 
 def _gen_oas_callback(descriptor: AgentACPDescriptor, spec_dict):
@@ -181,12 +179,16 @@ def generate_agent_oapi_for_schemas(specs: AgentACPSpec):
                                                                                     specs.output)
     spec_dict['components']['schemas']["ConfigSchema"] = _convert_descriptor_schema("ConfigSchema",
                                                                                     specs.config)
+    
     validate(spec_dict)
     return spec_dict
 
 
-def generate_agent_oapi(descriptor: AgentACPDescriptor):
-    spec_dict, base_uri = read_from_filename(ACP_SPEC_PATH)
+def generate_agent_oapi(descriptor: AgentACPDescriptor, spec_path: Optional[str] = None):
+    if spec_path is None:
+        spec_path = os.getenv("ACP_SPEC_PATH", "acp-spec/openapi.json")
+    
+    spec_dict, base_uri = read_from_filename(spec_path)
 
     # If no exception is raised by validate(), the spec is valid.
     validate(spec_dict)

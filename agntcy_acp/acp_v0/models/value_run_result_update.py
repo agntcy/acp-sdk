@@ -33,7 +33,7 @@ class ValueRunResultUpdate(BaseModel):
     type: StrictStr
     run_id: StrictStr = Field(description="The ID of the run.")
     status: RunStatus = Field(description="Status of the Run when this result was generated. This is particurarly useful when this data structure is used for streaming results. As the server can indicate an interrupt or an error condition while streaming the result.")
-    values: Optional[Dict[str, Any]] = Field(default=None, description="The output of the agent. The schema is described in agent ACP descriptor under 'spec.output'.")
+    values: Dict[str, Any] = Field(description="The output of the agent. The schema is described in agent ACP descriptor under 'spec.output'.")
     messages: Optional[List[Message]] = Field(default=None, description="Stream of messages returned by the run.")
     __properties: ClassVar[List[str]] = ["type", "run_id", "status", "values", "messages"]
 
