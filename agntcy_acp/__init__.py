@@ -4,11 +4,13 @@ import json
 from os import getenv
 from typing import Optional, Any, Dict, Union
 
-from .acp_v0.sync_client import ApiClient, AgentsApi, RunsApi, ThreadsApi
-from .acp_v0.async_client import AgentsApi as AsyncAgentsApi
-from .acp_v0.async_client import RunsApi as AsyncRunsApi
-from .acp_v0.async_client import ThreadsApi as AsyncThreadsApi
-from .acp_v0.async_client import ApiClient as AsyncApiClient
+from .acp_v0.sync_client.api_client import ApiClient
+from .acp_v0.sync_client.api import AgentsApi, ThreadsApi, StatelessRunsApi, ThreadRunsApi
+from .acp_v0.async_client.api import AgentsApi as AsyncAgentsApi
+from .acp_v0.async_client.api import StatelessRunsApi as AsyncStatelessRunsApi
+from .acp_v0.async_client.api import ThreadsApi as AsyncThreadsApi
+from .acp_v0.async_client.api import ThreadRunsApi as AsyncThreadRunsApi
+from .acp_v0.async_client.api_client import ApiClient as AsyncApiClient
 from .acp_v0 import ApiResponse
 from .acp_v0 import Configuration
 from .acp_v0.configuration import ServerVariablesT
@@ -28,13 +30,13 @@ from agntcy_acp.acp_v0.exceptions import (
     ApiException,
 )
 
-class ACPClient(AgentsApi, RunsApi, ThreadsApi):
+class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
     """Client for ACP API.
     """
     def __init__(self, api_client: Optional[ApiClient] = None):
         super().__init__(api_client)
 
-class AsyncACPClient(AsyncAgentsApi, AsyncRunsApi, AsyncThreadsApi):
+class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, AsyncThreadRunsApi):
     """Async client for ACP API.
     """
     def __init__(self, api_client: Optional[AsyncApiClient] = None):

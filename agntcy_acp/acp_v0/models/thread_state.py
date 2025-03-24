@@ -19,19 +19,22 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
-from agntcy_acp.acp_v0.models.agent_ref import AgentRef
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Any, ClassVar, Dict, List, Optional
+from agntcy_acp.acp_v0.models.message import Message
+from agntcy_acp.acp_v0.models.thread_checkpoint import ThreadCheckpoint
 from typing import Optional, Set
 from typing_extensions import Self
 
-class AgentMetadata(BaseModel):
+class ThreadState(BaseModel):
     """
-    Basic information associated to the agent
+    ThreadState
     """ # noqa: E501
-    ref: AgentRef
-    description: StrictStr = Field(description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect")
-    __properties: ClassVar[List[str]] = ["ref", "description"]
+    checkpoint: ThreadCheckpoint = Field(description="The identifier for this checkpoint.")
+    values: Dict[str, Any] = Field(description="The thread state. The schema is described in agent ACP descriptor under 'spec.thread_state'.")
+    messages: Optional[List[Message]] = Field(default=None, description="The current messages of the thread. If messages are contained in Thread.values, implementations should remove them from values when returning messages. When this key isn't present it means the thread/agent doesn't support messages.")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="The checkpoint metadata.")
+    __properties: ClassVar[List[str]] = ["checkpoint", "values", "messages", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,7 +54,7 @@ class AgentMetadata(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a JSON string"""
+        """Create an instance of ThreadState from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -72,14 +75,21 @@ class AgentMetadata(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of ref
-        if self.ref:
-            _dict['ref'] = self.ref.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of checkpoint
+        if self.checkpoint:
+            _dict['checkpoint'] = self.checkpoint.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in messages (list)
+        _items = []
+        if self.messages:
+            for _item_messages in self.messages:
+                if _item_messages:
+                    _items.append(_item_messages.to_dict())
+            _dict['messages'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a dict"""
+        """Create an instance of ThreadState from a dict"""
         if obj is None:
             return None
 
@@ -87,8 +97,10 @@ class AgentMetadata(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "ref": AgentRef.from_dict(obj["ref"]) if obj.get("ref") is not None else None,
-            "description": obj.get("description")
+            "checkpoint": ThreadCheckpoint.from_dict(obj["checkpoint"]) if obj.get("checkpoint") is not None else None,
+            "values": obj.get("values"),
+            "messages": [Message.from_dict(_item) for _item in obj["messages"]] if obj.get("messages") is not None else None,
+            "metadata": obj.get("metadata")
         })
         return _obj
 
