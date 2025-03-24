@@ -19,19 +19,30 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
-from agntcy_acp.acp_v0.models.agent_ref import AgentRef
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
+from agntcy_acp.acp_v0.models.message import Message
+from agntcy_acp.acp_v0.models.run_status import RunStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
-class AgentMetadata(BaseModel):
+class ValueRunResultUpdate(BaseModel):
     """
-    Basic information associated to the agent
+    Partial result provided as value through streaming.
     """ # noqa: E501
-    ref: AgentRef
-    description: StrictStr = Field(description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect")
-    __properties: ClassVar[List[str]] = ["ref", "description"]
+    type: StrictStr
+    run_id: StrictStr = Field(description="The ID of the run.")
+    status: RunStatus = Field(description="Status of the Run when this result was generated. This is particurarly useful when this data structure is used for streaming results. As the server can indicate an interrupt or an error condition while streaming the result.")
+    values: Optional[Dict[str, Any]] = Field(default=None, description="The output of the agent. The schema is described in agent ACP descriptor under 'spec.output'.")
+    messages: Optional[List[Message]] = Field(default=None, description="Stream of messages returned by the run.")
+    __properties: ClassVar[List[str]] = ["type", "run_id", "status", "values", "messages"]
+
+    @field_validator('type')
+    def type_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['values']):
+            raise ValueError("must be one of enum values ('values')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,7 +62,7 @@ class AgentMetadata(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a JSON string"""
+        """Create an instance of ValueRunResultUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -72,14 +83,18 @@ class AgentMetadata(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of ref
-        if self.ref:
-            _dict['ref'] = self.ref.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in messages (list)
+        _items = []
+        if self.messages:
+            for _item_messages in self.messages:
+                if _item_messages:
+                    _items.append(_item_messages.to_dict())
+            _dict['messages'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a dict"""
+        """Create an instance of ValueRunResultUpdate from a dict"""
         if obj is None:
             return None
 
@@ -87,8 +102,11 @@ class AgentMetadata(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "ref": AgentRef.from_dict(obj["ref"]) if obj.get("ref") is not None else None,
-            "description": obj.get("description")
+            "type": obj.get("type"),
+            "run_id": obj.get("run_id"),
+            "status": obj.get("status"),
+            "values": obj.get("values"),
+            "messages": [Message.from_dict(_item) for _item in obj["messages"]] if obj.get("messages") is not None else None
         })
         return _obj
 

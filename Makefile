@@ -11,7 +11,7 @@ install:
 ACP_SPEC_DIR=acp-spec
 ACP_CLIENT_DIR:=acp-sync-client-generated
 ACP_SUBPACKAGE_PREFIX=acp_v
-ACP_SPEC_FILE:=$(ACP_SPEC_DIR)/openapi.yaml
+ACP_SPEC_FILE:=$(ACP_SPEC_DIR)/openapi.json
 GEN_ACP_SYNC_PACKAGE_PREFIX:=acp_client_v
 SDK_ACP_SYNC_PACKAGE_NAME:=sync_client
 
@@ -21,7 +21,7 @@ $(ACP_SPEC_FILE):
 # Generate client and correct models for convenience.
 generate_acp_client $(ACP_CLIENT_DIR)/README.md : $(ACP_SPEC_FILE)
 	export SPEC_FILE="$(ACP_SPEC_FILE)" ; \
-	export SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' "$${SPEC_FILE}") ; \
+	SPEC_VERSION=$$(jq -r '.info.version | capture("(?<version>\\d+)\\.\\d+"; "") | .version' "$${SPEC_FILE}") ; \
 	export CLIENT_DIR="$(ACP_CLIENT_DIR)" ; \
 	export GEN_PACKAGE_NAME="$(GEN_ACP_SYNC_PACKAGE_PREFIX)$${SPEC_VERSION}" ; \
 	export SDK_SUBPACKAGE_NAME="agntcy_acp.$(ACP_SUBPACKAGE_PREFIX)$${SPEC_VERSION}" ; \
@@ -42,7 +42,7 @@ SDK_ACP_ASYNC_PACKAGE_NAME:=async_client
 
 generate_acp_async_client $(ACP_ASYNC_CLIENT_DIR)/README.md : $(ACP_SPEC_FILE)
 	export SPEC_FILE="$(ACP_SPEC_FILE)" ; \
-	export SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' "$${SPEC_FILE}") ; \
+	SPEC_VERSION=$$(jq -r '.info.version | capture("(?<version>\\d+)\\.\\d+"; "") | .version' "$${SPEC_FILE}") ; \
 	export CLIENT_DIR="$(ACP_ASYNC_CLIENT_DIR)" ; \
 	export GEN_PACKAGE_NAME="$(GEN_ACP_ASYNC_PACKAGE_PREFIX)$${SPEC_VERSION}" ; \
 	export SDK_SUBPACKAGE_NAME="agntcy_acp.$(ACP_SUBPACKAGE_PREFIX)$${SPEC_VERSION}" ; \
@@ -79,7 +79,7 @@ generate_manifest_models: $(AGNT_WKFW_SPEC_FILE)
 	echo MINOR_VERSION="\""$$(yq '.info.version | sub("\d+\.", "")' "$(AGNT_WKFW_SPEC_FILE)")"\"" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py"
 
 update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/README.md
-	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' $(ACP_SPEC_FILE)) ; \
+	ACP_SPEC_VERSION=$$(jq -r '.info.version | capture("(?<version>\\d+)\\.\\d+"; "") | .version' $(ACP_SPEC_FILE)) ; \
 	ACP_CLIENT_PACKAGE_DIR="$(ACP_CLIENT_DIR)/$(GEN_ACP_SYNC_PACKAGE_PREFIX)$${ACP_SPEC_VERSION}" ; \
 	ACP_ASYNC_CLIENT_PACKAGE_DIR="$(ACP_ASYNC_CLIENT_DIR)/$(GEN_ACP_ASYNC_PACKAGE_PREFIX)$${ACP_SPEC_VERSION}" ; \
 	cp -pR "$${ACP_CLIENT_PACKAGE_DIR}/__init__.py" \
@@ -96,7 +96,7 @@ update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/RE
 	cp -pR "$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/api" \
 		"$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/api_client.py" \
 		"$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/rest.py" \
-		"agntcy_acp/$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}/$(SDK_ACP_ASYNC_PACKAGE_NAME)/" && \
+		"agntcy_acp/$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}/$(SDK_ACP_ASYNC_PACKAGE_NAME)/"
 
 update_docs: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/README.md
 	cp -p "$(ACP_CLIENT_DIR)"/docs/*.md docs/models/ && \

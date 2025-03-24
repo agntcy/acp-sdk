@@ -19,36 +19,30 @@ import json
 import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
 from typing import Any, List, Optional
-from agntcy_acp.acp_v0.models.run_error import RunError
-from agntcy_acp.acp_v0.models.run_interrupt import RunInterrupt
-from agntcy_acp.acp_v0.models.run_result import RunResult
+from agntcy_acp.acp_v0.models.run_create_stateful import RunCreateStateful
+from agntcy_acp.acp_v0.models.run_create_stateless import RunCreateStateless
 from pydantic import StrictStr, Field
 from typing import Union, List, Set, Optional, Dict
 from typing_extensions import Literal, Self
 
-RUNOUTPUT_ONE_OF_SCHEMAS = ["RunError", "RunInterrupt", "RunResult"]
+RUNCREATION_ONE_OF_SCHEMAS = ["RunCreateStateful", "RunCreateStateless"]
 
-class RunOutput(BaseModel):
+class RunCreation(BaseModel):
     """
-    Output of a Run. Can be the final result or an interrupt.
+    RunCreation
     """
-    # data type: RunResult
-    oneof_schema_1_validator: Optional[RunResult] = None
-    # data type: RunInterrupt
-    oneof_schema_2_validator: Optional[RunInterrupt] = None
-    # data type: RunError
-    oneof_schema_3_validator: Optional[RunError] = None
-    actual_instance: Optional[Union[RunError, RunInterrupt, RunResult]] = None
-    one_of_schemas: Set[str] = { "RunError", "RunInterrupt", "RunResult" }
+    # data type: RunCreateStateful
+    oneof_schema_1_validator: Optional[RunCreateStateful] = None
+    # data type: RunCreateStateless
+    oneof_schema_2_validator: Optional[RunCreateStateless] = None
+    actual_instance: Optional[Union[RunCreateStateful, RunCreateStateless]] = None
+    one_of_schemas: Set[str] = { "RunCreateStateful", "RunCreateStateless" }
 
     model_config = ConfigDict(
         validate_assignment=True,
         protected_namespaces=(),
     )
 
-
-    discriminator_value_class_map: Dict[str, str] = {
-    }
 
     def __init__(self, *args, **kwargs) -> None:
         if args:
@@ -62,30 +56,25 @@ class RunOutput(BaseModel):
 
     @field_validator('actual_instance')
     def actual_instance_must_validate_oneof(cls, v):
-        instance = RunOutput.model_construct()
+        instance = RunCreation.model_construct()
         error_messages = []
         match = 0
-        # validate data type: RunResult
-        if not isinstance(v, RunResult):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `RunResult`")
+        # validate data type: RunCreateStateful
+        if not isinstance(v, RunCreateStateful):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `RunCreateStateful`")
         else:
             match += 1
-        # validate data type: RunInterrupt
-        if not isinstance(v, RunInterrupt):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `RunInterrupt`")
-        else:
-            match += 1
-        # validate data type: RunError
-        if not isinstance(v, RunError):
-            error_messages.append(f"Error! Input type `{type(v)}` is not `RunError`")
+        # validate data type: RunCreateStateless
+        if not isinstance(v, RunCreateStateless):
+            error_messages.append(f"Error! Input type `{type(v)}` is not `RunCreateStateless`")
         else:
             match += 1
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when setting `actual_instance` in RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when setting `actual_instance` in RunCreation with oneOf schemas: RunCreateStateful, RunCreateStateless. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when setting `actual_instance` in RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when setting `actual_instance` in RunCreation with oneOf schemas: RunCreateStateful, RunCreateStateless. Details: " + ", ".join(error_messages))
         else:
             return v
 
@@ -100,31 +89,25 @@ class RunOutput(BaseModel):
         error_messages = []
         match = 0
 
-        # deserialize data into RunResult
+        # deserialize data into RunCreateStateful
         try:
-            instance.actual_instance = RunResult.from_json(json_str)
+            instance.actual_instance = RunCreateStateful.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
-        # deserialize data into RunInterrupt
+        # deserialize data into RunCreateStateless
         try:
-            instance.actual_instance = RunInterrupt.from_json(json_str)
-            match += 1
-        except (ValidationError, ValueError) as e:
-            error_messages.append(str(e))
-        # deserialize data into RunError
-        try:
-            instance.actual_instance = RunError.from_json(json_str)
+            instance.actual_instance = RunCreateStateless.from_json(json_str)
             match += 1
         except (ValidationError, ValueError) as e:
             error_messages.append(str(e))
 
         if match > 1:
             # more than 1 match
-            raise ValueError("Multiple matches found when deserializing the JSON string into RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("Multiple matches found when deserializing the JSON string into RunCreation with oneOf schemas: RunCreateStateful, RunCreateStateless. Details: " + ", ".join(error_messages))
         elif match == 0:
             # no match
-            raise ValueError("No match found when deserializing the JSON string into RunOutput with oneOf schemas: RunError, RunInterrupt, RunResult. Details: " + ", ".join(error_messages))
+            raise ValueError("No match found when deserializing the JSON string into RunCreation with oneOf schemas: RunCreateStateful, RunCreateStateless. Details: " + ", ".join(error_messages))
         else:
             return instance
 
@@ -138,7 +121,7 @@ class RunOutput(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
-    def to_dict(self) -> Optional[Union[Dict[str, Any], RunError, RunInterrupt, RunResult]]:
+    def to_dict(self) -> Optional[Union[Dict[str, Any], RunCreateStateful, RunCreateStateless]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
             return None

@@ -19,19 +19,20 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
-from agntcy_acp.acp_v0.models.agent_ref import AgentRef
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Any, ClassVar, Dict, List, Optional
+from agntcy_acp.acp_v0.models.run import Run
+from agntcy_acp.acp_v0.models.run_output import RunOutput
 from typing import Optional, Set
 from typing_extensions import Self
 
-class AgentMetadata(BaseModel):
+class RunWaitResponse(BaseModel):
     """
-    Basic information associated to the agent
+    RunWaitResponse
     """ # noqa: E501
-    ref: AgentRef
-    description: StrictStr = Field(description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect")
-    __properties: ClassVar[List[str]] = ["ref", "description"]
+    run: Optional[Run] = Field(default=None, description="The run information.")
+    output: Optional[RunOutput] = None
+    __properties: ClassVar[List[str]] = ["run", "output"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,7 +52,7 @@ class AgentMetadata(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a JSON string"""
+        """Create an instance of RunWaitResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -72,14 +73,17 @@ class AgentMetadata(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of ref
-        if self.ref:
-            _dict['ref'] = self.ref.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of run
+        if self.run:
+            _dict['run'] = self.run.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of output
+        if self.output:
+            _dict['output'] = self.output.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of AgentMetadata from a dict"""
+        """Create an instance of RunWaitResponse from a dict"""
         if obj is None:
             return None
 
@@ -87,8 +91,8 @@ class AgentMetadata(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "ref": AgentRef.from_dict(obj["ref"]) if obj.get("ref") is not None else None,
-            "description": obj.get("description")
+            "run": Run.from_dict(obj["run"]) if obj.get("run") is not None else None,
+            "output": RunOutput.from_dict(obj["output"]) if obj.get("output") is not None else None
         })
         return _obj
 
