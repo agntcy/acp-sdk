@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import datetime
 import io
-from agntcy_acp import ACPClient, ApiResponse, Configuration, ApiClient
+from agntcy_acp import ACPClient, ApiResponse, ApiClientConfiguration, ApiClient
 from agntcy_acp.models import RunCreate, RunSearchRequest, Run, RunStatus
 
 class RESTResponse(io.IOBase):
@@ -27,7 +27,7 @@ def test_acp_client_runs_api(monkeypatch):
     init_run_id = "bugus-run-id"
     run_create = RunCreate(agent_id=agent_id)
 
-    api_client = ApiClient(Configuration(retries=2, api_key="bogus"))
+    api_client = ApiClient(ApiClientConfiguration(retries=2, api_key="bogus"))
     # Make sure apis return data
     def mock_call_api(
         method,
