@@ -1,7 +1,7 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
@@ -11,7 +11,15 @@ from agntcy_acp import (
     ApiClient,
     AsyncACPClient,
     AsyncApiClient,
-    Configuration,
+    ApiClientConfiguration,
+)
+from agntcy_acp.models import (
+    RunCreateStateless, 
+    Run, 
+    RunResult, 
+    RunOutput, 
+    RunError, 
+    RunWaitResponse,
 )
 from agntcy_acp.exceptions import ACPRunException
 from agntcy_acp.models import Run, RunCreate, RunError, RunOutput, RunResult
@@ -47,14 +55,14 @@ class ACPNode:
         self,
         name: str,
         agent_id: str,
-        client_config: Configuration,
+        client_config: ApiClientConfiguration,
         input_path: str,
         input_type,
         output_path: str,
         output_type,
-        config_path: str = None,
+        config_path: Optional[str] = None,
         config_type=None,
-        auth_header: dict = None,
+        auth_header: Optional[dict] = None,
     ):
         """Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -111,11 +119,11 @@ class ACPNode:
             self.outputType.model_validate(output),
         )
 
-    def _prepare_run_create(self, state: Any, config: RunnableConfig):
+    def _prepare_run_create(self, state: Any, config: RunnableConfig) -> RunCreateStateless:
         agent_input = self._extract_input(state)
         agent_config = self._extract_config(config)
 
-        run_create = RunCreate(
+        run_create = RunCreateStateless(
             agent_id=self.agent_id,
             input=agent_input.model_dump(),
             config=agent_config.model_dump() if agent_config else {},
@@ -138,37 +146,20 @@ class ACPNode:
         return state
 
     def invoke(self, state: Any, config: RunnableConfig) -> Any:
-
         run_create = self._prepare_run_create(state, config)
-
-        api_client = (
-            ApiClient(
-                configuration=self.clientConfig,
-                header_name=self.auth_header["name"],
-                header_value=self.auth_header["value"],
-            ),
-        )
-        acp_client = ACPClient(api_client=api_client)
-        run: Run = acp_client.create_run(run_create)
-        run_output = acp_client.get_run_output(run_id=run.run_id, block_timeout=120)
-
-        return self._handle_run_output(state, run_output)
+        with ApiClient(configuration=self.clientConfig) as api_client:
+            acp_client = ACPClient(api_client=api_client)
+            run_output: RunWaitResponse = acp_client.create_and_wait_for_stateless_run_output(run_create)
+        
+        return self._set_output(state, run_output.output)
 
     async def ainvoke(self, state: Any, config: RunnableConfig) -> Any:
         run_create = self._prepare_run_create(state, config)
-        api_client = AsyncApiClient(
-            configuration=self.clientConfig,
-            header_name=self.auth_header["name"],
-            header_value=self.auth_header["value"],
-        )
-        acp_client = AsyncACPClient(api_client=api_client)
-
-        run: Run = await acp_client.create_run(run_create)
-        run_output = await acp_client.get_run_output(
-            run_id=run.run_id, block_timeout=120
-        )
-
-        return self._handle_run_output(state, run_output)
+        async with AsyncApiClient(configuration=self.clientConfig) as api_client:
+            acp_client = AsyncACPClient(api_client=api_client)
+            run_output: RunWaitResponse = await acp_client.create_and_wait_for_stateless_run_output(run_create)
+        
+        return self._set_output(state, run_output.output)
 
     def __call__(self, state, config):
         return RunnableCallable(self.invoke, self.ainvoke)
