@@ -18,13 +18,22 @@ from .acp_v0.spec_version import MINOR_VERSION as ACP_MINOR_VERSION
 from .agws_v0.spec_version import VERSION as AGWS_VERSION
 from .agws_v0.spec_version import MAJOR_VERSION as AGWS_MAJOR_VERSION
 from .agws_v0.spec_version import MINOR_VERSION as AGWS_MINOR_VERSION
+from .exceptions import ACPDescriptorValidationException, ACPRunException
+from agntcy_acp.acp_v0.exceptions import (
+    OpenApiException, 
+    ApiTypeError,
+    ApiValueError,
+    ApiKeyError,
+    ApiAttributeError,
+    ApiException,
+)
 
 class ACPClient(AgentsApi, RunsApi, ThreadsApi):
-    def __init__(self, api_client: ApiClient | None = None):
+    def __init__(self, api_client: Optional[ApiClient] = None):
         super().__init__(api_client)
 
 class AsyncACPClient(AsyncAgentsApi, AsyncRunsApi, AsyncThreadsApi):
-    def __init__(self, api_client: AsyncApiClient | None = None):
+    def __init__(self, api_client: Optional[AsyncApiClient] = None):
         super().__init__(api_client)
 
 __ENV_VAR_SPECIAL_CHAR_TABLE = str.maketrans("-.", "__")
@@ -135,6 +144,14 @@ __all__ = [
     "AsyncACPClient",
     "ApiClientConfiguration",
     "ApiResponse",
+    "ACPDescriptorValidationException",
+    "ACPRunException",
+    "OpenApiException", 
+    "ApiTypeError",
+    "ApiValueError",
+    "ApiKeyError",
+    "ApiAttributeError",
+    "ApiException",
     "ACP_VERSION",
     "ACP_MAJOR_VERSION",
     "ACP_MINOR_VERSION",
