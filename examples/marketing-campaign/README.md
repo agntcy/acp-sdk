@@ -4,11 +4,11 @@ The **Marketing Campaign Manager** is a demonstration AI application developed w
 
 ## Features
 
-* It gathers necessary campaign details from the user through a chat.
-* Compose an email leveraging the [Email Composer Agent](../mailcomposer/) as a remote ACP agent.
-* It leverages the [IO Mapper Agent](https://github.com/agntcy/iomapper-agnt) to adapt Email Composer Agent output to Email Reviewer Agent.
-* Reviews the email leveraging the [Email Reviewer Agent](../email_reviewer/) as a remote ACP agent.
-* Send the email to the configured recipient through Twilio sendgrid leveraging the [API Bridge Agent](https://github.com/agntcy/api-bridge-agnt)
+- It gathers necessary campaign details from the user through a chat.
+- Compose an email leveraging the [Email Composer Agent](../mailcomposer/) as a remote ACP agent.
+- It leverages the [IO Mapper Agent](https://github.com/agntcy/iomapper-agnt) to adapt Email Composer Agent output to Email Reviewer Agent.
+- Reviews the email leveraging the [Email Reviewer Agent](../email_reviewer/) as a remote ACP agent.
+- Send the email to the configured recipient through Twilio sendgrid leveraging the [API Bridge Agent](https://github.com/agntcy/api-bridge-agnt)
 
 ---
 
@@ -17,6 +17,7 @@ The **Marketing Campaign Manager** is a demonstration AI application developed w
 Before running the application, ensure you have the following:
 
 ### Tools and Dependencies
+
 - [Python 3.9 or higher](https://www.python.org/downloads/)
 - [Poetry](https://python-poetry.org/docs/#installation)
 - [Golang](https://go.dev/doc/install)
@@ -72,6 +73,7 @@ make build
 Add the `wfsm` executable to your system's PATH:
 
 #### For macOS:
+
 ```sh
 cd build
 chmod +x wfsm
@@ -80,6 +82,7 @@ source ~/.zshrc
 ```
 
 #### For Linux:
+
 ```sh
 cd build
 chmod +x wfsm
@@ -127,6 +130,7 @@ curl http://localhost:8080/tyk/reload/group \
 ## Running the Marketing Campaign Manager
 
 The Marketing Campaign Manager application can be run in two ways:
+
 1. Using the **ACP client**.
 2. Using **LangGraph** directly.
 
@@ -181,16 +185,19 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
 
 2. **Start the Workflow Server**:
    Run the following command to deploy the Marketing Campaign workflow server:
+
    ```sh
    wfsm deploy -m ./deploy/marketing-campaign.json -e ./deploy/marketing_campaign_example.yaml -b workflowserver:latest
    ```
 
    If everything is set up correctly, the application will start, and the logs will display:
+
    - **Agent ID**
    - **API Key**
    - **Host**
 
    Example log output:
+
    ```plaintext
    2025-03-28T12:31:04+01:00 INF ---------------------------------------------------------------------
    2025-03-28T12:31:04+01:00 INF ACP agent deployment name: org.agntcy.marketing-campaign
@@ -202,6 +209,7 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
 
 3. **Export Environment Variables**:
    Use the information from the logs to set the following environment variables:
+
    ```sh
    export MARKETING_CAMPAIGN_HOST="http://localhost:62609"
    export MARKETING_CAMPAIGN_ID="eae32ada-aaf8-408c-bf0c-7654455ce6e3"
@@ -214,11 +222,13 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
 
 4. **Run the Application**:
    Start the Marketing Campaign Manager application using the ACP client:
+
    ```sh
    poetry run python src/marketing_campaign/main_acp_client.py
    ```
 
    Interact with the application via ACP Client to compose and review emails. Once approved, the email will be sent to the recipient via SendGrid.
+
 ---
 
 ### Method 2: Using LangGraph
@@ -231,14 +241,17 @@ This script is primarily intended for development and debugging purposes, allowi
 
 1. **Start Workflow Servers for Dependencies**:
    Manually start the workflow servers for the **MailComposer** and **EmailReviewer** agents in separate terminals:
+
    ```sh
    wfsm deploy -m ../mailcomposer/deploy/mailcomposer.json -e ../mailcomposer/deploy/mailcomposer_example.yaml -b workflowserver:latest
    ```
+
    ```sh
    wfsm deploy -m ../email_reviewer/deploy/email_reviewer.json -e ../email_reviewer/deploy/email_reviewer_example.yaml -b workflowserver:latest
    ```
 
    The logs will display the **Agent ID**, **API Key**, and **Host** for each agent. Use this information to set the following environment variables:
+
    ```sh
    export MAILCOMPOSER_HOST="http://localhost:<port>"
    export MAILCOMPOSER_ID="<mailcomposer-agent-id>"
@@ -249,8 +262,9 @@ This script is primarily intended for development and debugging purposes, allowi
    export EMAIL_REVIEWER_API_KEY='{"x-api-key": "<email-reviewer-api-key>"}'
    ```
 
-2. **Export Additional Environment Variables**:
+2. **Export Additional Environment Variables**
    Set the following environment variables:
+
    ```sh
    export API_HOST=0.0.0.0
    export SENDGRID_API_KEY=SG.your_secret
@@ -264,25 +278,104 @@ This script is primarily intended for development and debugging purposes, allowi
 
 3. **Run the Application**:
    Start the Marketing Campaign Manager application using LangGraph:
+
    ```sh
    poetry run python src/marketing_campaign/main_langgraph.py
    ```
 
-   Interact by invoking the langgraph application to compose and review emails. Once approved, the email will be sent to the recipient via SendGrid.
+   Interact by invoking the LangGraph application to compose and review emails. Once approved, the email will be sent to the recipient via SendGrid.
 
----
+````
 
 ### Additional Configuration
 
 In both scripts [main_acp_client.py](./src/marketing_campaign/main_acp_client.py) and [main_langgraph.py](./src/marketing_campaign/main_langgraph.py), you can customize the target audience for the campaign by modifying the `target_audience` parameter `target_audience=TargetAudience.academic`. Available options are:
+
 - `general`
 - `technical`
 - `business`
 - `academic`
 
 Example:
+
 ```python
 target_audience = TargetAudience.business
+````
+
+---
+
+### Method 3: Using UI
+
+This method provides an alternative way to interact with the Marketing Campaign application by using a ui build with [Gradio](https://www.gradio.app/).
+
+#### Steps:
+
+1. Adapt the file home.py under examples/marketing_campaign/ui change the paths to Workflow server and Workflow server manager
+
+```python
+PATH_TO_WFS
+PATH_TO_WFSM
+```
+
+Set the email details
+
+```python
+os.environ["RECIPIENT_EMAIL_ADDRESS"] = ""
+os.environ["SENDER_EMAIL_ADDRESS"] = ""
+```
+
+2. **Configure the Agents**:
+   Before starting the workflow server, provide the necessary configurations for the agents. Open the `./deploy/marketing_campaign_example.yaml` file located in the `deploy` folder and update the following values with your configuration:
+
+   ```yaml
+   values:
+     AZURE_OPENAI_API_KEY: your_secret
+     AZURE_OPENAI_ENDPOINT: "the_url.com"
+     API_HOST: 0.0.0.0
+     SENDGRID_HOST: http://host.docker.internal:8080
+     SENDGRID_API_KEY: SG.your-api-key
+   dependencies:
+     - name: mailcomposer
+       values:
+         AZURE_OPENAI_API_KEY: your_secret
+         AZURE_OPENAI_ENDPOINT: "the_url.com"
+     - name: email_reviewer
+       values:
+         AZURE_OPENAI_API_KEY: your_secret
+         AZURE_OPENAI_ENDPOINT: "the_url.com"
+   ```
+
+3. Run the API Bridge Agent
+
+Navigate to the `api-bridge-agnt` directory and run the following commands:
+
+```sh
+export OPENAI_API_KEY=***YOUR_OPENAI_API_KEY***
+
+# Optionally, if you want to use Azure OpenAI, you also need to specify the endpoint with the OPENAI_ENDPOINT environment variable:
+export OPENAI_ENDPOINT="https://YOUR-PROJECT.openai.azure.com"
+
+make start_redis
+make start_tyk
+```
+
+Configure the API Bridge Agent:
+
+```sh
+curl http://localhost:8080/tyk/apis/oas \
+  --header "x-tyk-authorization: foo" \
+  --header 'Content-Type: text/plain' \
+  -d@configs/api.sendgrid.com.oas.json
+
+curl http://localhost:8080/tyk/reload/group \
+  --header "x-tyk-authorization: foo"
+```
+
+4.  **Run Application**:
+    From within examples/marketing-campaign folder run:
+
+```sh
+poetry run python ./src/ui/home.py
 ```
 
 ---

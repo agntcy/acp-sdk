@@ -144,7 +144,7 @@
             }
           ],
           "default": null,
-          "description": "Final email produced by the mail composer",
+          "description": "Final email produced by the mail composer, which must be in html format",
           "title": "Final Email"
         }
       },

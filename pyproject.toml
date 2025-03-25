@@ -5,10 +5,10 @@ license = "Apache-2.0"
 description = "Agent Connect Protocol SDK"
 readme = "README.md"
 authors = [
-    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
+  { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 maintainers = [
-    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
+  { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 
 [project.urls]
@@ -29,7 +29,7 @@ pydantic = ">= 2"
 typing-extensions = ">= 4.7.1"
 aiohttp = ">= 3.8.4"
 aiohttp-retry = ">= 2.8.3"
-agntcy-iomapper = { extras=["langgraph"], version="0.2.2" }
+agntcy-iomapper = { extras = ["langgraph"], version = "0.2.2" }
 langgraph = "^0.3.16"
 
 [tool.poetry.group.test.dependencies]
