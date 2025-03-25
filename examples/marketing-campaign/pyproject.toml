@@ -10,7 +10,7 @@ requires-python =  ">=3.9.0,<4.0"
 dynamic = [ "dependencies" ]
 
 [tool.poetry.dependencies]
-agntcy_acp = "v0.1.0a2.dev0"
+agntcy_acp = "v1.0.0a0.dev1"
 python-dotenv = "^1.0.1"
 langgraph = "^0.3.5"
 langchain-openai = "^0.3.8"

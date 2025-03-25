@@ -1,7 +1,8 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
-import copy
 import os
+import json
+import copy
 
 from agntcy_acp.langgraph.api_bridge import APIBridgeAgentNode, APIBridgeInput
 from agntcy_acp.langgraph.io_mapper import add_io_mapped_conditional_edge
@@ -10,7 +11,7 @@ from langgraph.graph.state import CompiledStateGraph
 from marketing_campaign import mailcomposer
 from  marketing_campaign import state
 from agntcy_acp.langgraph.acp_node import ACPNode
-from agntcy_acp.acp_v0.configuration import Configuration
+from agntcy_acp import ApiClientConfiguration
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_core.runnables import RunnableConfig
 from langchain_openai.chat_models.azure import AzureChatOpenAI
@@ -85,20 +86,10 @@ def build_graph() -> CompiledStateGraph:
         temperature=0,
     )
     # Fill in client configuration for the remote agent
-    mailcomposer_host = os.environ.get("MAILCOMPOSER_HOST", "")
-    if not mailcomposer_host.startswith("http://"):
-        mailcomposer_host = f"http://{mailcomposer_host}:8000"
-    mailcomposer_api_key = os.environ.get("MAILCOMPOSER_API_KEY", None)
     mailcomposer_agent_id = os.environ.get("MAILCOMPOSER_ID", "")
-    email_reviewer_host = os.environ.get("EMAIL_REVIEWER_HOST", "")
-    if not email_reviewer_host.startswith("http://"):
-        email_reviewer_host = f"http://{email_reviewer_host}:8000"
-    email_reviewer_api_key = os.environ.get("EMAIL_REVIEWER_API_KEY", None)
     email_reviewer_agent_id = os.environ.get("EMAIL_REVIEWER_ID", "")
     sendgrid_host = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
-
-    mailcomposer_client_config = Configuration(
-        host=mailcomposer_host)
+    mailcomposer_client_config = ApiClientConfiguration.fromEnvPrefix("MAILCOMPOSER_")
 
     # Instantiate the local ACP node for the remote agent
     acp_mailcomposer = ACPNode(
@@ -108,14 +99,10 @@ def build_graph() -> CompiledStateGraph:
         input_path="mailcomposer_state.input",
         input_type=mailcomposer.InputSchema,
         output_path="mailcomposer_state.output",
-        output_type=mailcomposer.OutputSchema,
-        auth_header={"name": "x-api-key", "value": mailcomposer_api_key}
+        output_type=mailcomposer.OutputSchema
     )
 
-    email_reviewer_config = Configuration(
-        host=email_reviewer_host
-    )
-
+    email_reviewer_config = ApiClientConfiguration.fromEnvPrefix("EMAIL_REVIEWER_")
     acp_email_reviewer = ACPNode(
         name="email_reviewer",
         agent_id=email_reviewer_agent_id,
@@ -123,8 +110,7 @@ def build_graph() -> CompiledStateGraph:
         input_path="email_reviewer_state.input",
         input_type=email_reviewer.InputSchema,
         output_path="email_reviewer_state.output",
-        output_type=email_reviewer.OutputSchema,
-        auth_header={"name": "x-api-key", "value": email_reviewer_api_key}
+        output_type=email_reviewer.OutputSchema
     )
 
     # Instantiate APIBridge Agent Node
