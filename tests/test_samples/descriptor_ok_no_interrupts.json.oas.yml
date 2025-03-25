@@ -946,11 +946,6 @@ components:
       - values
       title: Value Run Result Update
       type: object
-  securitySchemes:
-    x-api-key:
-      in: header
-      name: x-api-key
-      type: apiKey
 info:
   title: ACP Spec for org.agntcy.sample-agent-1:0.0.1
   version: 0.2.0
@@ -2074,9 +2069,6 @@ paths:
       summary: Blocks waiting for the result of the run.
       tags:
       - Thread Runs
-security:
-- {}
-- x-api-key: []
 tags:
 - description: "Agents are AI workflows that can be configured and/or executed on\
     \ this server.  This means that a client of this server can start a Run on any\

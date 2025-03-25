@@ -35,12 +35,30 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
     """
     def __init__(self, api_client: Optional[ApiClient] = None):
         super().__init__(api_client)
+        self.__workflow_server_update_api_client()
+
+    def __workflow_server_update_api_client(self):
+        if self.api_client.configuration.api_key is not None:
+            # Check for 'x-api-key' config and move to header.
+            try:
+                self.api_client.default_headers['x-api-key'] = self.api_client.configuration.api_key['x-api-key']
+            except KeyError:
+                pass # ignore
 
 class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, AsyncThreadRunsApi):
     """Async client for ACP API.
     """
     def __init__(self, api_client: Optional[AsyncApiClient] = None):
         super().__init__(api_client)
+        self.__workflow_server_update_api_client()
+    
+    def __workflow_server_update_api_client(self):
+        if self.api_client.configuration.api_key is not None:
+            # Check for 'x-api-key' config and move to header.
+            try:
+                self.api_client.default_headers['x-api-key'] = self.api_client.configuration.api_key['x-api-key']
+            except KeyError:
+                pass # ignore
 
 __ENV_VAR_SPECIAL_CHAR_TABLE = str.maketrans("-.", "__")
 
