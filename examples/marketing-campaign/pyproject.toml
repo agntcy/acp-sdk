@@ -2,12 +2,10 @@
 name = "marketing-campaign"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Alessandro Duminuco",email = "aduminuc@cisco.com"}
-]
+authors = [{ name = "Alessandro Duminuco", email = "aduminuc@cisco.com" }]
 readme = "README.md"
-requires-python =  ">=3.9.0,<4.0"
-dynamic = [ "dependencies" ]
+requires-python = ">=3.9.0,<4.0"
+dynamic = ["dependencies"]
 
 [tool.poetry.dependencies]
 python-dotenv = "^1.0.1"
@@ -18,7 +16,7 @@ agntcy-acp = "1.1.1"
 
 
 [tool.poetry]
-packages = [{include = "marketing_campaign", from = "src"}]
+packages = [{ include = "marketing_campaign", from = "src" }]
 
 
 [build-system]
