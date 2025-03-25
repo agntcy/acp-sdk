@@ -322,6 +322,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -605,6 +606,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -887,6 +889,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -1169,6 +1172,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -1435,6 +1439,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -1701,6 +1706,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -1998,6 +2004,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -2274,6 +2281,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -2541,6 +2549,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(
@@ -2807,6 +2816,7 @@ class StatelessRunsApi:
 
         # authentication setting
         _auth_settings: List[str] = [
+            'x-api-key'
         ]
 
         return self.api_client.param_serialize(

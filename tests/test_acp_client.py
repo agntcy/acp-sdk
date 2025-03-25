@@ -27,7 +27,7 @@ def test_acp_client_runs_api(monkeypatch):
     init_run_id = "bugus-run-id"
     run_create = RunCreation(agent_id=agent_id)
 
-    api_client = ApiClient(ApiClientConfiguration(retries=2, api_key="bogus"))
+    api_client = ApiClient(ApiClientConfiguration(retries=2, api_key={"x-api-key": "bogus-api-key"}))
     # Make sure apis return data
     def mock_call_api(
         method,
@@ -37,6 +37,8 @@ def test_acp_client_runs_api(monkeypatch):
         post_params=None,
         _request_timeout=None            
     ):
+        assert header_params is not None
+        assert header_params["x-api-key"] == "bogus-api-key"
         return RESTResponse(status=200, body="""
 run_id: 1234-5678-90123
 """)
