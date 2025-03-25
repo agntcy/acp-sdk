@@ -128,6 +128,9 @@ class ApiClientConfiguration(Configuration):
 
         if host is None:
             host = _get_envvar_param(prefix, "host")
+            # Workflow server uses "endpoint"
+            if host is None:
+                host = _get_envvar_param(prefix, "endpoint")
         if api_key is None:
             str_value = _get_envvar_param(prefix, "api_key")
             if str_value is not None:
