@@ -15,7 +15,7 @@ for model in agntcy_acp/acp_v0/models/[a-z]*.py ; do
     match($2, "[^(]+");
     MODEL = substr($2,RSTART,RLENGTH-RSTART+1);
     printf("\`\`%s\`\`\n", MODEL);
-    print("=================================");
+    print("***************************************");
     printf(".. autopydantic_model:: agntcy_acp.models.%s\n", MODEL);
     print("   :members:");
     print("   :undoc-members:");
@@ -25,7 +25,7 @@ for model in agntcy_acp/acp_v0/models/[a-z]*.py ; do
     match($2, "[^(]+");
     MODEL = substr($2,RSTART,RLENGTH-RSTART+1);
     printf("\`\`%s\`\`\n", MODEL);
-    print("=================================");
+    print("***************************************");
     printf(".. autoclass:: agntcy_acp.models.%s\n", MODEL);
     print("   :members:");
     print("   :undoc-members:");
