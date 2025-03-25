@@ -29,10 +29,14 @@ from agntcy_acp.acp_v0.exceptions import (
 )
 
 class ACPClient(AgentsApi, RunsApi, ThreadsApi):
+    """Client for ACP API.
+    """
     def __init__(self, api_client: Optional[ApiClient] = None):
         super().__init__(api_client)
 
 class AsyncACPClient(AsyncAgentsApi, AsyncRunsApi, AsyncThreadsApi):
+    """Async client for ACP API.
+    """
     def __init__(self, api_client: Optional[AsyncApiClient] = None):
         super().__init__(api_client)
 
@@ -43,6 +47,33 @@ def _get_envvar_param(prefix: str, varname: str) -> Optional[str]:
     return getenv(env_varname.translate(__ENV_VAR_SPECIAL_CHAR_TABLE), None)
 
 class ApiClientConfiguration(Configuration):
+    """This class contains various settings of the API client.
+
+    :param host: Base url.
+    :param api_key: Dict to store API key(s).
+      Each entry in the dict specifies an API key.
+      The dict key is the name of the security scheme in the OAS specification.
+      The dict value is the API key secret.
+    :param api_key_prefix: Dict to store API prefix (e.g. Bearer).
+      The dict key is the name of the security scheme in the OAS specification.
+      The dict value is an API key prefix when generating the auth data.
+    :param username: Username for HTTP basic authentication.
+    :param password: Password for HTTP basic authentication.
+    :param access_token: Access token.
+    :param server_variables: Mapping with string values to replace variables in
+      templated server configuration. The validation of enums is performed for
+      variables with defined enum values before.
+    :param server_operation_variables: Mapping from operation ID to a mapping with
+      string values to replace variables in templated server configuration.
+      The validation of enums is performed for variables with defined enum
+      values before.
+    :param ssl_ca_cert: str - the path to a file of concatenated CA certificates
+      in PEM format.
+    :param retries: Number of retries for API requests.
+    :param ca_cert_data: verify the peer using concatenated CA certificate data
+      in PEM (str) or DER (bytes) format.
+    :param debug: Debug switch.
+    """
     def __init__(
         self, 
         host: Optional[str]=None,
@@ -83,6 +114,16 @@ class ApiClientConfiguration(Configuration):
         *,
         debug: Optional[bool] = None,
     ) -> "ApiClientConfiguration":
+        """Construct a configuration object using environment variables as
+        default source of parameter values.
+
+        :param env_var_prefix: String used as prefix for environment variable 
+        names. For example, with env_var_prefix="MY_", the default host parameter
+        value would be looked up in the "MY_HOST" environment variable if not
+        provided.
+        :return: Configuration object
+        :rtype: ApiClientConfiguration
+        """
         prefix = env_var_prefix.upper()
 
         if host is None:

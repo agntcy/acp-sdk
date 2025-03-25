@@ -14,22 +14,18 @@ for model in agntcy_acp/acp_v0/models/[a-z]*.py ; do
 /^class/ && /BaseModel/ { 
     match($2, "[^(]+");
     MODEL = substr($2,RSTART,RLENGTH-RSTART+1);
-    printf("\`\`%s\`\`\n", MODEL);
+    printf("\n\`\`%s\`\`\n", MODEL);
     print("***************************************");
     printf(".. autopydantic_model:: agntcy_acp.models.%s\n", MODEL);
     print("   :members:");
-    print("   :undoc-members:");
-    print("   :show-inheritance:\n");
 }
 /^class/ && /Enum/ { 
     match($2, "[^(]+");
     MODEL = substr($2,RSTART,RLENGTH-RSTART+1);
-    printf("\`\`%s\`\`\n", MODEL);
+    printf("\n\`\`%s\`\`\n", MODEL);
     print("***************************************");
     printf(".. autoclass:: agntcy_acp.models.%s\n", MODEL);
     print("   :members:");
-    print("   :undoc-members:");
-    print("   :show-inheritance:\n");
 }
 EOF
 done
