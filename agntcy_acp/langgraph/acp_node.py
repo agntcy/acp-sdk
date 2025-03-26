@@ -1,7 +1,7 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import logging
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
@@ -107,7 +107,7 @@ class ACPNode:
 
         return self.configType.model_validate(config)
 
-    def _set_output(self, state: Any, output: Any):
+    def _set_output(self, state: Any, output: Dict[str, Any]):
         output_parent = state
         for el in self.outputPath.split(".")[:-1]:
             output_parent = getattr(output_parent, el)
@@ -131,8 +131,7 @@ class ACPNode:
     
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
-            run_result: RunResult = run_output.actual_instance
-            self._set_output(state, run_result.values)
+            self._set_output(state, run_output.to_dict())
         elif isinstance(run_output.actual_instance, RunError):
             run_error: RunError = run_output.actual_instance
             raise ACPRunException(f"Run Failed: {run_error}")
