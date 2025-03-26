@@ -28,6 +28,13 @@ from agntcy_acp.acp_v0.exceptions import (
     ApiKeyError,
     ApiAttributeError,
     ApiException,
+    BadRequestException,
+    NotFoundException,
+    UnauthorizedException,
+    ForbiddenException,
+    ServiceException,
+    ConflictException,
+    UnprocessableEntityException,
 )
 
 class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
@@ -93,6 +100,7 @@ class ApiClientConfiguration(Configuration):
     :param ca_cert_data: verify the peer using concatenated CA certificate data
       in PEM (str) or DER (bytes) format.
     :param debug: Debug switch.
+
     """
     def __init__(
         self, 
@@ -135,12 +143,13 @@ class ApiClientConfiguration(Configuration):
         debug: Optional[bool] = None,
     ) -> "ApiClientConfiguration":
         """Construct a configuration object using environment variables as
-        default source of parameter values.
+        default source of parameter values. For example, with env_var_prefix="MY_", 
+        the default host parameter value would be looked up in the "MY_HOST" 
+        environment variable if not provided.
 
         :param env_var_prefix: String used as prefix for environment variable 
-        names. For example, with env_var_prefix="MY_", the default host parameter
-        value would be looked up in the "MY_HOST" environment variable if not
-        provided.
+        names.
+
         :return: Configuration object
         :rtype: ApiClientConfiguration
         """
@@ -216,6 +225,13 @@ __all__ = [
     "ApiKeyError",
     "ApiAttributeError",
     "ApiException",
+    "BadRequestException",
+    "NotFoundException",
+    "UnauthorizedException",
+    "ForbiddenException",
+    "ServiceException",
+    "ConflictException",
+    "UnprocessableEntityException",
     "ACP_VERSION",
     "ACP_MAJOR_VERSION",
     "ACP_MINOR_VERSION",
