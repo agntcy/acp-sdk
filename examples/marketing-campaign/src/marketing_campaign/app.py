@@ -10,7 +10,7 @@ from langgraph.graph.state import CompiledStateGraph
 from marketing_campaign import mailcomposer
 from  marketing_campaign import state
 from agntcy_acp.langgraph.acp_node import ACPNode
-from agntcy_acp.acp_v0.configuration import Configuration
+from agntcy_acp import ApiClientConfiguration
 from langchain_core.runnables.graph import MermaidDrawMethod
 from langchain_core.runnables import RunnableConfig
 from langchain_openai.chat_models.azure import AzureChatOpenAI
@@ -97,7 +97,7 @@ def build_graph() -> CompiledStateGraph:
     email_reviewer_agent_id = os.environ.get("EMAIL_REVIEWER_ID", "")
     sendgrid_host = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
 
-    mailcomposer_client_config = Configuration(
+    mailcomposer_client_config = ApiClientConfiguration(
         host=mailcomposer_host)
 
     # Instantiate the local ACP node for the remote agent
@@ -112,7 +112,7 @@ def build_graph() -> CompiledStateGraph:
         auth_header={"name": "x-api-key", "value": mailcomposer_api_key}
     )
 
-    email_reviewer_config = Configuration(
+    email_reviewer_config = ApiClientConfiguration(
         host=email_reviewer_host
     )
 
