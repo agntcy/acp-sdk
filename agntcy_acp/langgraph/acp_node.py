@@ -132,7 +132,7 @@ class ACPNode:
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
             run_result: RunResult = run_output.actual_instance
-            self._set_output(state, run_result.result)
+            self._set_output(state, run_result.values)
         elif isinstance(run_output.actual_instance, RunError):
             run_error: RunError = run_output.actual_instance
             raise ACPRunException(f"Run Failed: {run_error}")
