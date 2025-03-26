@@ -43,15 +43,20 @@ jobs:
         env:
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          TAG="${TAG_NAME##v}"
+          TAG="${TAG_NAME#v}"
           PYPROJECT_VERSION=$(awk '/version/ { gsub("\"", ""); print $3; exit; }' pyproject.toml)
       
-          if [ ! "${PYPROJECT_VERSION}" = "${TAG}" ]; then
+          if [ ! "${PYPROJECT_VERSION}" = "${TAG%.dev*}" ]; then
               echo "You created the \"${{ github.ref_name }}\" git tag; it is fine, BUT it does not match the pyproject.toml file"
               exit 1
           fi
 
-          echo "Building and publishing version: ${PYPROJECT_VERSION}" >> $GITHUB_STEP_SUMMARY
+          # Update version to match in case it is a dev version
+          if [ ! "${TAG%.dev*}" = "${TAG}" ]; then
+            sed -i '' "s/version = \"${TAG%.dev*}\"/version = \"${TAG}\"/" pyproject.toml
+          fi
+
+          echo "Building and publishing version: ${TAG}" >> $GITHUB_STEP_SUMMARY
 
       - name: Build package
         env:
