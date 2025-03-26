@@ -1207,7 +1207,7 @@ components:
       title: Resume Payload Schema
       type: object
     Run:
-      description: Holds all the information of a run
+      description: Holds common information of a run
       properties:
         agent_id:
           description: The agent that was used for this run.
@@ -1219,10 +1219,6 @@ components:
           format: date-time
           title: Created At
           type: string
-        creation:
-          oneOf:
-          - $ref: '#/components/schemas/RunCreateStateful'
-          - $ref: '#/components/schemas/RunCreateStateless'
         run_id:
           description: The ID of the run.
           format: uuid
@@ -1245,7 +1241,6 @@ components:
           title: Updated At
           type: string
       required:
-      - creation
       - run_id
       - agent_id
       - created_at
@@ -1344,7 +1339,7 @@ components:
             type: string
         type: object
       description: Payload for creating a stateless run.
-      title: RunCreateStateful
+      title: RunCreateStateless
     RunError:
       description: Run terminated with an error
       properties:
@@ -1486,6 +1481,32 @@ components:
           title: Status
       title: Run Search Request
       type: object
+    RunStateful:
+      allOf:
+      - $ref: '#/components/schemas/Run'
+      - properties:
+          creation:
+            $ref: '#/components/schemas/RunCreateStateful'
+            description: ''
+            title: Creation
+        required:
+        - creation
+        type: object
+      description: Holds all the information of a stateful run
+      title: Agent Run Stateful
+    RunStateless:
+      allOf:
+      - $ref: '#/components/schemas/Run'
+      - properties:
+          creation:
+            $ref: '#/components/schemas/RunCreateStateless'
+            description: ''
+            title: Creation
+        required:
+        - creation
+        type: object
+      description: Holds all the information of a stateless run
+      title: Agent Run Stateless
     RunStatus:
       enum:
       - pending
@@ -1494,12 +1515,21 @@ components:
       - timeout
       - interrupted
       type: string
-    RunWaitResponse:
+    RunWaitResponseStateful:
       properties:
         output:
           $ref: '#/components/schemas/RunOutput'
         run:
-          $ref: '#/components/schemas/Run'
+          $ref: '#/components/schemas/RunStateful'
+          description: The run information.
+          title: Run
+      type: object
+    RunWaitResponseStateless:
+      properties:
+        output:
+          $ref: '#/components/schemas/RunOutput'
+        run:
+          $ref: '#/components/schemas/RunStateless'
           description: The run information.
           title: Run
       type: object
@@ -1736,7 +1766,7 @@ components:
       type: object
 info:
   title: ACP Spec for org.agntcy.mailcomposer:0.0.1
-  version: 0.2.0
+  version: 0.2.1
 openapi: 3.1.1
 paths:
   /agents/search:
@@ -1848,7 +1878,7 @@ paths:
                 content:
                   application/json:
                     schema:
-                      $ref: '#/components/schemas/Run'
+                      $ref: '#/components/schemas/RunStateless'
                 required: true
               responses:
                 '200':
@@ -1867,7 +1897,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
+                $ref: '#/components/schemas/RunStateless'
           description: Success
         '404':
           content:
@@ -1909,7 +1939,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Run'
+                  $ref: '#/components/schemas/RunStateless'
                 title: Run Search Response
                 type: array
           description: Success
@@ -1980,7 +2010,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunWaitResponse'
+                $ref: '#/components/schemas/RunWaitResponseStateless'
           description: Success
         '404':
           content:
@@ -2033,7 +2063,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
+                $ref: '#/components/schemas/RunStateless'
           description: Success
         '404':
           content:
@@ -2134,7 +2164,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RunWaitResponse'
+                $ref: '#/components/schemas/RunWaitResponseStateless'
           description: Success
         '404':
           content:

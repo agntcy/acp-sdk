@@ -19,27 +19,26 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
-from agntcy_acp.acp_v0.models.stream_event_payload import StreamEventPayload
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from agntcy_acp.acp_v0.models.run_create_stateful import RunCreateStateful
+from agntcy_acp.acp_v0.models.run_status import RunStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
-class RunOutputStream(BaseModel):
+class RunStateful(BaseModel):
     """
-    Server-sent event containing one agent output event. Actual event type is carried inside the data.
+    Holds all the information of a stateful run
     """ # noqa: E501
-    id: StrictStr = Field(description="Unique identifier of the event")
-    event: StrictStr = Field(description="Event type. This is the constant string `agent_event` to be compatible with SSE spec. The actual type differentiation is done in the event itself.")
-    data: StreamEventPayload
-    __properties: ClassVar[List[str]] = ["id", "event", "data"]
-
-    @field_validator('event')
-    def event_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['agent_event']):
-            raise ValueError("must be one of enum values ('agent_event')")
-        return value
+    run_id: StrictStr = Field(description="The ID of the run.")
+    thread_id: Optional[StrictStr] = Field(default=None, description="Optional Thread ID wher the Run belongs to. This is populated only for runs on agents agents supporting Threads.")
+    agent_id: StrictStr = Field(description="The agent that was used for this run.")
+    created_at: datetime = Field(description="The time the run was created.")
+    updated_at: datetime = Field(description="The last time the run was updated.")
+    status: RunStatus = Field(description="The status of the run. One of 'pending', 'error', 'success', 'timeout', 'interrupted'.")
+    creation: RunCreateStateful
+    __properties: ClassVar[List[str]] = ["run_id", "thread_id", "agent_id", "created_at", "updated_at", "status", "creation"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,7 +58,7 @@ class RunOutputStream(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of RunOutputStream from a JSON string"""
+        """Create an instance of RunStateful from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -80,14 +79,14 @@ class RunOutputStream(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of data
-        if self.data:
-            _dict['data'] = self.data.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of creation
+        if self.creation:
+            _dict['creation'] = self.creation.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of RunOutputStream from a dict"""
+        """Create an instance of RunStateful from a dict"""
         if obj is None:
             return None
 
@@ -95,9 +94,13 @@ class RunOutputStream(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "event": obj.get("event"),
-            "data": StreamEventPayload.from_dict(obj["data"]) if obj.get("data") is not None else None
+            "run_id": obj.get("run_id"),
+            "thread_id": obj.get("thread_id"),
+            "agent_id": obj.get("agent_id"),
+            "created_at": obj.get("created_at"),
+            "updated_at": obj.get("updated_at"),
+            "status": obj.get("status"),
+            "creation": RunCreateStateful.from_dict(obj["creation"]) if obj.get("creation") is not None else None
         })
         return _obj
 
