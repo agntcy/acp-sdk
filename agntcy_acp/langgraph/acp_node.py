@@ -1,6 +1,7 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import logging
+from collections.abc import MutableMapping
 from typing import Any, Dict, Optional
 
 from langchain_core.runnables import RunnableConfig
@@ -107,15 +108,25 @@ class ACPNode:
 
         return self.configType.model_validate(config)
 
-    def _set_output(self, state: Any, output: Dict[str, Any]):
+    def _set_output(self, state: Any, output: Optional[Dict[str, Any]]):
         output_parent = state
+        output_state = self.outputType.model_validate(output)
+
         for el in self.outputPath.split(".")[:-1]:
-            output_parent = getattr(output_parent, el)
-        setattr(
-            output_parent,
-            self.outputPath.split(".")[-1],
-            self.outputType.model_validate(output),
-        )
+            if isinstance(output_parent, MutableMapping):
+                output_parent = output_parent[el]
+            elif hasattr(output_parent, el):
+                output_parent = getattr(output_parent, el)
+            else:
+                raise ValueError("object missing attribute: {el}")
+        
+        el = self.outputPath.split(".")[-1]
+        if isinstance(output_parent, MutableMapping):
+            output_parent[el] = output_state
+        elif hasattr(output_parent, el):
+            setattr(output_parent, el, output_state)
+        else:
+            raise ValueError("object missing attribute: {el}")
 
     def _prepare_run_create(self, state: Any, config: RunnableConfig) -> RunCreateStateless:
         agent_input = self._extract_input(state)
@@ -131,7 +142,8 @@ class ACPNode:
     
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
-            self._set_output(state, run_output.to_dict())
+            run_result: RunResult = run_output.actual_instance
+            self._set_output(state, run_result.values)
         elif isinstance(run_output.actual_instance, RunError):
             run_error: RunError = run_output.actual_instance
             raise ACPRunException(f"Run Failed: {run_error}")
@@ -148,8 +160,8 @@ class ACPNode:
             acp_client = ACPClient(api_client=api_client)
             run_output = acp_client.create_and_wait_for_stateless_run_output(run_create)
         
-        state_update = self._handle_run_output(state, run_output.output)
-        return self._set_output(state, state_update)
+        self._handle_run_output(state, run_output.output)
+        return state
 
     async def ainvoke(self, state: Any, config: RunnableConfig) -> Any:
         run_create = self._prepare_run_create(state, config)
@@ -157,8 +169,8 @@ class ACPNode:
             acp_client = AsyncACPClient(api_client=api_client)
             run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
         
-        state_update = self._handle_run_output(state, run_output.output)
-        return self._set_output(state, state_update)
+        self._handle_run_output(state, run_output.output)
+        return state
 
     def __call__(self, state, config):
         return RunnableCallable(self.invoke, self.ainvoke)
