@@ -53,7 +53,7 @@ jobs:
 
           # Update version to match in case it is a dev version
           if [ ! "${TAG%.dev*}" = "${TAG}" ]; then
-            sed -i '' "s/version = \"${TAG%.dev*}\"/version = \"${TAG}\"/" pyproject.toml
+            sed -i '' -e "s/version = \"${TAG%.dev*}\"/version = \"${TAG}\"/" pyproject.toml
           fi
 
           echo "Building and publishing version: ${TAG}" >> $GITHUB_STEP_SUMMARY
