@@ -18,6 +18,7 @@ from agntcy_acp.models import (
     RunResult, 
     RunOutput, 
     RunError, 
+    RunInterrupt,
 )
 from agntcy_acp.exceptions import ACPRunException
 
@@ -127,7 +128,7 @@ class ACPNode:
         )
 
         return run_create
-
+    
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
             run_result: RunResult = run_output.actual_instance
@@ -135,10 +136,10 @@ class ACPNode:
         elif isinstance(run_output.actual_instance, RunError):
             run_error: RunError = run_output.actual_instance
             raise ACPRunException(f"Run Failed: {run_error}")
+        elif isinstance(run_output.actual_instance, RunInterrupt):
+            raise ACPRunException(f"ACP Server returned a unsupporteed interrupt response: {run_output}")
         else:
-            raise ACPRunException(
-                f"ACP Server returned a unsupporteed response: {run_output}"
-            )
+            raise ACPRunException(f"ACP Server returned a unsupporteed response: {run_output}")
 
         return state
 
@@ -148,7 +149,8 @@ class ACPNode:
             acp_client = ACPClient(api_client=api_client)
             run_output = acp_client.create_and_wait_for_stateless_run_output(run_create)
         
-        return self._set_output(state, run_output.output)
+        state_update = self._handle_run_output(state, run_output.output)
+        return self._set_output(state, state_update)
 
     async def ainvoke(self, state: Any, config: RunnableConfig) -> Any:
         run_create = self._prepare_run_create(state, config)
@@ -156,7 +158,8 @@ class ACPNode:
             acp_client = AsyncACPClient(api_client=api_client)
             run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
         
-        return self._set_output(state, run_output.output)
+        state_update = self._handle_run_output(state, run_output.output)
+        return self._set_output(state, state_update)
 
     def __call__(self, state, config):
         return RunnableCallable(self.invoke, self.ainvoke)
