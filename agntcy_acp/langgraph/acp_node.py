@@ -4,7 +4,7 @@ from typing import Any, Optional
 from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
 from agntcy_acp import ACPClient, ApiClient, AsyncACPClient, AsyncApiClient, ApiClientConfiguration
-from agntcy_acp.models import RunCreateStateless, RunWaitResponse
+from agntcy_acp.models import RunCreateStateless
 import logging
 
 logger = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ class ACPNode():
         run_create = self._prepare_run_create(state, config)
         with ApiClient(configuration=self.clientConfig) as api_client:
             acp_client = ACPClient(api_client=api_client)
-            run_output: RunWaitResponse = acp_client.create_and_wait_for_stateless_run_output(run_create)
+            run_output = acp_client.create_and_wait_for_stateless_run_output(run_create)
         
         return self._set_output(state, run_output.output)
 
@@ -115,7 +115,7 @@ class ACPNode():
         run_create = self._prepare_run_create(state, config)
         async with AsyncApiClient(configuration=self.clientConfig) as api_client:
             acp_client = AsyncACPClient(api_client=api_client)
-            run_output: RunWaitResponse = await acp_client.create_and_wait_for_stateless_run_output(run_create)
+            run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
         
         return self._set_output(state, run_output.output)
 
