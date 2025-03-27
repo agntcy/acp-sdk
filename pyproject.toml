@@ -29,7 +29,7 @@ pydantic = ">= 2"
 typing-extensions = ">= 4.7.1"
 aiohttp = ">= 3.8.4"
 aiohttp-retry = ">= 2.8.3"
-agntcy-iomapper = "v0.2.0a0"
+agntcy-iomapper = { extras=["langgraph"], version="0.2.1" }
 langgraph = "^0.3.16"
 
 [tool.poetry.group.test.dependencies]
