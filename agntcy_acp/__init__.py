@@ -148,7 +148,7 @@ class ApiClientConfiguration(Configuration):
         environment variable if not provided.
 
         :param env_var_prefix: String used as prefix for environment variable 
-        names.
+          names.
 
         :return: Configuration object
         :rtype: ApiClientConfiguration
