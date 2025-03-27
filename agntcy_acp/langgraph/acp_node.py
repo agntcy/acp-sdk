@@ -3,7 +3,7 @@
 import logging
 from collections.abc import MutableMapping
 from typing import Any, Dict, Optional
-
+from pydantic import BaseModel
 from langchain_core.runnables import RunnableConfig
 from langgraph.utils.runnable import RunnableCallable
 
@@ -15,6 +15,7 @@ from agntcy_acp import (
     ApiClientConfiguration,
 )
 from agntcy_acp.models import (
+    Config,
     RunCreateStateless, 
     RunResult, 
     RunOutput, 
@@ -26,12 +27,12 @@ from agntcy_acp.exceptions import ACPRunException
 logger = logging.getLogger(__name__)
 
 
-def _extract_element(container: Any, path: str):
+def _extract_element(container: Any, path: str) -> Any:
     element = container
     for path_el in path.split("."):
         element = (
             element.get(path_el)
-            if isinstance(element, dict)
+            if isinstance(element, MutableMapping)
             else getattr(element, path_el)
         )
 
@@ -61,7 +62,7 @@ class ACPNode:
         output_type,
         config_path: Optional[str] = None,
         config_type=None,
-        auth_header: Optional[dict] = None,
+        auth_header: Optional[Dict] = None,
     ):
         """Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -91,12 +92,12 @@ class ACPNode:
     def get_name(self):
         return self.__name__
 
-    def _extract_input(self, state: Any):
-        if state is None:
-            return None
+    def _extract_input(self, state: Any) -> Any:
+        if not state:
+            return state
         
         try:
-            if self.inputPath is not None:
+            if self.inputPath:
                 state = _extract_element(state, self.inputPath)
         except Exception as e:
             raise Exception(
@@ -105,16 +106,18 @@ class ACPNode:
         
         return state
 
-    def _extract_config(self, config: Any):
-        if config is None:
-            return None
+    def _extract_config(self, config: Any) -> Any:
+        if not config:
+            return config
         
         try:
-            if self.configPath is not None:
+            if not self.configPath:
+                config = {}
+            else:
                 if "configurable" not in config:
                     logger.error(f"ACP Node {self.get_name()}. Unable to extract config: missing key \"configurable\" in RunnableConfig")
                     return None
-                
+
                 config = _extract_element(config["configurable"], self.configPath)
         except Exception as e:
             logger.info(f"ACP Node {self.get_name()}. Unable to extract config: {e}")
@@ -147,15 +150,26 @@ class ACPNode:
 
     def _prepare_run_create(self, state: Any, config: RunnableConfig) -> RunCreateStateless:
         agent_input = self._extract_input(state)
+        if isinstance(agent_input, BaseModel):
+            input_to_agent = agent_input.model_dump()
+        elif isinstance(agent_input, MutableMapping):
+            input_to_agent = agent_input
+        else:
+            input_to_agent = {}
+
         agent_config = self._extract_config(config)
+        if isinstance(agent_config, BaseModel):
+            config_to_agent = agent_config.model_dump()
+        elif isinstance(agent_config, MutableMapping):
+            config_to_agent = agent_config
+        else:
+            config_to_agent = {}
 
-        run_create = RunCreateStateless(
+        return RunCreateStateless(
             agent_id=self.agent_id,
-            input=agent_input.model_dump(),
-            config=agent_config.model_dump() if agent_config else {},
+            input=input_to_agent,
+            config=Config(configurable=config_to_agent),
         )
-
-        return run_create
     
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
