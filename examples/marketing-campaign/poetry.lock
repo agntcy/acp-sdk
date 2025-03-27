@@ -2,18 +2,18 @@
 
 [[package]]
 name = "agntcy-acp"
-version = "1.1.0a0.dev6"
+version = "1.1.1"
 description = "Agent Connect Protocol SDK"
 optional = false
 python-versions = "<4.0,>=3.9.0"
 groups = ["main"]
 files = [
-    {file = "agntcy_acp-1.1.0a0.dev6-py3-none-any.whl", hash = "sha256:647d018e9ab900aa074e4f10bb691435a673090f1ee84095c1e645bc0472ee8d"},
-    {file = "agntcy_acp-1.1.0a0.dev6.tar.gz", hash = "sha256:3e3461cd69c59e512ea47ce76f6613f87ff73582b321ace3d9d7d9b578e94570"},
+    {file = "agntcy_acp-1.1.1-py3-none-any.whl", hash = "sha256:4bd9dffbccdf770056832936916324b2c4a6958e49f4a40456367b8d02447e8b"},
+    {file = "agntcy_acp-1.1.1.tar.gz", hash = "sha256:5583e5918cf9ff9baebc3ef15a8fa28c4b9a0207c0c6636c2018b71aa310f66e"},
 ]
 
 [package.dependencies]
-agntcy-iomapper = "v0.2.0a0"
+agntcy-iomapper = {version = "0.2.1", extras = ["langgraph"]}
 aiohttp = ">=3.8.4"
 aiohttp-retry = ">=2.8.3"
 click = ">=8.1.8,<9.0.0"
@@ -27,14 +27,14 @@ urllib3 = ">=1.25.3,<3.0.0"
 
 [[package]]
 name = "agntcy-iomapper"
-version = "0.2.0a0"
+version = "0.2.1"
 description = "A tool to transform output from one agent to the input of another."
 optional = false
 python-versions = "<4.0,>=3.9.0"
 groups = ["main"]
 files = [
-    {file = "agntcy_iomapper-0.2.0a0-py3-none-any.whl", hash = "sha256:1839a8d5b32530a240376ebce296ba0b6b1687e88a1c33dae8d0d43977a234f1"},
-    {file = "agntcy_iomapper-0.2.0a0.tar.gz", hash = "sha256:6113214af3715182fdac4ec6468176e90f10843d867ff9c1a1e0798bc512ecfb"},
+    {file = "agntcy_iomapper-0.2.1-py3-none-any.whl", hash = "sha256:7f51d26c1744e8bde1e4af5d4d02458de16bb7b2c48815cd2384f98842b5aa13"},
+    {file = "agntcy_iomapper-0.2.1.tar.gz", hash = "sha256:22d7c74a18200aeb031a02c1e794567c0ff390c694a0c7ee4f88026e6d4da760"},
 ]
 
 [package.dependencies]
@@ -43,13 +43,16 @@ jinja2 = ">=3.1.5,<4.0.0"
 jsonpath-ng = ">=1.7.0,<2.0.0"
 jsonref = ">=1.1.0,<2.0.0"
 jsonschema = {version = ">=4.23.0,<5.0.0", extras = ["format"]}
+langchain = {version = ">=0.3.19,<0.4.0", optional = true, markers = "extra == \"langgraph\""}
+langchain-openai = {version = ">=0.3.6,<0.4.0", optional = true, markers = "extra == \"langgraph\""}
+langgraph = {version = ">=0.3.16,<0.4.0", optional = true, markers = "extra == \"langgraph\""}
 llama-index = ">=0.12.20,<0.13.0"
 openapi-pydantic = ">=0.5.1,<0.6.0"
 pydantic = ">=2.10.6,<3.0.0"
 python-dotenv = ">=1.0.1,<2.0.0"
 
 [package.extras]
-langgraph = ["langchain (>=0.3.19,<0.4.0)", "langchain-openai (>=0.3.6,<0.4.0)", "langgraph (>=0.2.73,<0.3.0)"]
+langgraph = ["langchain (>=0.3.19,<0.4.0)", "langchain-openai (>=0.3.6,<0.4.0)", "langgraph (>=0.3.16,<0.4.0)"]
 pydantic-ai = ["pydantic-ai (>=0.0.23,<0.0.24)"]
 
 [[package]]
@@ -4166,4 +4169,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9.0,<4.0"
-content-hash = "eddb3d91b0183b7c04892bd60d15a274c8fcce3836007d22389a7e95e9ad5322"
+content-hash = "abf733cfabbbb0873c692de9c3738f45cf9cc9edf890856fe9a6885d09b8e865"

@@ -14,7 +14,7 @@ python-dotenv = "^1.0.1"
 langgraph = "^0.3.5"
 langchain-openai = "^0.3.8"
 langchain = "^0.3.20"
-agntcy-acp = "1.1.0a0.dev6"
+agntcy-acp = "1.1.1"
 
 
 [tool.poetry]
