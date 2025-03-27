@@ -2,11 +2,17 @@
 Prerequisites:
 
 [Make](https://cmake.org/)
+
 [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+
 [Python at lest verstion 3.9](https://www.python.org/downloads/)
+
 [Docker with buildx](https://docs.docker.com/get-started/get-docker/)
+
 [docker-compose](https://docs.docker.com/compose/)
+
 [Golang](https://go.dev/doc/install)
+
 [Git LFS](https://git-lfs.com/)
 
 Clone the various repositories 
