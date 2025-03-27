@@ -99,7 +99,8 @@ def build_graph() -> CompiledStateGraph:
         input_path="mailcomposer_state.input",
         input_type=mailcomposer.InputSchema,
         output_path="mailcomposer_state.output",
-        output_type=mailcomposer.OutputSchema
+        output_type=mailcomposer.OutputSchema,
+        config_path="",
     )
 
     email_reviewer_config = ApiClientConfiguration.fromEnvPrefix("EMAIL_REVIEWER_")
@@ -110,7 +111,8 @@ def build_graph() -> CompiledStateGraph:
         input_path="email_reviewer_state.input",
         input_type=email_reviewer.InputSchema,
         output_path="email_reviewer_state.output",
-        output_type=email_reviewer.OutputSchema
+        output_type=email_reviewer.OutputSchema,
+        config_path="",
     )
 
     # Instantiate APIBridge Agent Node
