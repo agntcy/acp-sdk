@@ -1,6 +1,6 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
-from typing import Any
+from typing import Any, Optional
 
 import requests
 from langchain_core.runnables import RunnableConfig
@@ -33,16 +33,16 @@ class APIBridgeAgentNode(acp_node.ACPNode):
         input_path: str,
         output_path: str,
         service_api_key: str,
-        input_type=None,
-        output_type=None,
-        apikey: str = None,
+        input_type: Any = APIBridgeInput,
+        output_type: Any = APIBridgeOutput,
+        apikey: Optional[str] = None,
     ):
         self.__name__ = name
         self.hostname = hostname
         self.apikey = apikey
         self.service_name = service_name
-        self.inputType = input_type if input_type else APIBridgeInput
-        self.outputType = output_type if output_type else APIBridgeOutput
+        self.inputType = input_type
+        self.outputType = output_type
         self.inputPath = input_path
         self.outputPath = output_path
         self.service_api_key = service_api_key
