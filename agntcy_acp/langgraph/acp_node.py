@@ -92,21 +92,38 @@ class ACPNode:
         return self.__name__
 
     def _extract_input(self, state: Any):
+        if state is None:
+            return None
+        
         try:
-            return _extract_element(state, self.inputPath)
+            if self.inputPath is not None:
+                state = _extract_element(state, self.inputPath)
         except Exception as e:
             raise Exception(
                 f"ERROR in ACP Node {self.get_name()}. Unable to extract input: {e}"
             )
+        
+        return state
 
     def _extract_config(self, config: Any):
+        if config is None:
+            return None
+        
         try:
-            config = _extract_element(config["configurable"], self.configPath)
+            if self.configPath is not None:
+                if "configurable" not in config:
+                    logger.error(f"ACP Node {self.get_name()}. Unable to extract config: missing key \"configurable\" in RunnableConfig")
+                    return None
+                
+                config = _extract_element(config["configurable"], self.configPath)
         except Exception as e:
             logger.info(f"ACP Node {self.get_name()}. Unable to extract config: {e}")
             return None
 
-        return self.configType.model_validate(config)
+        if self.configType is not None:
+            return self.configType.model_validate(config)
+        else:
+            return config
 
     def _set_output(self, state: Any, output: Optional[Dict[str, Any]]):
         output_parent = state
