@@ -15,10 +15,14 @@ Prerequisites:
 
 [Git LFS](https://git-lfs.com/)
 
-Clone the various repositories 
+Clone the repositories 
+
 [ACP SDK](https://github.com/agntcy/acp-sdk/tree/main)
+
 [Workflow server](https://github.com/agntcy/workflow-srv)
+
 [Workflow server manager](https://github.com/agntcy/workflow-srv-mgr)
+
 [API bridge agent](https://github.com/agntcy/api-bridge-agnt)
 
 # Getting started
