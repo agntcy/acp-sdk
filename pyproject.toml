@@ -11,6 +11,12 @@ maintainers = [
     { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
 
+[project.urls]
+homepage = "https://github.com/agntcy/acp-sdk"
+source = "https://github.com/agntcy/acp-sdk"
+documentation = "https://docs.agntcy.org/index.html"
+issues = "https://github.com/agntcy/acp-sdk/issues"
+
 [tool.poetry.dependencies]
 python = ">=3.9.0,<4.0"
 click = "^8.1.8"
