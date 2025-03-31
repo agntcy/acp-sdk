@@ -64,8 +64,11 @@ class EmailReviewer(Workflow):
         self.tools = tools or []
 
         self.llm = llm or AzureOpenAI(
-            model="gpt-4o-mini",
-            deployment_name="gpt-4o-mini",
+            model="gpt-4o",
+            deployment_name="gpt-4o",
+            api_version="2024-07-01-preview",
+            temperature=0,
+            seed=42,
         )
 
         self.memory = ChatMemoryBuffer.from_defaults(llm=llm)

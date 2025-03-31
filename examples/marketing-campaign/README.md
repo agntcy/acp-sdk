@@ -100,8 +100,11 @@ make docker-build-dev
 Navigate to the `api-bridge-agnt` directory and run the following commands:
 
 ```sh
-export AZURE_OPENAI_API_KEY=***YOUR_OPENAI_API_KEY***
-export AZURE_OPENAI_ENDPOINT=***YOUR_OPENAI_ENDPOINT***
+export OPENAI_API_KEY=***YOUR_OPENAI_API_KEY***
+
+# Optionally, if you want to use Azure OpenAI, you also need to specify the endpoint with the OPENAI_ENDPOINT environment variable:
+export OPENAI_ENDPOINT="https://YOUR-PROJECT.openai.azure.com"
+
 make start_redis
 make start_tyk
 ```
@@ -162,7 +165,7 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
      AZURE_OPENAI_API_KEY: your_secret
      AZURE_OPENAI_ENDPOINT: "the_url.com"
      API_HOST: 0.0.0.0
-     SENDGRID_HOST: http://host:port
+     SENDGRID_HOST: http://host.docker.internal:8080
      SENDGRID_API_KEY: SG.your-api-key
    dependencies:
      - name: mailcomposer
@@ -202,6 +205,10 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
    export MARKETING_CAMPAIGN_HOST="http://localhost:62609"
    export MARKETING_CAMPAIGN_ID="eae32ada-aaf8-408c-bf0c-7654455ce6e3"
    export MARKETING_CAMPAIGN_API_KEY='{"x-api-key": "08817517-7000-48e9-94d8-01d22cf7d20a"}'
+
+   # Configuration of the application
+   export RECIPIENT_EMAIL_ADDRESS="recipient@example.com"
+   export SENDER_EMAIL_ADDRESS="sender@example.com" # Sender email address as configured in Sendgrid
    ```
 
 4. **Run the Application**:

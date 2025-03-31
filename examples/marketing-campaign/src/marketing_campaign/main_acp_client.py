@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import os
 import asyncio
-from marketing_campaign.app import graph
 from marketing_campaign.state import OverallState, ConfigModel
 from marketing_campaign import mailcomposer
 from marketing_campaign.email_reviewer import TargetAudience
