@@ -214,8 +214,7 @@ This method demonstrates how to communicate with the Marketing Campaign applicat
 4. **Run the Application**:
    Start the Marketing Campaign Manager application using the ACP client:
    ```sh
-   cd src/marketing_campaign
-   poetry run python main_acp_client.py
+   poetry run python src/marketing_campaign/main_acp_client.py
    ```
 
    Interact with the application via ACP Client to compose and review emails. Once approved, the email will be sent to the recipient via SendGrid.
@@ -261,8 +260,7 @@ This script is primarily intended for development and debugging purposes, allowi
 3. **Run the Application**:
    Start the Marketing Campaign Manager application using LangGraph:
    ```sh
-   cd src/marketing_campaign
-   poetry run python main_langgraph.py
+   poetry run python src/marketing_campaign/main_langgraph.py
    ```
 
    Interact by invoking the langgraph application to compose and review emails. Once approved, the email will be sent to the recipient via SendGrid.
