@@ -114,4 +114,7 @@ test: setup_test
 check: test
 	scripts/check-models.sh
 
+test_gha: setup_test
+	poetry run pytest --exitfirst -vv -m "not needs_acp_spec" tests/
+
 all: install generate test

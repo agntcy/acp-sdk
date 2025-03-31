@@ -45,7 +45,7 @@ jobs:
       run: poetry check
 
     - name: Check code
-      run: make test
+      run: make test_gha
       shell: bash
 
     - name: Print summary

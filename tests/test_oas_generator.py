@@ -7,6 +7,7 @@ from agntcy_acp.manifest.generator import generate_agent_oapi
 from openapi_spec_validator.readers import read_from_filename
 from deepdiff import diff
 
+@pytest.mark.needs_acp_spec
 @pytest.mark.parametrize(
     "test_filename, oas_ref_filename",
     [
