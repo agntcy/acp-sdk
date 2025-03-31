@@ -29,9 +29,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        submodules: true
-        token: ${{ secrets.GH_PAT_REPO_ACCESS }}
 
     - name: Set up python ${{ env.PYTHON_VERSION }}
       id: setup-python
@@ -48,7 +45,7 @@ jobs:
       run: poetry check
 
     - name: Check code
-      run: make check
+      run: make test
       shell: bash
 
     - name: Print summary
