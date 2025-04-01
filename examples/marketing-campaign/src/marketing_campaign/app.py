@@ -19,6 +19,15 @@ from marketing_campaign import email_reviewer
 from marketing_campaign.state import SendGridState, MailComposerState
 
 
+# Fill in client configuration for the remote agent
+MAILCOMPOSER_AGENT_ID = os.environ.get("MAILCOMPOSER_ID", "")
+EMAIL_REVIEWER_AGENT_ID = os.environ.get("EMAIL_REVIEWER_ID", "")
+SENDGRID_HOST = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
+MAILCOMPOSER_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix("MAILCOMPOSER_")
+EMAIL_REVIEWER_CONFIG = ApiClientConfiguration.fromEnvPrefix("EMAIL_REVIEWER_")
+GENERATE_MARMAID_GRAPH = os.environ.get("GENERATE_MARMAID_GRAPH", "False").lower() == "true"
+
+
 def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.OverallState:
     cfg = config.get('configurable', {})
 
@@ -85,28 +94,22 @@ def build_graph() -> CompiledStateGraph:
         seed=42,
         temperature=0,
     )
-    # Fill in client configuration for the remote agent
-    mailcomposer_agent_id = os.environ.get("MAILCOMPOSER_ID", "")
-    email_reviewer_agent_id = os.environ.get("EMAIL_REVIEWER_ID", "")
-    sendgrid_host = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
-    mailcomposer_client_config = ApiClientConfiguration.fromEnvPrefix("MAILCOMPOSER_")
 
     # Instantiate the local ACP node for the remote agent
     acp_mailcomposer = ACPNode(
         name="mailcomposer",
-        agent_id=mailcomposer_agent_id,
-        client_config=mailcomposer_client_config,
+        agent_id=MAILCOMPOSER_AGENT_ID,
+        client_config=MAILCOMPOSER_CLIENT_CONFIG,
         input_path="mailcomposer_state.input",
         input_type=mailcomposer.InputSchema,
         output_path="mailcomposer_state.output",
         output_type=mailcomposer.OutputSchema
     )
 
-    email_reviewer_config = ApiClientConfiguration.fromEnvPrefix("EMAIL_REVIEWER_")
     acp_email_reviewer = ACPNode(
         name="email_reviewer",
-        agent_id=email_reviewer_agent_id,
-        client_config=email_reviewer_config,
+        agent_id=EMAIL_REVIEWER_AGENT_ID,
+        client_config=EMAIL_REVIEWER_CONFIG,
         input_path="email_reviewer_state.input",
         input_type=email_reviewer.InputSchema,
         output_path="email_reviewer_state.output",
@@ -123,7 +126,7 @@ def build_graph() -> CompiledStateGraph:
         input_path="sendgrid_state.input",
         output_path="sendgrid_state.output",
         service_api_key=sendgrid_api_key,
-        hostname=sendgrid_host,
+        hostname=SENDGRID_HOST,
         service_name="sendgrid/v3/mail/send"
     )
 
@@ -169,11 +172,11 @@ def build_graph() -> CompiledStateGraph:
 
     g = sg.compile()
     g.name = "Marketing Campaign Manager"
-    # print(g.get_graph().draw_mermaid())
-    with open("___graph.png", "wb") as f:
-        f.write(g.get_graph().draw_mermaid_png(
-            draw_method=MermaidDrawMethod.API,
-        ))
+    if GENERATE_MARMAID_GRAPH:
+        with open("___graph.png", "wb") as f:
+            f.write(g.get_graph().draw_mermaid_png(
+                draw_method=MermaidDrawMethod.API,
+            ))
     return g
 
 
