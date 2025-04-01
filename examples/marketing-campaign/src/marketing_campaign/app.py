@@ -25,7 +25,7 @@ EMAIL_REVIEWER_AGENT_ID = os.environ.get("EMAIL_REVIEWER_ID", "")
 SENDGRID_HOST = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
 MAILCOMPOSER_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix("MAILCOMPOSER_")
 EMAIL_REVIEWER_CONFIG = ApiClientConfiguration.fromEnvPrefix("EMAIL_REVIEWER_")
-GENERATE_MARMAID_GRAPH = os.environ.get("GENERATE_MARMAID_GRAPH", "False").lower() == "true"
+GENERATE_MERMAID_GRAPH = os.environ.get("GENERATE_MERMAID_GRAPH", "False").lower() == "true"
 
 
 def process_inputs(state: state.OverallState, config: RunnableConfig) -> state.OverallState:
@@ -172,7 +172,7 @@ def build_graph() -> CompiledStateGraph:
 
     g = sg.compile()
     g.name = "Marketing Campaign Manager"
-    if GENERATE_MARMAID_GRAPH:
+    if GENERATE_MERMAID_GRAPH:
         with open("___graph.png", "wb") as f:
             f.write(g.get_graph().draw_mermaid_png(
                 draw_method=MermaidDrawMethod.API,
