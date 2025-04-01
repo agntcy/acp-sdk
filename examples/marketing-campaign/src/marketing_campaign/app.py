@@ -129,7 +129,7 @@ def build_graph() -> CompiledStateGraph:
         output_path="sendgrid_state.output",
         service_api_key=sendgrid_api_key,
         hostname=SENDGRID_HOST,
-        service_name="sendgrid/v3/mail/send"
+        service_name="sendgrid"
     )
 
     # Create the state graph

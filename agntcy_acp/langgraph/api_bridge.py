@@ -41,6 +41,9 @@ class APIBridgeAgentNode(acp_node.ACPNode):
         self.hostname = hostname
         self.apikey = apikey
         self.service_name = service_name
+        # API Bridge agent requires the endpoint to end with '/'
+        if not self.service_name.endswith('/'):
+            self.service_name += '/'
         self.inputType = input_type
         self.outputType = output_type
         self.inputPath = input_path
@@ -50,17 +53,10 @@ class APIBridgeAgentNode(acp_node.ACPNode):
     def invoke(self, state: Any, config: RunnableConfig) -> Any:
         api_bridge_input = self._extract_input(state)
 
-        api_bridge_input.query = (
-            "Please use content-type application/json." + api_bridge_input.query
-        )
-
         # TODO: Merge config with runnable config
         headers = {
-            "Accept": None,
             "Authorization": f"Bearer {self.service_api_key}",
-            "Accept-Encoding": None,
-            "Content-Type": "text/plain",
-            "X-Nl-Query-Enabled": "yes",
+            "Content-Type": "application/nlq",
         }
         r = requests.post(
             f"{self.hostname}/{self.service_name}",
