@@ -92,6 +92,7 @@ source ~/.bashrc
 Navigate to the `workflow-srv` directory and build the Docker image for the Workflow Server:
 
 ```sh
+git submodule update --init --recursive
 make docker-build-dev
 ```
 
@@ -255,6 +256,10 @@ This script is primarily intended for development and debugging purposes, allowi
    export SENDGRID_API_KEY=SG.your_secret
    export AZURE_OPENAI_API_KEY=your_secret
    export AZURE_OPENAI_ENDPOINT="the_url.com"
+
+   # Configuration of the application
+   export RECIPIENT_EMAIL_ADDRESS="recipient@example.com"
+   export SENDER_EMAIL_ADDRESS="sender@example.com" # Sender email address as configured in Sendgrid
    ```
 
 3. **Run the Application**:
