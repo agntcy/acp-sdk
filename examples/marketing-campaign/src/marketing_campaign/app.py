@@ -25,6 +25,8 @@ EMAIL_REVIEWER_AGENT_ID = os.environ.get("EMAIL_REVIEWER_ID", "")
 SENDGRID_HOST = os.environ.get("SENDGRID_HOST", "http://localhost:8080")
 MAILCOMPOSER_CLIENT_CONFIG = ApiClientConfiguration.fromEnvPrefix("MAILCOMPOSER_")
 EMAIL_REVIEWER_CONFIG = ApiClientConfiguration.fromEnvPrefix("EMAIL_REVIEWER_")
+
+# Set to True to generate a mermaid graph
 GENERATE_MERMAID_GRAPH = os.environ.get("GENERATE_MERMAID_GRAPH", "False").lower() == "true"
 
 
