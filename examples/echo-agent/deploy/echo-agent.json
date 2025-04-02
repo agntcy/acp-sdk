@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "ref": {
+      "name": "org.agntcy.echo_agent",
+      "version": "0.0.1"
+    },
+    "description": "Provides a test interface to echo input to output."
+  },
+  "specs": {
+    "capabilities": {
+      "threads": false,
+      "interrupts": false,
+      "callbacks": false
+    },
+    "input": {
+      "$defs": {
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "messages": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Message"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Messages"
+        }
+      },
+      "title": "InputState",
+      "type": "object"
+    },
+    "output": {
+      "$defs": {
+        "Message": {
+          "properties": {
+            "type": {
+              "$ref": "#/$defs/Type",
+              "description": "indicates the originator of the message, a human or an assistant"
+            },
+            "content": {
+              "description": "the content of the message",
+              "title": "Content",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "content"
+          ],
+          "title": "Message",
+          "type": "object"
+        },
+        "Type": {
+          "enum": [
+            "human",
+            "assistant",
+            "ai"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "properties": {
+        "messages": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Message"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Messages"
+        }
+      },
+      "title": "OutputState",
+      "type": "object"
+    },
+    "config": {
+      "properties": {
+        "to_upper": {
+          "title": "to_upper",
+          "description": "If true, convert text to upper before echoing.",
+          "type": "boolean",
+          "default": false
+        },
+        "to_lower": {
+          "title": "to_lower",
+          "description": "If true, convert text to lower before echoing.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "title": "ConfigSchema",
+      "type": "object"
+    }
+  },
+  "deployment": {
+    "deployment_options": [
+      {
+        "type": "source_code",
+        "name": "source_code_local",
+        "url": "https://github.com/agntcy/acp-sdk.git/examples/echo_agent",
+        "framework_config": {
+          "framework_type": "langgraph",
+          "graph": "echo_agent.langgraph.AGENT_GRAPH"
+        }
+      }
+    ],
+    "env_vars": [
+      {
+        "desc": "If true-ish, convert text to lower before echoing. Superseded by config.",
+        "name": "TO_LOWER"
+      },
+      {
+        "desc": "If true-ish, convert text to upper before echoing. Superseded by config.",
+        "name": "TO_UPPER"
+      }
+    ],
+    "dependencies": []
+  }
+}
