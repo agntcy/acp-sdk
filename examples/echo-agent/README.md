@@ -49,7 +49,8 @@ Before running the application, ensure you have the following:
 
 * Make sure that the [workflow server manager](https://docs.agntcy.org/pages/agws/workflow_server_manager.html#getting-started) cli (wfsm) is added to your path
 
-* Start the workflow server
+* Start the workflow server. Note the existing manifest assumes you are deploying from the directory with the `pyproject.toml` file for the echo agent. Adjust as needed.
+
     ```
-    wfsm deploy -m deploy/echo-agent.json -e deploy/echo_agent_example.yaml -b workflowserver:latest
+    wfsm deploy --manifestPath deploy/echo-agent.json --envFilePath deploy/echo_agent_example.yaml
     ```
