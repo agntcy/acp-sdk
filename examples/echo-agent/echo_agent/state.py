@@ -33,5 +33,5 @@ class OutputState(BaseModel):
 
 
 class AgentState(BaseModel):
-    input: InputState
-    output: OutputState
+    echo_input: InputState
+    echo_output: Optional[OutputState] = None

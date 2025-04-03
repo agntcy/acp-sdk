@@ -7,7 +7,7 @@ import click
 from langchain_core.runnables import RunnableConfig
 
 from .langgraph import AGENT_GRAPH
-from .state import ConfigSchema, InputState, Message, MsgType, OutputState
+from .state import AgentState, ConfigSchema, InputState, Message, MsgType
 
 logger = logging.getLogger(__name__)
 
@@ -91,16 +91,16 @@ def echo_server_agent(
     else:
         messages = []
 
-    input = InputState(messages=messages)
-    logger.debug(f"input messages: {input.model_dump_json()}")
+    echo_input = InputState(messages=messages)
+    logger.debug(f"input messages: {echo_input.model_dump_json()}")
 
     output_state = AGENT_GRAPH.invoke(
-        {"input": input, "output": OutputState()},
+        AgentState(echo_input=echo_input),
         config=RunnableConfig(configurable=config),
     )
 
     logger.debug(f"output messages: {output_state}")
-    print(output_state["output"].model_dump_json(indent=2))
+    print(output_state["echo_output"].model_dump_json(indent=2))
 
 
 if __name__ == "__main__":

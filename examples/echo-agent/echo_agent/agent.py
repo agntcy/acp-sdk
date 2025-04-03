@@ -1,24 +1,34 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import logging
+from typing import Any, Dict
 
 from langchain_core.runnables import RunnableConfig
 
-from .state import AgentState, Message, MsgType
+from .state import AgentState, Message, MsgType, OutputState
 
 logger = logging.getLogger(__name__)
 
 
 # Define agent function
-def echo_agent(state: AgentState, config: RunnableConfig) -> AgentState:
+def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     args = config.get("configurable", {})
     logger.debug(f"enter --- state: {state.model_dump_json()}, config: {args}")
     ai_response = None
 
-    if state.input.messages is not None:
+    # Note: subfields are not typed when running in the workflow server
+    # so we fix that here.
+    if hasattr(state.echo_input, "messages"):
+        messages = getattr(state.echo_input, "messages")
+    elif "messages" in state.echo_input:
+        messages = [Message.model_validate(m) for m in state.echo_input["messages"]]
+    else:
+        messages = []
+
+    if messages is not None:
         # Get last human message
         human_message = next(
-            filter(lambda m: m.type == MsgType.human, reversed(state.input.messages)),
+            filter(lambda m: m.type == MsgType.human, reversed(messages)),
             None,
         )
         if human_message is not None:
@@ -38,6 +48,4 @@ def echo_agent(state: AgentState, config: RunnableConfig) -> AgentState:
     else:
         output_messages = []
 
-    state.output.messages = state.input.messages + output_messages
-    logger.debug(f"exit ---- state: {state.model_dump_json()}")
-    return state
+    return {"echo_output": OutputState(messages=messages + output_messages)}
