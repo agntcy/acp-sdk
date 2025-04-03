@@ -94,8 +94,11 @@ def echo_server_agent(
     echo_input = InputState(messages=messages)
     logger.debug(f"input messages: {echo_input.model_dump_json()}")
 
+    # Imitate input from ACP API
+    input_api_object = AgentState(echo_input=echo_input).model_dump(mode="json")
+
     output_state = AGENT_GRAPH.invoke(
-        AgentState(echo_input=echo_input),
+        AGENT_GRAPH.builder.schema.model_validate(input_api_object),
         config=RunnableConfig(configurable=config),
     )
 
