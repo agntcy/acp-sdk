@@ -1,15 +1,20 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import builtins
+from datetime import datetime
 import importlib
 import json
+import logging
 from typing import Any, Tuple, Union
 
 from agntcy_acp import ACPClient, AsyncApiClient
 from deepdiff import diff
+from pydantic import BaseModel
 
 from .types import TestOperation
 
+
+logger = logging.getLogger(__name__)
 
 def _get_class(full_name: str) -> Any:
     names = full_name.rsplit(".", maxsplit=1)
@@ -47,7 +52,11 @@ def _get_op_args(
 def _process_result(
     result: Any, operation: TestOperation, op_idx: int
 ) -> Tuple[bool, Any]:
-    result_dump = result.model_dump(exclude_none=True)
+    if isinstance(result, BaseModel):
+        result_dump = result.model_dump(exclude_none=True)
+    else:
+        result_dump = {}
+    
     ret_val = True
 
     # Check for no modified values
@@ -58,17 +67,23 @@ def _process_result(
             threshold_to_diff_deeper=0,
             use_enum_value=True,
         )
-        if "values_changed" in mapdiff:
+        if "values_changed" in mapdiff or "dictionary_item_removed" in mapdiff:
             print(
-                f"{op_idx}: operation {operation.operation_id}:\n{json.dumps(mapdiff['values_changed'], indent=2)}"
+                f"operation {op_idx}: {operation.operation_id}:\n{mapdiff.to_json(indent=2)}"
             )
             ret_val = False
     if operation.output_exact:
         result_dump = result.model_dump()
-        mapdiff = diff.DeepDiff(operation.output_at_least, result_dump)
+        mapdiff = diff.DeepDiff(
+            operation.output_exact, 
+            result_dump,
+            threshold_to_diff_deeper=0,
+            use_enum_value=True,
+            exclude_types=[datetime],
+        )
         if mapdiff:
             print(
-                f"{op_idx}: operation {operation.operation_id}:\n{mapdiff.to_json(indent=2)}"
+                f"operation {op_idx}: {operation.operation_id}:\n{mapdiff.to_json(indent=2)}"
             )
             ret_val = False
 
@@ -80,10 +95,14 @@ def process_operation(
 ) -> Tuple[bool, Any]:
     op, args = _get_op_args(client, operation)
 
-    if args:
-        result = op(**args)
-    else:
-        result = op()
+    try:
+        if args:
+            result = op(**args)
+        else:
+            result = op()
+    except Exception as exc:
+        logger.exception(exc)
+        result = None
 
     return _process_result(result, operation, op_idx)
 
@@ -93,9 +112,13 @@ async def async_process_operation(
 ) -> Tuple[bool, Any]:
     op, args = _get_op_args(client, operation)
 
-    if args:
-        result = await op(**args)
-    else:
-        result = await op()
+    try:
+        if args:
+            result = await op(**args)
+        else:
+            result = await op()
+    except Exception as exc:
+        logger.exception(exc)
+        result = None
 
     return _process_result(result, operation, op_idx)

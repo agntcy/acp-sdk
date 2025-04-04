@@ -45,13 +45,11 @@ operations:
             configurable:
               to_upper: true
     output_at_least:
-      run:
-        status: success
+      status: pending
   - operation_id: get_stateless_run
     test_input:
       run_id:
         type: str
         value: "{{ results[-1].run_id }}"
     output_at_least:
-      run:
-        status: success
+      status: success
