@@ -1,0 +1,66 @@
+[project]
+name = "acp-test"
+version = "0.1.0"
+license = "Apache-2.0"
+description = "ACP test client"
+readme = "README.md"
+authors = [
+    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
+]
+maintainers = [
+    { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9.0,<4.0"
+click = "^8.1.8"
+pydantic = ">= 2"
+agntcy_acp = { path = "../", develop = true }
+pyyaml = "^6.0.2"
+python-dotenv = "^1.1.0"
+jinja2 = "^3.1.6"
+
+[tool.poetry.group.test.dependencies]
+pytest = "*"
+pytest-asyncio = "^0.23.5"
+deepdiff = "^8.4.2"
+
+[tool.poetry.group.sanity.dependencies]
+mypy = "^1.10.0"
+ruff = "^0.4.6"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.poetry.scripts]
+cli = "acp_test.__main__:execute_test_file"
+
+[tool.ruff]
+lint.select = ["E", "F", "I", "TID251"]
+lint.ignore = ["E501"]
+line-length = 88
+indent-width = 4
+extend-include = ["*.ipynb"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
+
+[tool.mypy]
+disallow_untyped_defs = true
+explicit_package_bases = true
+warn_no_return = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+allow_redefinition = true
+# https://mypy.readthedocs.io/en/stable/config_file.html
+disable_error_code = "typeddict-item, return-value, override, has-type"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

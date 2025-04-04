@@ -1,0 +1,57 @@
+metadata:
+  client_config:
+    retries: 3
+  env_prefix: ECHO_AGENT_
+operations:
+  - operation_id: create_and_wait_for_stateless_run_output
+    test_input:
+      run_create_stateless:
+        type: agntcy_acp.models.RunCreateStateless
+        arguments:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+          input:
+            echo_input:
+              messages:
+                - type: human
+                  content: "What is up, Dude?"
+          config:
+            configurable:
+              to_upper: true
+    output_at_least:
+      output:
+        actual_instance:
+          type: result
+          values:
+            echo_output:
+              messages:
+                - content: "What is up, Dude?"
+                  type: human
+                - content: "WHAT IS UP, DUDE?"
+                  type: assistant
+      run:
+        status: success
+  - operation_id: create_stateless_run
+    test_input:
+      run_create_stateless:
+        type: agntcy_acp.models.RunCreateStateless
+        arguments:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+          input:
+            echo_input:
+              messages:
+                - type: human
+                  content: "What is up, Dude?"
+          config:
+            configurable:
+              to_upper: true
+    output_at_least:
+      run:
+        status: success
+  - operation_id: get_stateless_run
+    test_input:
+      run_id:
+        type: str
+        value: "{{ results[-1].run_id }}"
+    output_at_least:
+      run:
+        status: success

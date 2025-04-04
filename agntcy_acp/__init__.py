@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 from os import getenv
+from pydantic_core import CoreSchema, core_schema
+from pydantic import GetCoreSchemaHandler, BaseModel
 from typing import Optional, Any, Dict, Union
 
 from .acp_v0.sync_client.api_client import ApiClient
@@ -73,7 +75,7 @@ def _get_envvar_param(prefix: str, varname: str) -> Optional[str]:
     env_varname = prefix + varname.upper()
     return getenv(env_varname.translate(__ENV_VAR_SPECIAL_CHAR_TABLE), None)
 
-class ApiClientConfiguration(Configuration):
+class ApiClientConfiguration(Configuration,BaseModel):
     """This class contains various settings of the API client.
 
     :param host: Base url.
@@ -211,6 +213,7 @@ class ApiClientConfiguration(Configuration):
             ca_cert_data,
             debug=debug,
         )
+
 
 __all__ = [
     "ACPClient",
