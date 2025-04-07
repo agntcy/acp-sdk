@@ -15,6 +15,7 @@ maintainers = [
 python = ">=3.9.0,<4.0"
 langgraph = "^0.3.5"
 pydantic = ">= 2"
+click = "^8.1.8"
 
 [tool.poetry.group.sanity.dependencies]
 mypy = "^1.10.0"
