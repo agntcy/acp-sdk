@@ -12,8 +12,7 @@ from marketing_campaign import mailcomposer
 from marketing_campaign.email_reviewer import TargetAudience
 from marketing_campaign.state import ConfigModel, OverallState
 
-from agntcy_acp import ApiClientConfiguration, AsyncACPClient
-from agntcy_acp.acp_v0.async_client.api_client import ApiClient as AsyncApiClient
+from agntcy_acp import ApiClient, ApiClientConfiguration, AsyncACPClient
 from agntcy_acp.models import (
     Config,
     RunCreateStateless,
@@ -26,10 +25,11 @@ overall_state = OverallState(
 )
 client_config = None
 
+# Must be provided before you could run the app
 os.environ["RECIPIENT_EMAIL_ADDRESS"] = ""
 os.environ["SENDER_EMAIL_ADDRESS"] = ""
-PATH_TO_WFSM = "/Users/reginaldocosta/workspace/workflow-srv-mgr/wfsm"
-PATH_TO_WFS = "/Users/reginaldocosta/workspace/workflow-srv"
+PATH_TO_WFSM = ""
+PATH_TO_WFS = ""
 
 
 def run_make_commands(path, command):
@@ -151,7 +151,6 @@ async def chat_with_bot(api_client, message, history):
         ),
     )
 
-    # async with AsyncApiClient(configuration=client_config) as api_client:
     acp_client = AsyncACPClient(api_client=api_client)
     run_output = None
 
@@ -211,10 +210,8 @@ async def gradio_ui():
 
     generate_config_interface(ioa_components_paths)
 
-    # with gr.Blocks() as acp_demo:
-    #     with gr.Sidebar(open=True, width=450, position="right"):
     client_config = ApiClientConfiguration.fromEnvPrefix("MARKETING_CAMPAIGN_")
-    api_client = AsyncApiClient(configuration=client_config)
+    api_client = ApiClient(configuration=client_config)
 
     global overall_state
 

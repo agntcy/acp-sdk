@@ -122,7 +122,7 @@ curl http://localhost:8080/tyk/apis/oas \
   -d@configs/api.sendgrid.com.oas.json
 
 curl http://localhost:8080/tyk/reload/group \
-  --header "x-tyk-authorization: foo"****
+  --header "x-tyk-authorization: foo"
 ```
 
 ---

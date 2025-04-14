@@ -36,6 +36,14 @@ def process_inputs(
     cfg = config.get("configurable", {})
 
     user_message = state.messages[-1].content
+    if "recipient_email_address" not in cfg or "sender_email_address" not in cfg:
+        raise ValueError(
+            """
+            recipient_email_address and/or sender_email_address not provided. 
+            You can set them as environment variables 
+            RECIPIENT_EMAIL_ADDRESS SENDER_EMAIL_ADDRESS
+            """
+        )
     state.recipient_email_address = cfg["recipient_email_address"]
     state.sender_email_address = cfg["sender_email_address"]
 
