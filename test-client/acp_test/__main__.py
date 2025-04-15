@@ -102,6 +102,9 @@ def execute_test_file(
 ):
     """ """
     logging.basicConfig(level=log_level.upper())
+    logging.getLogger("urllib3").setLevel(log_level.upper())
+    logging.getLogger("aiohttp").setLevel(log_level.upper())
+
 
     # CLI overrides environment after loading dotenv
     for env_string in env:

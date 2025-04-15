@@ -1,0 +1,71 @@
+metadata:
+  client_config:
+    retries: 3
+  env_prefix: ECHO_AGENT_
+operations:
+  - operation_id: create_thread
+    test_input:
+      thread_create:
+        type: agntcy_acp.models.ThreadCreate
+    output_at_least:
+      status: idle
+  - operation_id: create_thread_run
+    test_input:
+      run_create_stateful:
+        type: agntcy_acp.models.RunCreateStateful
+        arguments:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+          input:
+            echo_input:
+              messages:
+                - type: human
+                  content: "What is up, Dude?"
+          config:
+            configurable:
+              to_upper: true
+    output_at_least:
+      status: pending
+      thread_id: "{{ results[0].thread_id }}"
+      agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+  - operation_id: wait_for_thread_run_output
+    test_input:
+      thread_id:
+        type: str
+        value: "{{ results[0].thread_id }}"
+      run_id:
+        type: str
+        value: "{{ results[1].run_id }}"
+    output_at_least:
+      output:
+        actual_instance:
+          type: result
+          values:
+            echo_output:
+              messages:
+                - content: "What is up, Dude?"
+                  type: human
+                - content: "WHAT IS UP, DUDE?"
+                  type: assistant
+      run:
+        status: success
+        thread_id: "{{ results[0].thread_id }}"
+        run_id: "{{ results[1].run_id }}"
+  - operation_id: get_thread_run
+    test_input:
+      thread_id:
+        type: str
+        value: "{{ results[0].thread_id }}"
+      run_id:
+        type: str
+        value: "{{ results[1].run_id }}"
+    output_at_least:
+      thread_id: "{{ results[0].thread_id }}"
+      agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+      run_id: "{{ results[1].run_id }}"
+  - operation_id: get_thread
+    test_input:
+      thread_id:
+        type: str
+        value: "{{ results[0].thread_id }}"
+    output_at_least:
+      status: idle

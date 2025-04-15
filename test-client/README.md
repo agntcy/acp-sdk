@@ -26,10 +26,10 @@ root level of this repository.
   manager.
 
   ```
-  wfsm deploy --manifestPath examples/echo-agent/deploy/echo-agent.json --envFilePath examples/echo-agent/deploy/echo_agent_example.yaml
+  cd examples/echo-agent ; wfsm deploy --manifestPath deploy/echo-agent.json --envFilePath deploy/echo_agent_example.yaml
   ```
 
-  2. Configure the test variables to match the server
+  1. Configure the test variables to match the server
   deployment. These can be stored in a `.env` file or
   supplied on the command line. The "WORKFLOW_SERVER_" values 
   will need to be taken from the output of workflow-server in the 
@@ -42,10 +42,16 @@ root level of this repository.
   ECHO_AGENT_AGENT_ID="WORKFLOW_SERVER_AGENT_ID"
   ```
 
-  3. Run the test client from the CLI.
+  1. Run the test async client from the CLI on the stateless API set.
 
   ```
-  cd test-client ; poetry run cli --async ./examples/echo_agent_test.yaml
+  cd test-client ; poetry run cli --async ./examples/echo_agent_stateless.yaml
+  ```
+
+  1. Run the test sync client from the CLI on the stateful API set.
+
+  ```
+  cd test-client ; poetry run cli ./examples/echo_agent_stateful.yaml
   ```
 
 ## Test configuration file layout

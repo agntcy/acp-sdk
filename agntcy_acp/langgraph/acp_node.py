@@ -63,6 +63,7 @@ class ACPNode:
         config_path: Optional[str] = None,
         config_type=None,
         auth_header: Optional[Dict] = None,
+        use_threads: bool = False,
     ):
         """Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -88,6 +89,7 @@ class ACPNode:
         self.configPath = config_path
         self.configType = config_type
         self.auth_header = auth_header
+        self.use_threads = use_threads
 
     def get_name(self):
         return self.__name__
@@ -103,8 +105,13 @@ class ACPNode:
             raise Exception(
                 f"ERROR in ACP Node {self.get_name()}. Unable to extract input: {e}"
             )
-        
-        return state
+
+        if isinstance(agent_input, BaseModel):
+            return agent_input.model_dump()
+        elif isinstance(agent_input, MutableMapping):
+            return agent_input
+        else:
+            return {}
 
     def _extract_config(self, config: Any) -> Any:
         if not config:
@@ -124,9 +131,17 @@ class ACPNode:
             return None
 
         if self.configType is not None:
-            return self.configType.model_validate(config)
+            # Set defaults, etc.
+            agent_config = self.configType.model_validate(config)
         else:
-            return config
+            agent_config = config
+
+        if isinstance(agent_config, BaseModel):
+            return agent_config.model_dump()
+        elif isinstance(agent_config, MutableMapping):
+            return agent_config
+        else:
+            return {}
 
     def _set_output(self, state: Any, output: Optional[Dict[str, Any]]):
         output_parent = state
@@ -147,29 +162,6 @@ class ACPNode:
             setattr(output_parent, el, output_state)
         else:
             raise ValueError("object missing attribute: {el}")
-
-    def _prepare_run_create(self, state: Any, config: RunnableConfig) -> RunCreateStateless:
-        agent_input = self._extract_input(state)
-        if isinstance(agent_input, BaseModel):
-            input_to_agent = agent_input.model_dump()
-        elif isinstance(agent_input, MutableMapping):
-            input_to_agent = agent_input
-        else:
-            input_to_agent = {}
-
-        agent_config = self._extract_config(config)
-        if isinstance(agent_config, BaseModel):
-            config_to_agent = agent_config.model_dump()
-        elif isinstance(agent_config, MutableMapping):
-            config_to_agent = agent_config
-        else:
-            config_to_agent = {}
-
-        return RunCreateStateless(
-            agent_id=self.agent_id,
-            input=input_to_agent,
-            config=Config(configurable=config_to_agent),
-        )
     
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
@@ -186,19 +178,48 @@ class ACPNode:
         return state
 
     def invoke(self, state: Any, config: RunnableConfig) -> Any:
-        run_create = self._prepare_run_create(state, config)
-        with ApiClient(configuration=self.clientConfig) as api_client:
-            acp_client = ACPClient(api_client=api_client)
-            run_output = acp_client.create_and_wait_for_stateless_run_output(run_create)
+        if self.use_threads:
+            run_create = RunCreateStateful(
+                agent_id=self.agent_id,
+                input=self._extract_input(state),
+                config=Config(configurable=self._extract_config(config)),
+            )
+            with ApiClient(configuration=self.clientConfig) as api_client:
+                acp_client = ACPClient(api_client=api_client)
+                run_output = acp_client.create_and_wait_for_thread_run_output(run_create)
+        else:
+            run_create = RunCreateStateless(
+                agent_id=self.agent_id,
+                input=self._extract_input(state),
+                config=Config(configurable=self._extract_config(config)),
+            )
+            with ApiClient(configuration=self.clientConfig) as api_client:
+                acp_client = ACPClient(api_client=api_client)
+                run_output = acp_client.create_and_wait_for_stateless_run_output(run_create)
         
+        # output is the same between stateful and stateless
         self._handle_run_output(state, run_output.output)
         return state
 
     async def ainvoke(self, state: Any, config: RunnableConfig) -> Any:
-        run_create = self._prepare_run_create(state, config)
-        async with AsyncApiClient(configuration=self.clientConfig) as api_client:
-            acp_client = AsyncACPClient(api_client=api_client)
-            run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
+        if self.use_threads:
+            run_create = RunCreateStateful(
+                agent_id=self.agent_id,
+                input=self._extract_input(state),
+                config=Config(configurable=self._extract_config(config)),
+            )
+            async with AsyncApiClient(configuration=self.clientConfig) as api_client:
+                acp_client = AsyncACPClient(api_client=api_client)
+                run_output = await acp_client.create_and_wait_for_thread_run_output(run_create)
+        else:
+            run_create = RunCreateStateless(
+                agent_id=self.agent_id,
+                input=self._extract_input(state),
+                config=Config(configurable=self._extract_config(config)),
+            )
+            async with AsyncApiClient(configuration=self.clientConfig) as api_client:
+                acp_client = AsyncACPClient(api_client=api_client)
+                run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
         
         self._handle_run_output(state, run_output.output)
         return state
