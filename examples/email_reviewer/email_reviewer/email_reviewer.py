@@ -1,40 +1,43 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
-from typing import Any, Optional
-from pydantic import BaseModel, Field
+from typing import Any
+
 from dotenv import load_dotenv
 from llama_index.core.agent.react import ReActChatFormatter, ReActOutputParser
-from .state import EmailReviewerInput, EmailReview, ConfigSchema
-
 from llama_index.core.llms.llm import LLM
 from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.core.prompts import ChatPromptTemplate
 from llama_index.core.tools.types import BaseTool
 from llama_index.core.workflow import (
-    Event,
     Context,
-    Workflow,
+    Event,
     StartEvent,
     StopEvent,
+    Workflow,
     step,
 )
-from llama_index.core.prompts import ChatPromptTemplate
 from llama_index.llms.azure_openai import AzureOpenAI
 
+from .state import EmailReview
+
 load_dotenv()
+
 
 class LogEvent(Event):
     msg: str
     delta: bool = False
 
 
-
-EMAIL_REVIEWER_SYSTEM_PROMPT = "You are an email reviewer assistant, in charge of reviewing an email"
+EMAIL_REVIEWER_SYSTEM_PROMPT = (
+    "You are an email reviewer assistant, in charge of reviewing an email"
+)
 
 EMAIL_REVIEWER_USER_PROMPT = """Your tasks are:
 1) Check whether the provided email has no writing errors
 2) Check whether the provided email matches the target audience
 3) If the email has writing errors or does not match the target audience below, correct the email.
+4) Create a list of modifications just a string describying the changes applied eg: Sentence  A was modified to sentence B.
 
 The target audience:
 {target_audience}
@@ -72,27 +75,28 @@ class EmailReviewer(Workflow):
         )
 
         self.memory = ChatMemoryBuffer.from_defaults(llm=llm)
-        self.formatter = ReActChatFormatter.from_defaults(
-            context=extra_context or ""
-        )
+        self.formatter = ReActChatFormatter.from_defaults(context=extra_context or "")
         self.output_parser = ReActOutputParser()
         self.sources = []
 
     @step
-    async def review_email(
-        self, ctx: Context, ev: StartEvent
-    ) -> StopEvent:
+    async def review_email(self, ctx: Context, ev: StartEvent) -> StopEvent:
         if self._verbose:
             ctx.write_event_to_stream(
-                LogEvent(msg=f"Reviewing email for audience {ev.target_audience}"))
+                LogEvent(msg=f"Reviewing email for audience {ev.target_audience}")
+            )
 
         audience_descr = AUDIENCE_DESCRIPTIONS_MAP.get(
-            ev.target_audience, "General Audience")
+            ev.target_audience, "General Audience"
+        )
 
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", EMAIL_REVIEWER_SYSTEM_PROMPT),
-            ("user", EMAIL_REVIEWER_USER_PROMPT)
-        ])
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", EMAIL_REVIEWER_SYSTEM_PROMPT),
+                ("user", EMAIL_REVIEWER_USER_PROMPT),
+            ]
+        )
+
         review = await self.llm.astructured_predict(
             EmailReview,
             prompt,
@@ -126,15 +130,14 @@ async def main():
 
     # print(await workflow.run(email=email_example, target_audience=audience_example))
 
-
     handler = workflow.run(email=email_example, target_audience=audience_example)
 
     async for ev in handler.stream_events():
         print("ev: ", type(ev), ev)
 
-
     final_result = await handler
     print("Final result", final_result)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

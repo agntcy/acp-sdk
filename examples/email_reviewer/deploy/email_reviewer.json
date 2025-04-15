@@ -62,6 +62,12 @@
           "default": null,
           "description": "The corrected version of the email, if changes were necessary",
           "title": "Corrected Email"
+        },
+        "review_result": {
+          "default": "",
+          "description": "A description explaining why the email was changed if email was not changed it should have a string stating just that",
+          "title": "Review Result",
+          "type": "string"
         }
       },
       "required": [
