@@ -81,9 +81,9 @@
       {
         "type": "source_code",
         "name": "source_code_local",
-        "url": ".",
+        "url": "https://github.com/agntcy/acp-sdk.git//examples/email_reviewer",
         "framework_config": {
-          "framework_type": "llama_index",
+          "framework_type": "llamaindex",
           "path": "email_reviewer:email_reviewer_workflow"
         }
       }
