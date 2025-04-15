@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 from collections.abc import MutableMapping
-from typing import Any, Dict, Optional
-
+from typing import Any, Dict, Optional, Union
+from pydantic import BaseModel
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import (
     interrupt,
@@ -19,6 +19,7 @@ from agntcy_acp import (
 from agntcy_acp.exceptions import ACPRunException
 from agntcy_acp.models import (
     Config,
+    RunCreateStateful,
     RunCreateStateless,
     RunError,
     RunInterrupt,
@@ -66,6 +67,7 @@ class ACPNode:
         config_path: Optional[str] = None,
         config_type=None,
         auth_header: Optional[Dict] = None,
+        use_threads: bool = False,
     ):
         """Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -166,32 +168,7 @@ class ACPNode:
             setattr(output_parent, el, output_state)
         else:
             raise ValueError("object missing attribute: {el}")
-
-    def _prepare_run_create(
-        self, state: Any, config: RunnableConfig
-    ) -> RunCreateStateless:
-        agent_input = self._extract_input(state)
-        if isinstance(agent_input, BaseModel):
-            input_to_agent = agent_input.model_dump()
-        elif isinstance(agent_input, MutableMapping):
-            input_to_agent = agent_input
-        else:
-            input_to_agent = {}
-
-        agent_config = self._extract_config(config)
-        if isinstance(agent_config, BaseModel):
-            config_to_agent = agent_config.model_dump()
-        elif isinstance(agent_config, MutableMapping):
-            config_to_agent = agent_config
-        else:
-            config_to_agent = {}
-
-        return RunCreateStateless(
-            agent_id=self.agent_id,
-            input=input_to_agent,
-            config=Config(configurable=config_to_agent),
-        )
-
+    
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
             run_result: RunResult = run_output.actual_instance
@@ -210,7 +187,7 @@ class ACPNode:
 
         return state
 
-    def _get_thread_id(self, config: RunnableConfig):
+    def _get_thread_id(self, config: RunnableConfig) -> Optional[str]:
         configurable = config.get("configurable", {})
         thread_id = configurable.get("thread_id", None)
         return thread_id
@@ -219,7 +196,7 @@ class ACPNode:
         self,
         config: RunnableConfig,
         run_output: RunWaitResponseStateless,
-        thread_id: str,
+        thread_id: Optional[str],
     ):
         if thread_id is None:
             raise ValueError("Thread_id is required for a interrupted run")
@@ -241,17 +218,28 @@ class ACPNode:
     def invoke(
         self,
         state: dict[str, Any] | Any,
-        config: RunnableConfig | None = None,
+        config: Optional[RunnableConfig] = None,
         **kwargs: Any,
     ) -> Any:
-
-        thread_id = self._get_thread_id(config)
         with ACPClient(configuration=self.clientConfig) as acp_client:
+            thread_id = self._get_thread_id(config)
             run_output = None
-            if thread_id is not None and thread_id in self.previous_thread_run:
-                run_output = self.previous_thread_run.get(thread_id, None)
+            if thread_id is not None:
+                if thread_id in self.previous_thread_run:
+                    run_output = self.previous_thread_run.get(thread_id, None)
+                else:
+                    run_create = RunCreateStateful(
+                        agent_id=self.agent_id,
+                        input=self._extract_input(state),
+                        config=Config(configurable=self._extract_config(config)),
+                    )
+                    run_output = acp_client.create_and_wait_for_thread_run_output(thread_id, run_create)
             else:
-                run_create = self._prepare_run_create(state, config)
+                run_create = RunCreateStateless(
+                    agent_id=self.agent_id,
+                    input=self._extract_input(state),
+                    config=Config(configurable=self._extract_config(config)),
+                )
                 run_output = acp_client.create_and_wait_for_stateless_run_output(
                     run_create
                 )
@@ -274,17 +262,29 @@ class ACPNode:
     async def ainvoke(
         self,
         state: dict[str, Any] | Any,
-        config: RunnableConfig | None = None,
+        config: Optional[RunnableConfig] = None,
         **kwargs: Any,
     ) -> Any:
         async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
             thread_id = self._get_thread_id(config)
             run_output = None
 
-            if thread_id is not None and thread_id in self.previous_thread_run:
-                run_output = self.previous_thread_run.get(thread_id, None)
+            if thread_id is not None:
+                if thread_id in self.previous_thread_run:
+                    run_output = self.previous_thread_run.get(thread_id, None)
+                else:
+                    run_create = RunCreateStateful(
+                        agent_id=self.agent_id,
+                        input=self._extract_input(state),
+                        config=Config(configurable=self._extract_config(config)),
+                    )
+                    run_output = await acp_client.create_and_wait_for_thread_run_output(thread_id, run_create)
             else:
-                run_create = self._prepare_run_create(state, config)
+                run_create = RunCreateStateless(
+                    agent_id=self.agent_id,
+                    input=self._extract_input(state),
+                    config=Config(configurable=self._extract_config(config)),
+                )
                 run_output = await acp_client.create_and_wait_for_stateless_run_output(
                     run_create
                 )
@@ -301,7 +301,6 @@ class ACPNode:
                     run_id=resume_run.run_id
                 )
         state = self._handle_run_output(state, run_output.output)
-        return state
 
     def __call__(self, state, config):
         return RunnableCallable(self.invoke, self.ainvoke)
