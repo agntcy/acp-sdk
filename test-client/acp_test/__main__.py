@@ -22,6 +22,11 @@ from jinja2.sandbox import SandboxedEnvironment
 from .client import async_process_operation, process_operation
 from .types import TestFile, TestOperation
 
+try:
+    from yaml import CSafeLoader as SafeLoader
+except ImportError:
+    from yaml import SafeLoader
+
 load_dotenv(dotenv_path=find_dotenv(usecwd=True))
 logger = logging.getLogger(__name__)
 
@@ -34,18 +39,18 @@ async def arun_test(
 ) -> List[int]:
     render_env["results"] = []
     fails = []
-    async with AsyncApiClient(config) as api_client:
-        acp_client = AsyncACPClient(api_client)
+    async with AsyncACPClient(configuration=config) as acp_client:
         for op_idx, op in enumerate(operations):
             # Substitute results in templates to allow forwarding run_id, etc.
             op_json = op.model_dump_json(exclude_defaults=True)
+            logger.debug(f"render_env: {render_env['results']}")
             new_op_json = jinja_env.from_string(op_json).render(render_env)
             op = TestOperation.model_validate_json(new_op_json)
 
-            success, result = await async_process_operation(acp_client, op, op_idx)
-            if not success:
-                fails.append(op_idx)
-            render_env["results"].append(result)
+            async for success, result in async_process_operation(acp_client, op, op_idx):
+                if not success:
+                    fails.append(op_idx)
+                render_env["results"].append(result)
     return fails
 
 
@@ -57,18 +62,17 @@ def run_test(
 ) -> List[int]:
     render_env["results"] = []
     fails = []
-    with ApiClient(config) as api_client:
-        acp_client = ACPClient(api_client)
+    with ACPClient(configuration=config) as acp_client:
         for op_idx, op in enumerate(operations):
             # Substitute results in templates to allow forwarding run_id, etc.
             op_json = op.model_dump_json(exclude_defaults=True)
             new_op_json = jinja_env.from_string(op_json).render(render_env)
             op = TestOperation.model_validate_json(new_op_json)
 
-            success, result = process_operation(acp_client, op, op_idx)
-            if not success:
-                fails.append(op_idx)
-            render_env["results"].append(result)
+            for success, result in process_operation(acp_client, op, op_idx):
+                if not success:
+                    fails.append(op_idx)
+                render_env["results"].append(result)
     return fails
 
 
@@ -115,12 +119,10 @@ def execute_test_file(
 
     # Read test config
     if filename == "-":
-        fh = sys.stdin
+        file_data = sys.stdin.read()
     else:
-        fh = open(filename, "r")
-
-    with fh:
-        file_data = fh.read()
+        with open(str(filename), "r") as fh:
+            file_data = fh.read()
 
     # Substitute templates
     jinja_env = SandboxedEnvironment(
@@ -132,7 +134,7 @@ def execute_test_file(
     render_env = {"env": os.environ}
 
     # Load YAML
-    yaml_data = yaml.safe_load(file_data)
+    yaml_data = yaml.load(file_data, Loader=SafeLoader)
     tests = TestFile.model_validate(yaml_data)
 
     config_args = tests.metadata.client_config.model_dump(exclude_none=True)

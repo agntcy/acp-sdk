@@ -1,0 +1,71 @@
+metadata:
+  client_config:
+    retries: 3
+  env_prefix: ECHO_AGENT_
+operations:
+  - operation_id: create_and_stream_stateless_run_output
+    test_input:
+      run_create_stateless:
+        type: agntcy_acp.models.RunCreateStateless
+        arguments:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+          input:
+            messages:
+              - type: human
+                content: "What is up, Dude?"
+          config:
+            configurable:
+              to_upper: true
+    output_stream:
+      - output_at_least:
+          event: agent_event
+          data:
+            actual_instance:
+              type: values
+              status: pending
+              values:
+                messages:
+                  - content: "What is up, Dude?"
+                    type: human
+                  - content: "WHAT IS UP, DUDE?"
+                    type: assistant
+  - operation_id: create_stateless_run
+    test_input:
+      run_create_stateless:
+        type: agntcy_acp.models.RunCreateStateless
+        arguments:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+          input:
+            messages:
+              - type: human
+                content: "What is up, Dude?"
+          config:
+            configurable:
+              to_upper: false
+              to_lower: true
+    output_at_least:
+      status: pending
+  - operation_id: stream_stateless_run_output
+    test_input:
+      run_id:
+        type: str
+        value: "{{ results[1].run_id }}"
+    output_at_least:
+      event: agent_event
+      data:
+        actual_instance:
+          type: values
+          status: success
+          values:
+            messages:
+              - content: "What is up, Dude?"
+                type: human
+              - content: "what is up, dude?"
+                type: assistant
+  - operation_id: get_stateless_run
+    test_input:
+      run_id:
+        type: str
+        value: "{{ results[1].run_id }}"
+    output_at_least:
+      status: success

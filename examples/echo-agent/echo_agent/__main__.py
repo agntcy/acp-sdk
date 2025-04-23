@@ -2,12 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 import itertools
 import logging
+import json
 
 import click
 from langchain_core.runnables import RunnableConfig
 
 from .langgraph import AGENT_GRAPH
-from .state import AgentState, ConfigSchema, InputState, Message, MsgType
+from .state import AgentState, ConfigSchema, Message, MsgType, MessageList
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class ParamMessage(click.ParamType):
     envvar="TO_UPPER",
     is_flag=True,
     show_envvar=True,
+    default=False,
     help="Convert input to upper case.",
 )
 @click.option(
@@ -39,6 +41,7 @@ class ParamMessage(click.ParamType):
     envvar="TO_LOWER",
     is_flag=True,
     show_envvar=True,
+    default=False,
     help="Convert input to lower case.",
 )
 @click.option(
@@ -71,11 +74,7 @@ def echo_server_agent(
     """ """
     logging.basicConfig(level=log_level.upper())
 
-    config = ConfigSchema()
-    if to_upper is not None:
-        config["to_upper"] = to_upper
-    if to_lower is not None:
-        config["to_lower"] = to_lower
+    config = ConfigSchema(to_lower=to_lower, to_upper=to_upper)
     if human is not None and assistant is not None:
         # Interleave list starting with human. Stops at shortest list.
         messages = list(itertools.chain(*zip(human, assistant)))
@@ -91,11 +90,10 @@ def echo_server_agent(
     else:
         messages = []
 
-    echo_input = InputState(messages=messages)
-    logger.debug(f"input messages: {echo_input.model_dump_json()}")
+    logger.debug(f"input messages: {messages}")
 
     # Imitate input from ACP API
-    input_api_object = AgentState(echo_input=echo_input).model_dump(mode="json")
+    input_api_object = AgentState(messages=messages).model_dump(mode="json")
 
     output_state = AGENT_GRAPH.invoke(
         AGENT_GRAPH.builder.schema.model_validate(input_api_object),
@@ -103,7 +101,8 @@ def echo_server_agent(
     )
 
     logger.debug(f"output messages: {output_state}")
-    print(output_state["echo_output"].model_dump_json(indent=2))
+    agent_state = AgentState(messages=output_state.get("messages", []))
+    print(agent_state.model_dump_json(indent=2))
 
 
 if __name__ == "__main__":

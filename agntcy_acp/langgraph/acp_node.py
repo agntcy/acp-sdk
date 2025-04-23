@@ -63,7 +63,6 @@ class ACPNode:
         config_path: Optional[str] = None,
         config_type=None,
         auth_header: Optional[Dict] = None,
-        use_threads: bool = False,
     ):
         """Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -89,7 +88,6 @@ class ACPNode:
         self.configPath = config_path
         self.configType = config_type
         self.auth_header = auth_header
-        self.use_threads = use_threads
 
     def get_name(self):
         return self.__name__
@@ -178,48 +176,18 @@ class ACPNode:
         return state
 
     def invoke(self, state: Any, config: RunnableConfig) -> Any:
-        if self.use_threads:
-            run_create = RunCreateStateful(
-                agent_id=self.agent_id,
-                input=self._extract_input(state),
-                config=Config(configurable=self._extract_config(config)),
-            )
-            with ApiClient(configuration=self.clientConfig) as api_client:
-                acp_client = ACPClient(api_client=api_client)
-                run_output = acp_client.create_and_wait_for_thread_run_output(run_create)
-        else:
-            run_create = RunCreateStateless(
-                agent_id=self.agent_id,
-                input=self._extract_input(state),
-                config=Config(configurable=self._extract_config(config)),
-            )
-            with ApiClient(configuration=self.clientConfig) as api_client:
-                acp_client = ACPClient(api_client=api_client)
-                run_output = acp_client.create_and_wait_for_stateless_run_output(run_create)
+        run_create = self._prepare_run_create(state, config)
+        with ACPClient(configuration=self.clientConfig) as acp_client:
+            run_output = acp_client.create_and_wait_for_stateless_run_output(run_create)
         
         # output is the same between stateful and stateless
         self._handle_run_output(state, run_output.output)
         return state
 
     async def ainvoke(self, state: Any, config: RunnableConfig) -> Any:
-        if self.use_threads:
-            run_create = RunCreateStateful(
-                agent_id=self.agent_id,
-                input=self._extract_input(state),
-                config=Config(configurable=self._extract_config(config)),
-            )
-            async with AsyncApiClient(configuration=self.clientConfig) as api_client:
-                acp_client = AsyncACPClient(api_client=api_client)
-                run_output = await acp_client.create_and_wait_for_thread_run_output(run_create)
-        else:
-            run_create = RunCreateStateless(
-                agent_id=self.agent_id,
-                input=self._extract_input(state),
-                config=Config(configurable=self._extract_config(config)),
-            )
-            async with AsyncApiClient(configuration=self.clientConfig) as api_client:
-                acp_client = AsyncACPClient(api_client=api_client)
-                run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
+        run_create = self._prepare_run_create(state, config)
+        async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
+            run_output = await acp_client.create_and_wait_for_stateless_run_output(run_create)
         
         self._handle_run_output(state, run_output.output)
         return state
