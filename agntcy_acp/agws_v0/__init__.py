@@ -1,13 +1,19 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
-# noqa: E501
-from ..acp_v0.models import *
-from ..agws_v0.models import (
+# flake8: noqa
+# noqa: F401
+from .models import (
+    AgentRef,
     Streaming,
     Capabilities,
     Interrupt,
+    AgentACPSpec,
+    AgentSearchRequest,
     ErrorResponse,
+    StreamingMode,
     RunStatus,
+    RunSearchRequest,
+    RunError,
     InputSchema,
     OutputSchema,
     ConfigSchema,
@@ -15,13 +21,24 @@ from ..agws_v0.models import (
     StreamUpdateSchema,
     InterruptPayloadSchema,
     ResumePayloadSchema,
+    ThreadCreate,
+    ThreadSearchRequest,
+    Thread,
     EnvVar,
     FrameworkType,
     SecurityScheme,
+    AgentMetadata,
+    Agent,
     AgentACPDescriptor,
+    RunCreate,
+    Run,
+    RunResult,
     CustomRunResultUpdate,
+    RunInterrupt,
     SourceCodeDeployment,
     AgentConnectProtocol,
+    RunOutput,
+    RunOutputStream,
     RemoteServiceDeployment,
     DockerDeployment,
     DeploymentOptions,
