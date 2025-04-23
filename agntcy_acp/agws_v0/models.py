@@ -345,6 +345,15 @@ class Thread(BaseModel):
     )
 
 
+class EnvVarValues(BaseModel):
+    name: Optional[str] = Field(
+        None,
+        description="name of the agent dependency these environment variables are for",
+    )
+    values: Optional[Dict[str, str]] = None
+    dependencies: Optional[List[EnvVarValues]] = None
+
+
 class EnvVar(BaseModel):
     desc: str
     name: str
@@ -380,6 +389,20 @@ class Type5(Enum):
 
 class Type6(Enum):
     docker = "docker"
+
+
+class DockerDeployment(BaseModel):
+    type: Literal["docker"]
+    name: Optional[str] = Field(
+        None,
+        description="Name this deployment option is referred to within this agent. This is needed to indicate which one is preferred when this manifest is referred. Can be omitted, in such case selection is not possible.            -",
+        title="Deployment Option Name",
+    )
+    image: AnyUrl = Field(
+        ...,
+        description="Container image built for the agent containing the agent and Workflow Server.",
+        title="Agent Docker image",
+    )
 
 
 class Type7(Enum):
@@ -490,6 +513,24 @@ class RunInterrupt(BaseModel):
     interrupt: InterruptPayloadSchema
 
 
+class AgentDependency(BaseModel):
+    name: str = Field(..., description="Name of the agent dependency", title="Name")
+    ref: AgentRef = Field(
+        ...,
+        description="Reference to the agent in the agent directory. It includes the version and the locator.",
+    )
+    deployment_option: Optional[str] = Field(
+        None,
+        description="Selected deployment option for this agent. ",
+        title="Deployment Option",
+    )
+    env_var_values: Optional[EnvVarValues] = Field(
+        None,
+        description="Environment variable values to be set for this agent.",
+        title="Environment Variable Values",
+    )
+
+
 class SourceCodeDeployment(BaseModel):
     type: Literal["source_code"]
     name: Optional[str] = Field(
@@ -553,31 +594,12 @@ class RemoteServiceDeployment(BaseModel):
     protocol: AgentConnectProtocol
 
 
-class DockerDeployment(BaseModel):
-    type: Literal["docker"]
-    name: Optional[str] = Field(
-        None,
-        description="Name this deployment option is referred to within this agent. This is needed to indicate which one is preferred when this manifest is referred. Can be omitted, in such case selection is not possible.            -",
-        title="Deployment Option Name",
-    )
-    image: AnyUrl = Field(
-        ..., description="Container image for the agent", title="Agent Docker image"
-    )
-    protocol: AgentConnectProtocol
-
-
 class DeploymentOptions(
     RootModel[Union[SourceCodeDeployment, RemoteServiceDeployment, DockerDeployment]]
 ):
     root: Union[SourceCodeDeployment, RemoteServiceDeployment, DockerDeployment] = (
         Field(..., discriminator="type")
     )
-
-
-class AgentManifest(BaseModel):
-    metadata: AgentMetadata
-    specs: AgentACPSpec
-    deployment: Optional[AgentDeployment] = None
 
 
 class AgentDeployment(BaseModel):
@@ -598,38 +620,10 @@ class AgentDeployment(BaseModel):
     )
 
 
-class AgentDependency(BaseModel):
-    name: str = Field(..., description="Name of the agent dependency", title="Name")
-    ref: AgentRef = Field(
-        ...,
-        description="Reference to the agent in the agent directory. It includes the version and the locator.",
-    )
-    deployment_option: Optional[str] = Field(
-        None,
-        description="Selected deployment option for this agent. ",
-        title="Deployment Option",
-    )
-    env_var_values: Optional[EnvVarValues] = Field(
-        None,
-        description="Environment variable values to be set for this agent.",
-        title="Environment Variable Values",
-    )
+class AgentManifest(BaseModel):
+    metadata: AgentMetadata
+    specs: AgentACPSpec
+    deployment: Optional[AgentDeployment] = None
 
 
-class Dependency(BaseModel):
-    name: Optional[str] = Field(
-        None,
-        description="name of the agent dependency these environment variables are for",
-    )
-    values: Optional[EnvVarValues] = None
-
-
-class EnvVarValues(BaseModel):
-    values: Optional[Dict[str, str]] = None
-    dependencies: Optional[List[Dependency]] = None
-
-
-AgentManifest.model_rebuild()
-AgentDeployment.model_rebuild()
-AgentDependency.model_rebuild()
-Dependency.model_rebuild()
+EnvVarValues.model_rebuild()
