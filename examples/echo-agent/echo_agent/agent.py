@@ -16,23 +16,15 @@ def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     logger.debug(f"enter --- state: {state.model_dump_json()}, config: {args}")
     ai_response = None
 
-    # Note: subfields are not typed when running in the workflow server
-    # so we fix that here.
-    if hasattr(state.echo_input, "messages"):
-        messages = getattr(state.echo_input, "messages")
-    elif "messages" in state.echo_input:
-        messages = [Message.model_validate(m) for m in state.echo_input["messages"]]
-    else:
-        messages = []
-
-    if messages is not None:
-        # Get last human message
-        human_message = next(
-            filter(lambda m: m.type == MsgType.human, reversed(messages)),
-            None,
-        )
-        if human_message is not None:
-            ai_response = human_message.content
+    messages = state.echo_input.messages or []
+    
+    # Get last human message
+    human_message = next(
+        filter(lambda m: m.type == MsgType.human, reversed(messages)),
+        None,
+    )
+    if human_message is not None:
+        ai_response = human_message.content
 
     if "to_upper" in args:
         to_upper = args["to_upper"]
