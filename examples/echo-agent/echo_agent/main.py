@@ -2,13 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 import itertools
 import logging
-import json
 
 import click
 from langchain_core.runnables import RunnableConfig
 
 from .langgraph import AGENT_GRAPH
-from .state import AgentState, ConfigSchema, Message, MsgType, MessageList
+from .state import AgentState, ConfigSchema, Message, MsgType
 
 logger = logging.getLogger(__name__)
 

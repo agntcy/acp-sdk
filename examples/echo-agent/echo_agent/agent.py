@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 # Define agent function
 def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     args = config.get("configurable", {})
-    logger.debug(f"enter --- state: {state.model_dump_json()}, config: {args}")
     ai_response = None
 
     # Note: subfields are not typed when running in the workflow server
@@ -21,6 +20,7 @@ def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     messages = state.messages or []
 
     if messages:
+        logger.debug(f"received messages: {messages}")
         # Get last human message
         human_message = next(
             filter(lambda m: m.type == MsgType.human, reversed(messages)),
@@ -43,5 +43,4 @@ def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     else:
         output_messages = []
 
-    logger.debug(f"returning messages: {output_messages}")
     return {"messages": messages + output_messages}

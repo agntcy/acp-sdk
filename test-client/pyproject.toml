@@ -1,6 +1,6 @@
 [project]
 name = "acp-test"
-version = "0.1.0"
+version = "0.2.0"
 license = "Apache-2.0"
 description = "ACP test client"
 readme = "README.md"
@@ -34,7 +34,7 @@ pythonpath = ["."]
 asyncio_mode = "auto"
 
 [tool.poetry.scripts]
-cli = "acp_test.__main__:execute_test_file"
+cli = "acp_test.main:execute_test_file"
 
 [tool.ruff]
 lint.select = ["E", "F", "I", "TID251"]

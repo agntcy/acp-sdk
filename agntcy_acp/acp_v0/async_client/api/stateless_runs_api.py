@@ -15,7 +15,7 @@
 
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union, AsyncGenerator
+from typing import Any, Dict, List, Optional, Tuple, Union, AsyncIterator
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBool, StrictStr, field_validator
@@ -356,7 +356,7 @@ class StatelessRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> AsyncGenerator[RunOutputStream]:
+    ) -> AsyncIterator[RunOutputStream]:
         """Create a stateless run and stream its output
 
         Create a stateless run and join its output stream. See 'GET /runs/{run_id}/stream' for details on the return values.
@@ -394,7 +394,6 @@ class StatelessRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ServerSideEvent",
             '404': "str",
             '409': "str",
             '422': "str",
@@ -406,19 +405,19 @@ class StatelessRunsApi:
         # Handle errors separately
         if response_data.status != 200:
             await response_data.read()
-            self.api_client.response_deserialize(
+            yield self.api_client.response_deserialize(
                 response_data=response_data,
                 response_types_map=_response_types_map,
             ).data
-        # Handle SSE data
-        stream = response_data.response.content.iter_chunked(4096)
-        async for event in sse_astream(stream):
-            print(event.model_dump_json(indent=2))
-            yield RunOutputStream(
-                id=event.last_event_id,
-                event=event.event_type,
-                data=StreamEventPayload.from_json(event.event_data),
-            )
+        else:
+            # Handle SSE data
+            stream = response_data.response.content.iter_chunked(4096)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call
@@ -437,7 +436,7 @@ class StatelessRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[RunOutputStream]:
+    ) -> AsyncIterator[ApiResponse[RunOutputStream]]:
         """Create a stateless run and stream its output
 
         Create a stateless run and join its output stream. See 'GET /runs/{run_id}/stream' for details on the return values.
@@ -475,7 +474,6 @@ class StatelessRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "RunOutputStream",
             '404': "str",
             '409': "str",
             '422': "str",
@@ -484,11 +482,22 @@ class StatelessRunsApi:
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
+        # Handle errors separately
+        if response_data.status != 200:
+            await response_data.read()
+            yield self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_response_types_map,
+            )
+        else:
+            # Handle SSE data
+            stream = response_data.response.content.iter_chunked(4096)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call
@@ -2320,7 +2329,7 @@ class StatelessRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RunOutputStream:
+    ) -> AsyncIterator[RunOutputStream]:
         """Stream output from Stateless Run
 
         Join the output stream of an existing run. This endpoint streams output in real-time from a run. Only output produced after this endpoint is called will be streamed.
@@ -2358,7 +2367,6 @@ class StatelessRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "RunOutputStream",
             '404': "str",
             '422': "str",
         }
@@ -2366,11 +2374,22 @@ class StatelessRunsApi:
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        # Handle errors separately
+        if response_data.status != 200:
+            await response_data.read()
+            yield self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_response_types_map,
+            ).data
+        else:
+            # Handle SSE data
+            stream = response_data.response.content.iter_chunked(4096)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call
@@ -2389,7 +2408,7 @@ class StatelessRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[RunOutputStream]:
+    ) -> AsyncIterator[ApiResponse[RunOutputStream]]:
         """Stream output from Stateless Run
 
         Join the output stream of an existing run. This endpoint streams output in real-time from a run. Only output produced after this endpoint is called will be streamed.
@@ -2427,7 +2446,6 @@ class StatelessRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "RunOutputStream",
             '404': "str",
             '422': "str",
         }
@@ -2435,11 +2453,22 @@ class StatelessRunsApi:
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
+        # Handle errors separately
+        if response_data.status != 200:
+            await response_data.read()
+            yield self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_response_types_map,
+            )
+        # Handle SSE data
+        else:
+            stream = response_data.response.content.iter_chunked(4096)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call

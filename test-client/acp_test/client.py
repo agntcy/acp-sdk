@@ -1,11 +1,11 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import builtins
-from datetime import datetime
 import importlib
 import inspect
 import logging
-from typing import Any, Tuple, Union, Dict, AsyncGenerator, Generator
+from datetime import datetime
+from typing import Any, AsyncIterator, Dict, Iterator, Tuple, Union
 
 from agntcy_acp import ACPClient, AsyncACPClient
 from deepdiff import diff
@@ -13,8 +13,8 @@ from pydantic import BaseModel
 
 from .types import TestOperation
 
-
 logger = logging.getLogger(__name__)
+
 
 def _get_class(full_name: str) -> Any:
     names = full_name.rsplit(".", maxsplit=1)
@@ -49,7 +49,12 @@ def _get_op_args(
     return op, args
 
 
-def _check_output_at_least(result_dump: Dict[str,Any], output_at_least: Dict[str,Any], op_id: str, op_idx: int) -> bool:
+def _check_output_at_least(
+    result_dump: Dict[str, Any],
+    output_at_least: Dict[str, Any],
+    op_id: str,
+    op_idx: int,
+) -> bool:
     mapdiff = diff.DeepDiff(
         output_at_least,
         result_dump,
@@ -57,29 +62,29 @@ def _check_output_at_least(result_dump: Dict[str,Any], output_at_least: Dict[str
         use_enum_value=True,
     )
     if "values_changed" in mapdiff or "dictionary_item_removed" in mapdiff:
-        print(
-            f"operation {op_idx}: {op_id}:\n{mapdiff.to_json(indent=2)}"
-        )
+        print(f"operation {op_idx}: {op_id}:\n{mapdiff.to_json(indent=2)}")
         return False
     else:
         return True
 
-def _check_output_exact(result: Any, output_exact: Dict[str,Any], op_id: str, op_idx: int) -> bool:
+
+def _check_output_exact(
+    result: Any, output_exact: Dict[str, Any], op_id: str, op_idx: int
+) -> bool:
     result_dump = result.model_dump()
     mapdiff = diff.DeepDiff(
-        output_exact, 
+        output_exact,
         result_dump,
         threshold_to_diff_deeper=0,
         use_enum_value=True,
         exclude_types=[datetime],
     )
     if mapdiff:
-        print(
-            f"operation {op_idx}: {op_id}:\n{mapdiff.to_json(indent=2)}"
-        )
+        print(f"operation {op_idx}: {op_id}:\n{mapdiff.to_json(indent=2)}")
         return False
     else:
         return False
+
 
 def _process_result(
     result: Any, operation: TestOperation, op_idx: int
@@ -88,7 +93,7 @@ def _process_result(
         result_dump = result.model_dump(exclude_none=True)
     else:
         result_dump = {}
-    
+
     ret_val = True
     op_id = operation.operation_id
 
@@ -96,21 +101,37 @@ def _process_result(
     if operation.output_stream:
         op = operation.output_stream.pop(0)
         if "output_at_least" in op:
-            ret_val = _check_output_at_least(result_dump, op["output_at_least"], op_id, op_idx) and ret_val
+            ret_val = (
+                _check_output_at_least(
+                    result_dump, op["output_at_least"], op_id, op_idx
+                )
+                and ret_val
+            )
         if "output_exact" in op:
-            ret_val = _check_output_exact(result, op["output_exact"], op_id, op_idx) and ret_val
+            ret_val = (
+                _check_output_exact(result, op["output_exact"], op_id, op_idx)
+                and ret_val
+            )
     else:
         if operation.output_at_least:
-            ret_val = _check_output_at_least(result_dump, operation.output_at_least, op_id, op_idx) and ret_val
+            ret_val = (
+                _check_output_at_least(
+                    result_dump, operation.output_at_least, op_id, op_idx
+                )
+                and ret_val
+            )
         if operation.output_exact:
-            ret_val = _check_output_exact(result, operation.output_exact, op_id, op_idx) and ret_val
+            ret_val = (
+                _check_output_exact(result, operation.output_exact, op_id, op_idx)
+                and ret_val
+            )
 
     return ret_val, result_dump
 
 
 def process_operation(
     client: ACPClient, operation: TestOperation, op_idx: int
-) -> Generator[Tuple[bool, Any]]:
+) -> Iterator[Tuple[bool, Any]]:
     op, args = _get_op_args(client, operation)
     result = op(**args)
 
@@ -127,7 +148,7 @@ def process_operation(
 
 async def async_process_operation(
     client: AsyncACPClient, operation: TestOperation, op_idx: int
-) -> AsyncGenerator[Tuple[bool, Any]]:
+) -> AsyncIterator[Tuple[bool, Any]]:
     op, args = _get_op_args(client, operation)
     async_obj = op(**args)
 
@@ -145,4 +166,3 @@ async def async_process_operation(
     except Exception as exc:
         logger.exception(exc)
         yield _process_result(None, operation, op_idx)
-

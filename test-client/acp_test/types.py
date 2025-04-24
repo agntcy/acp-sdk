@@ -54,9 +54,9 @@ class TestMetadata(BaseModel):
 class TestOperation(BaseModel):
     operation_id: OperationId
     test_input: Optional[Dict[str, TestInvocation]] = None
-    output_at_least: Optional[Dict[str,Any]] = None
-    output_exact: Optional[Dict[str,Any]] = None
-    output_stream: List[Dict[str,Any]] = []
+    output_at_least: Optional[Dict[str, Any]] = None
+    output_exact: Optional[Dict[str, Any]] = None
+    output_stream: List[Dict[str, Any]] = []
 
 
 class TestFile(BaseModel):

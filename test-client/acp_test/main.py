@@ -11,10 +11,8 @@ import click
 import yaml
 from agntcy_acp import (
     ACPClient,
-    ApiClient,
     ApiClientConfiguration,
     AsyncACPClient,
-    AsyncApiClient,
 )
 from dotenv import find_dotenv, load_dotenv
 from jinja2.sandbox import SandboxedEnvironment
@@ -43,11 +41,12 @@ async def arun_test(
         for op_idx, op in enumerate(operations):
             # Substitute results in templates to allow forwarding run_id, etc.
             op_json = op.model_dump_json(exclude_defaults=True)
-            logger.debug(f"render_env: {render_env['results']}")
             new_op_json = jinja_env.from_string(op_json).render(render_env)
             op = TestOperation.model_validate_json(new_op_json)
 
-            async for success, result in async_process_operation(acp_client, op, op_idx):
+            async for success, result in async_process_operation(
+                acp_client, op, op_idx
+            ):
                 if not success:
                     fails.append(op_idx)
                 render_env["results"].append(result)
@@ -108,7 +107,6 @@ def execute_test_file(
     logging.basicConfig(level=log_level.upper())
     logging.getLogger("urllib3").setLevel(log_level.upper())
     logging.getLogger("aiohttp").setLevel(log_level.upper())
-
 
     # CLI overrides environment after loading dotenv
     for env_string in env:

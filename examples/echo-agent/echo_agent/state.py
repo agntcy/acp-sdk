@@ -1,7 +1,7 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 from enum import Enum
-from typing import Optional, TypedDict, List
+from typing import List, Optional, TypedDict
 
 from pydantic import BaseModel, Field, RootModel
 
@@ -23,7 +23,9 @@ class ConfigSchema(TypedDict):
     to_upper: bool
     to_lower: bool
 
+
 MessageList = RootModel[List[Message]]
+
 
 class AgentState(BaseModel):
     messages: Optional[List[Message]] = None

@@ -62,5 +62,5 @@ file for the echo agent. Adjust as needed.
   make a request to the agent using `curl`:
 
   ```
-  curl -s -H 'content-type: application/json' -H "x-api-key: ${API_KEY}" -d '{"agent_id": "'${AGENT_ID}'", "input": { "echo_input": { "messages": [ { "type": "human", "content": "What is up, Dude?" } ] } }, "config": { "configurable": { "to_upper": true } } }' http://127.0.0.1:${WORKFLOW_SERVER_PORT}/runs/wait
+  curl -s -H 'content-type: application/json' -H "x-api-key: ${API_KEY}" -d '{"agent_id": "'${AGENT_ID}'", "input": { "messages": [ { "type": "human", "content": "What is up, Dude?" } ] }, "config": { "configurable": { "to_upper": true } } }' http://127.0.0.1:${WORKFLOW_SERVER_PORT}/runs/wait
   ```

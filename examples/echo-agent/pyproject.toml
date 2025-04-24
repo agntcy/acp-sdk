@@ -22,7 +22,7 @@ mypy = "^1.10.0"
 ruff = "^0.4.6"
 
 [tool.poetry.scripts]
-echo_agent = "echo_agent.__main__:echo_server_agent"
+echo_agent = "echo_agent.main:echo_server_agent"
 
 [tool.ruff]
 lint.select = ["E", "F", "I", "TID251"]

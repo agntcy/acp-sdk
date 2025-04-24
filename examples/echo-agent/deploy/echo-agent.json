@@ -2,7 +2,7 @@
   "metadata": {
     "ref": {
       "name": "org.agntcy.echo_agent",
-      "version": "0.0.1"
+      "version": "0.1.0"
     },
     "description": "Provides a test interface to echo input to output."
   },
