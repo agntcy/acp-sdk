@@ -54,7 +54,7 @@ assumes you are deploying from the directory with the `pyproject.toml`
 file for the echo agent. Adjust as needed.
 
   ```
-  wfsm deploy --manifestPath deploy/echo-agent.json --envFilePath deploy/echo_agent_example.yaml
+  wfsm deploy --manifestPath deploy/echo-agent-manifest.json --envFilePath deploy/echo-agent-wfsm-config.yaml
   ```
 
   Using the output of the logs to get the values for the
