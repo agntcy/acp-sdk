@@ -104,10 +104,10 @@ class ACPNode:
                 f"ERROR in ACP Node {self.get_name()}. Unable to extract input: {e}"
             )
 
-        if isinstance(agent_input, BaseModel):
-            return agent_input.model_dump()
-        elif isinstance(agent_input, MutableMapping):
-            return agent_input
+        if isinstance(state, BaseModel):
+            return state.model_dump()
+        elif isinstance(state, MutableMapping):
+            return state
         else:
             return {}
 
@@ -160,6 +160,29 @@ class ACPNode:
             setattr(output_parent, el, output_state)
         else:
             raise ValueError("object missing attribute: {el}")
+    
+    def _prepare_run_create(self, state: Any, config: RunnableConfig) -> RunCreateStateless:
+        agent_input = self._extract_input(state)
+        if isinstance(agent_input, BaseModel):
+            input_to_agent = agent_input.model_dump()
+        elif isinstance(agent_input, MutableMapping):
+            input_to_agent = agent_input
+        else:
+            input_to_agent = {}
+
+        agent_config = self._extract_config(config)
+        if isinstance(agent_config, BaseModel):
+            config_to_agent = agent_config.model_dump()
+        elif isinstance(agent_config, MutableMapping):
+            config_to_agent = agent_config
+        else:
+            config_to_agent = {}
+
+        return RunCreateStateless(
+            agent_id=self.agent_id,
+            input=input_to_agent,
+            config=Config(configurable=config_to_agent),
+        )
     
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):

@@ -84,7 +84,7 @@ def _parse_event_lines(lines: List[str]) -> Iterator[SSEvent]:
             event_data = value
         elif key == "id":
             if "\u0000" not in value:
-                last_event_id = value            
+                last_event_id = value
 
 def sse_stream(stream: Iterator[bytes]) -> Iterator[SSEvent]:
     found_lines = []

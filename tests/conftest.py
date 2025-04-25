@@ -2,11 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 import datetime
 import io
+
 import pytest
 
 import agntcy_acp
-from agntcy_acp import ApiResponse, ApiClient, AsyncApiClient, ApiClientConfiguration
-from agntcy_acp.models import RunStateless, RunCreateStateless, RunStatus
+from agntcy_acp import ApiResponse
+from agntcy_acp.models import (
+    RunCreateStateless,
+    RunOutput,
+    RunOutputStream,
+    RunResult,
+    RunStateless,
+    RunStatus,
+    StreamEventPayload,
+    ValueRunResultUpdate,
+)
 
 
 @pytest.fixture
@@ -16,6 +26,42 @@ def default_agent_id():
 @pytest.fixture
 def default_api_key():
     return "bogus-api-key"
+
+@pytest.fixture
+def default_run_stateless_response(default_agent_id) -> RunStateless:
+    init_run_id = "bugus-run-id"
+    return RunStateless(
+        run_id=init_run_id, 
+        agent_id=default_agent_id, 
+        creation=RunCreateStateless(agent_id=default_agent_id),
+        status=RunStatus.SUCCESS,
+        created_at=datetime.datetime.now(),
+        updated_at=datetime.datetime.now(),
+    )
+
+@pytest.fixture
+def default_run_output() -> RunOutput:
+    return RunOutput(RunResult(
+        type="result",
+        values={
+            "key": "value",
+        }
+    ))
+
+@pytest.fixture
+def default_run_output_stream(default_run_stateless_response) -> RunOutputStream:
+    return RunOutputStream(
+        id="1",
+        event="agent_event",
+        data=StreamEventPayload(ValueRunResultUpdate(
+            type="values",
+            run_id = default_run_stateless_response.run_id,
+            status="success",
+            values = {
+                "key": "value",
+            }
+        )),
+    )
 
 @pytest.fixture
 def mock_async_api_client(

@@ -1,7 +1,9 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import os
+
 import pytest
+
 from agntcy_acp.manifest.validator import validate_agent_descriptor_file
 
 

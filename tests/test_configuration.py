@@ -1,7 +1,9 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import json
+
 from agntcy_acp import ApiClientConfiguration
+
 
 def test_client_config(monkeypatch):
     host = "test.host.com"

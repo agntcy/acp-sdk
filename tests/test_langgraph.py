@@ -1,13 +1,22 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import datetime
-from langgraph.graph import StateGraph, START, END
-from pydantic import BaseModel
 from typing import TypedDict
+
+from langgraph.graph import END, START, StateGraph
+from pydantic import BaseModel
+
 import agntcy_acp
 from agntcy_acp import ApiClientConfiguration, ApiResponse
 from agntcy_acp.langgraph.acp_node import ACPNode
-from agntcy_acp.models import RunWaitResponseStateless, RunStateless, RunCreateStateless, RunStatus, RunOutput
+from agntcy_acp.models import (
+    RunCreateStateless,
+    RunOutput,
+    RunStateless,
+    RunStatus,
+    RunWaitResponseStateless,
+)
+
 
 class InputSchema(BaseModel):
     content: str
@@ -75,5 +84,3 @@ def test_langgraph_acp_node(mock_sync_api_client, default_api_key, default_agent
     output_state = graph.invoke({"input": InputSchema(content=input), "output": OutputSchema(content="bad-output")})
     assert output_state is not None
     assert output_state["output"].content == input
-
-
