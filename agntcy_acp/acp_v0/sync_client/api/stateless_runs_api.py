@@ -415,7 +415,7 @@ class StatelessRunsApi:
             ).data
         else:
             # Handle SSE data
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.stream(4096)
             for event in sse_stream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,
@@ -495,7 +495,7 @@ class StatelessRunsApi:
             )
         else:
             # Handle SSE data
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.stream(4096)
             for event in sse_stream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,
@@ -2386,7 +2386,7 @@ class StatelessRunsApi:
             ).data
         # Handle SSE data
         else:
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.stream(4096)
             for event in sse_stream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,
@@ -2465,7 +2465,7 @@ class StatelessRunsApi:
                 response_types_map=_response_types_map,
             )
         else:
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.stream(4096)
             for event in sse_stream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,

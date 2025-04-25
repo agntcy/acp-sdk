@@ -205,7 +205,8 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
 
     # Convenience functions to use this client as an sync context manager.
     def __enter__(self):
-        return self.api_client.__enter__()
+        self.api_client.__enter__()
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.api_client.__exit__(exc_type, exc_value, traceback)
@@ -255,7 +256,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
             ca_cert_data,
             debug=debug,
         )
-        return cls(api_client=ApiClient(client_config))
+        return ACPClient(api_client=ApiClient(client_config))
 
     @classmethod
     def fromConfiguration(
@@ -298,7 +299,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
             ca_cert_data,
             debug=debug,
         )
-        return cls(api_client=ApiClient(client_config))
+        return ACPClient(api_client=ApiClient(client_config))
 
 
 class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, AsyncThreadRunsApi):
