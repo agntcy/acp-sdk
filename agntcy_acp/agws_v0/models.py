@@ -24,16 +24,16 @@ class AgentRef(BaseModel):
     )
     url: Optional[AnyUrl] = Field(
         None,
-        description="URL of the record. Can be a network location or a file.",
+        description="URL of the record. Can be a network location, i.e. an entry in the Agent Directory or a file.",
         title="Agent Record URL",
     )
 
 
 class Streaming(BaseModel):
-    result: Optional[bool] = Field(
+    values: Optional[bool] = Field(
         None,
-        description="This is `true` if the agent supports result streaming. If `false` or missing, result streaming is not supported. Result streaming consists of a stream of objects of type `RunResult`, where each one sent over the stream fully replace the previous one.",
-        title="Result Streaming",
+        description="This is `true` if the agent supports values streaming. If `false` or missing, values streaming is not supported. Values streaming consists of a stream of objects of type `ValueRunResultUpdate`, where each one sent over the stream fully replace the previous one.",
+        title="Values Streaming",
     )
     custom: Optional[bool] = Field(
         None,
@@ -201,14 +201,92 @@ class AgentSearchRequest(BaseModel):
     )
 
 
+class IfNotExists(Enum):
+    create = "create"
+    reject = "reject"
+
+
+class OnCompletion(Enum):
+    delete = "delete"
+    keep = "keep"
+
+
+class Status(Enum):
+    idle = "idle"
+    busy = "busy"
+    interrupted = "interrupted"
+    error = "error"
+
+
+class ThreadCheckpoint(BaseModel):
+    checkpoint_id: UUID = Field(
+        ..., description="The ID of the checkpoint.", title="Checkpoint Id"
+    )
+
+
+class IfExists(Enum):
+    raise_ = "raise"
+    do_nothing = "do_nothing"
+
+
+class ThreadCreate(BaseModel):
+    thread_id: Optional[UUID] = Field(
+        None,
+        description="The ID of the thread. If not provided, a random UUID will be generated.",
+        title="Thread Id",
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Free form metadata for this thread", title="Metadata"
+    )
+    if_exists: Optional[IfExists] = Field(
+        "raise",
+        description="How to handle duplicate creation. Must be either 'raise' (raise error if duplicate), or 'do_nothing' (return existing thread).",
+        title="If Exists",
+    )
+
+
+class Content(BaseModel):
+    text: str
+    type: Literal["text"]
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class Content1(BaseModel):
+    type: str
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class Message(BaseModel):
+    role: str = Field(..., description="The role of the message.", title="Role")
+    content: Union[str, List[Union[Content, Content1]]] = Field(
+        ..., description="The content of the message.", title="Content"
+    )
+    id: Optional[str] = Field(None, description="The ID of the message.", title="Id")
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, description="The metadata of the message.", title="Metadata"
+    )
+
+
 class ErrorResponse(RootModel[str]):
     root: str = Field(
         ..., description="Error message returned from the server", title="ErrorResponse"
     )
 
 
+class OnDisconnect(Enum):
+    cancel = "cancel"
+    continue_ = "continue"
+
+
+class MultitaskStrategy(Enum):
+    reject = "reject"
+    rollback = "rollback"
+    interrupt = "interrupt"
+    enqueue = "enqueue"
+
+
 class StreamingMode(Enum):
-    result = "result"
+    values = "values"
     custom = "custom"
 
 
@@ -218,6 +296,13 @@ class RunStatus(Enum):
     success = "success"
     timeout = "timeout"
     interrupted = "interrupted"
+
+
+class ThreadStatus(Enum):
+    idle = "idle"
+    busy = "busy"
+    interrupted = "interrupted"
+    error = "error"
 
 
 class RunSearchRequest(BaseModel):
@@ -248,15 +333,19 @@ class Type(Enum):
     result = "result"
 
 
+class Type1(Enum):
+    values = "values"
+
+
 class Event(Enum):
     agent_event = "agent_event"
 
 
-class Type1(Enum):
+class Type2(Enum):
     custom = "custom"
 
 
-class Type2(Enum):
+class Type3(Enum):
     error = "error"
 
 
@@ -269,7 +358,7 @@ class RunError(BaseModel):
     )
 
 
-class Type3(Enum):
+class Type4(Enum):
     interrupt = "interrupt"
 
 
@@ -301,7 +390,183 @@ class ResumePayloadSchema(BaseModel):
     pass
 
 
-class ThreadCreate(BaseModel):
+class AgentRefModel(BaseModel):
+    name: str = Field(
+        ...,
+        description="Name of the agent that identifies the agent in its record",
+        title="Name",
+    )
+    version: str = Field(
+        ...,
+        description="Version of the agent in its record. Should be formatted according to semantic versioning (https://semver.org)",
+        title="Version",
+    )
+    url: Optional[AnyUrl] = Field(
+        None,
+        description="URL of the record. Can be a network location or a file.",
+        title="Agent Record URL",
+    )
+
+
+class AgentMetadata(BaseModel):
+    ref: AgentRefModel
+    description: str = Field(
+        ...,
+        description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect",
+        title="Description",
+    )
+
+
+class Streaming1(BaseModel):
+    result: Optional[bool] = Field(
+        None,
+        description="This is `true` if the agent supports result streaming. If `false` or missing, result streaming is not supported. Result streaming consists of a stream of objects of type `RunResult`, where each one sent over the stream fully replace the previous one.",
+        title="Result Streaming",
+    )
+    custom: Optional[bool] = Field(
+        None,
+        description="This is `true` if the agent supports custom objects streaming. If `false` or missing, custom streaming is not supported. Custom Objects streaming consists of a stream of object whose schema is specified by the agent ACP descriptor under `specs.custom_streaming_update`.",
+        title="Custom Objects Streaming",
+    )
+
+
+class Capabilities1(BaseModel):
+    threads: Optional[bool] = Field(
+        False,
+        description="This is `true` if the agent supports run threads. If this is `false`, then the threads tagged with `Threads` are not available. If missing, it means `false`",
+        title="Thread Support",
+    )
+    interrupts: Optional[bool] = Field(
+        False,
+        description="This is `true` if the agent runs can interrupt to request additional input and can be subsequently resumed. If missing, it means `false`",
+        title="Interrupt Support",
+    )
+    callbacks: Optional[bool] = Field(
+        False,
+        description="This is `true` if the agent supports a webhook to report run results. If this is `false`, providing a `webhook` at run creation has no effect. If missing, it means `false`",
+        title="Callback Support",
+    )
+    streaming: Optional[Streaming1] = Field(
+        None,
+        description="Supported streaming modes. If missing, streaming is not supported.  If no mode is supported attempts to stream output will result in an error.",
+        title="Streaming Modes",
+    )
+
+
+class AgentACPSpecModel(BaseModel):
+    capabilities: Capabilities1 = Field(
+        ...,
+        description="Declares what invocation features this agent is capable of.",
+        title="Agent Capabilities",
+    )
+    input: Dict[str, Any] = Field(
+        ...,
+        description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        examples=[
+            {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                    "name": {"type": "string"},
+                    "address": {"type": "string"},
+                    "age": {"type": "integer", "format": "int32", "minimum": 0},
+                },
+            }
+        ],
+    )
+    output: Dict[str, Any] = Field(
+        ...,
+        description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        examples=[
+            {
+                "type": "object",
+                "required": ["name"],
+                "properties": None,
+                "name": {"type": "string"},
+                "address": {"type": "string"},
+                "age": {"type": "integer", "format": "int32", "minimum": 0},
+            }
+        ],
+    )
+    custom_streaming_update: Optional[Dict[str, Any]] = Field(
+        None,
+        description="This describes the format of an Update in the streaming.  Must be specified if `streaming.custom` capability is true and cannot be specified otherwise. Format follows: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        examples=[
+            {
+                "type": "object",
+                "required": ["name"],
+                "properties": None,
+                "name": {"type": "string"},
+                "address": {"type": "string"},
+                "age": {"type": "integer", "format": "int32", "minimum": 0},
+            }
+        ],
+    )
+    thread_state: Optional[Dict[str, Any]] = Field(
+        None,
+        description="This describes the format of ThreadState.  Cannot be specified if `threads` capability is false. If not specified, when `threads` capability is true, then the API to retrieve ThreadState from a Thread or a Run is not available. This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        examples=[
+            {
+                "type": "object",
+                "required": ["name"],
+                "properties": None,
+                "name": {"type": "string"},
+                "address": {"type": "string"},
+                "age": {"type": "integer", "format": "int32", "minimum": 0},
+            }
+        ],
+    )
+    config: Dict[str, Any] = Field(
+        ...,
+        description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
+        examples=[
+            {
+                "type": "object",
+                "required": ["name"],
+                "properties": None,
+                "name": {"type": "string"},
+                "address": {"type": "string"},
+                "age": {"type": "integer", "format": "int32", "minimum": 0},
+            }
+        ],
+    )
+    interrupts: Optional[List[Interrupt]] = Field(
+        None,
+        description="List of possible interrupts that can be provided by the agent. If `interrupts` capability is true, this needs to have at least one item.",
+    )
+
+
+class StreamingModeModel(Enum):
+    result = "result"
+    custom = "custom"
+
+
+class Type5(Enum):
+    result = "result"
+
+
+class Type6(Enum):
+    custom = "custom"
+
+
+class Type7(Enum):
+    error = "error"
+
+
+class RunErrorModel(BaseModel):
+    type: Type7 = Field(..., title="Output Type")
+    run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
+    errcode: int = Field(..., description="code of the error", title="Error Code")
+    description: str = Field(
+        ..., description="description of the error", title="Error Description"
+    )
+
+
+class Type8(Enum):
+    interrupt = "interrupt"
+
+
+class ThreadCreate1(BaseModel):
     agent_id: str = Field(
         ...,
         description="Identifier of the agent this thread is executed on",
@@ -312,7 +577,7 @@ class ThreadCreate(BaseModel):
     )
 
 
-class ThreadSearchRequest(BaseModel):
+class ThreadSearchRequest1(BaseModel):
     agent_id: Optional[UUID] = Field(
         None,
         description="Matches all threads associated with the specified agent ID.",
@@ -331,7 +596,7 @@ class ThreadSearchRequest(BaseModel):
     )
 
 
-class Thread(BaseModel):
+class Thread1(BaseModel):
     thread_id: str = Field(
         ..., description="unique identifier of a thread", title="Thread ID"
     )
@@ -361,7 +626,7 @@ class EnvVar(BaseModel):
     defaultValue: Optional[str] = None
 
 
-class Type4(Enum):
+class Type9(Enum):
     source_code = "source_code"
 
 
@@ -383,11 +648,11 @@ class LlamaIndexConfig(BaseModel):
     path: str
 
 
-class Type5(Enum):
+class Type10(Enum):
     remote_service = "remote_service"
 
 
-class Type6(Enum):
+class Type11(Enum):
     docker = "docker"
 
 
@@ -405,21 +670,12 @@ class DockerDeployment(BaseModel):
     )
 
 
-class Type7(Enum):
+class Type12(Enum):
     ACP = "ACP"
 
 
 class SecurityScheme(BaseModel):
     pass
-
-
-class AgentMetadata(BaseModel):
-    ref: AgentRef
-    description: str = Field(
-        ...,
-        description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect",
-        title="Description",
-    )
 
 
 class Agent(BaseModel):
@@ -436,7 +692,214 @@ class AgentACPDescriptor(BaseModel):
     specs: AgentACPSpec
 
 
+class Run(BaseModel):
+    run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
+    thread_id: Optional[UUID] = Field(
+        None,
+        description="Optional Thread ID wher the Run belongs to. This is populated only for runs on agents agents supporting Threads.",
+        title="Agent ID",
+    )
+    agent_id: UUID = Field(
+        ..., description="The agent that was used for this run.", title="Agent Id"
+    )
+    created_at: AwareDatetime = Field(
+        ..., description="The time the run was created.", title="Created At"
+    )
+    updated_at: AwareDatetime = Field(
+        ..., description="The last time the run was updated.", title="Updated At"
+    )
+    status: RunStatus = Field(
+        ...,
+        description="The status of the run. One of 'pending', 'error', 'success', 'timeout', 'interrupted'.",
+        title="Status",
+    )
+
+
+class ThreadSearchRequest(BaseModel):
+    metadata: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Matches all threads for which metadata has  keys and values equal to those specified in this object.",
+        title="Metadata Filter",
+    )
+    values: Optional[Dict[str, Any]] = Field(
+        None, description="State values to filter on.", title="Values"
+    )
+    status: Optional[ThreadStatus] = None
+    limit: Optional[conint(ge=1, le=1000)] = Field(
+        10, description="Maximum number to return.", title="Limit"
+    )
+    offset: Optional[conint(ge=0)] = Field(
+        0, description="Offset to start from.", title="Offset"
+    )
+
+
+class Thread(BaseModel):
+    thread_id: str = Field(
+        ..., description="unique identifier of a thread", title="Thread ID"
+    )
+    created_at: AwareDatetime = Field(
+        ..., description="The time the thread was created.", title="Created At"
+    )
+    updated_at: AwareDatetime = Field(
+        ..., description="The last time the thread was updated.", title="Updated At"
+    )
+    metadata: Dict[str, Any] = Field(
+        ..., description="Free form metadata for this thread", title="Metadata"
+    )
+    status: Status = Field(..., description="The status of the thread.", title="Status")
+    values: Optional[ThreadStateSchema] = Field(
+        None, description="The current state of the thread.", title="Values"
+    )
+    messages: Optional[List[Message]] = Field(
+        None,
+        description="The current Messages of the thread. If messages are contained in Thread.values, implementations should remove them from values when returning messages. When this key isn't present it means the thread/agent doesn't support messages.",
+        title="Messages",
+    )
+
+
+class ThreadState(BaseModel):
+    checkpoint: ThreadCheckpoint = Field(
+        ..., description="The identifier for this checkpoint.", title="Checkpoint"
+    )
+    values: ThreadStateSchema = Field(
+        ..., description="The current state of the thread.", title="Values"
+    )
+    messages: Optional[List[Message]] = Field(
+        None,
+        description="The current messages of the thread. If messages are contained in Thread.values, implementations should remove them from values when returning messages. When this key isn't present it means the thread/agent doesn't support messages.",
+        title="Messages",
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, description="The checkpoint metadata.", title="Metadata"
+    )
+
+
+class ThreadPatch(BaseModel):
+    checkpoint: Optional[ThreadCheckpoint] = Field(
+        None,
+        description="The identifier of the checkpoint to branch from. Ignored for metadata-only patches. If not provided, defaults to the latest checkpoint.",
+        title="Checkpoint",
+    )
+    metadata: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Metadata to merge with existing thread metadata.",
+        title="Metadata",
+    )
+    values: Optional[ThreadStateSchema] = Field(
+        None, description="The current state of the thread.", title="Values"
+    )
+    messages: Optional[List[Message]] = Field(
+        None,
+        description="The current Messages of the thread. If messages are contained in Thread.values, implementations should remove them from values when returning messages. When this key isn't present it means the thread/agent doesn't support messages.",
+        title="Messages",
+    )
+
+
+class Config(BaseModel):
+    tags: Optional[List[str]] = Field(None, title="Tags")
+    recursion_limit: Optional[int] = Field(None, title="Recursion Limit")
+    configurable: Optional[ConfigSchema] = None
+
+
 class RunCreate(BaseModel):
+    agent_id: Optional[str] = Field(
+        None,
+        description="The agent ID to run. If not provided will use the default agent for this service.",
+        title="Agent Id",
+    )
+    input: Optional[InputSchema] = None
+    metadata: Optional[Dict[str, Any]] = Field(
+        None, description="Metadata to assign to the run.", title="Metadata"
+    )
+    config: Optional[Config] = Field(
+        None, description="The configuration for the agent.", title="Config"
+    )
+    webhook: Optional[AnyUrl] = Field(
+        None,
+        description="Webhook to call upon change of run status. This is a url that accepts a POST containing the `Run` object as body. See Callbacks definition.",
+        title="Status change webhook",
+    )
+    stream_mode: Optional[Union[List[StreamingMode], StreamingMode]] = Field(
+        None,
+        description="If populated, indicates that the client requests to stream results with the specified streaming mode(s). The requested streaming mode(s) must be one or more of those supported by the agent as declared in agent ACP descriptor  under `specs.capabilities`",
+        title="Stream Mode",
+    )
+    on_disconnect: Optional[OnDisconnect] = Field(
+        "cancel",
+        description="The disconnect mode to use. Must be one of 'cancel' or 'continue'.",
+        title="On Disconnect",
+    )
+    multitask_strategy: Optional[MultitaskStrategy] = Field(
+        "reject",
+        description="Multitask strategy to use. Must be one of 'reject', 'interrupt', 'rollback', or 'enqueue'.",
+        title="Multitask Strategy",
+    )
+    after_seconds: Optional[int] = Field(
+        None,
+        description="The number of seconds to wait before starting the run. Use to schedule future runs.",
+        title="After Seconds",
+    )
+
+
+class RunResult(BaseModel):
+    type: Literal["result"] = Field(..., title="Output Type")
+    values: Optional[OutputSchema] = None
+    messages: Optional[List[Message]] = Field(
+        None, description="The messages returned by the run.", title="Messages"
+    )
+
+
+class ValueRunResultUpdate(BaseModel):
+    type: Literal["values"] = Field(..., title="Streaming Output Type")
+    run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
+    status: RunStatus = Field(
+        ...,
+        description="Status of the Run when this result was generated. This is particurarly useful when this data structure is used for streaming results. As the server can indicate an interrupt or an error condition while streaming the result.",
+        title="Run Status",
+    )
+    values: OutputSchema
+    messages: Optional[List[Message]] = Field(
+        None, description="Stream of messages returned by the run.", title="Messages"
+    )
+
+
+class CustomRunResultUpdate(BaseModel):
+    type: Literal["custom"] = Field(..., title="Streaming Output Type")
+    run_id: Optional[UUID] = Field(
+        None, description="The ID of the run.", title="Run Id"
+    )
+    status: RunStatus = Field(
+        ...,
+        description="Status of the Run when this result was generated",
+        title="Run Status",
+    )
+    update: StreamUpdateSchema
+
+
+class RunInterrupt(BaseModel):
+    type: Literal["interrupt"] = Field(..., title="Output Type")
+    interrupt: InterruptPayloadSchema
+
+
+class AgentDependency(BaseModel):
+    name: str = Field(..., description="Name of the agent dependency", title="Name")
+    ref: AgentRefModel = Field(
+        ...,
+        description="Reference to the agent in the agent directory. It includes the version and the locator.",
+    )
+    deployment_option: Optional[str] = Field(
+        None,
+        description="Selected deployment option for this agent. ",
+        title="Deployment Option",
+    )
+    env_var_values: Optional[EnvVarValues] = Field(
+        None,
+        description="Environment variable values to be set for this agent.",
+        title="Environment Variable Values",
+    )
+
+
+class RunCreate1(BaseModel):
     agent_id: UUID = Field(..., description="The ID of the agent.", title="Agent Id")
     thread_id: Optional[UUID] = Field(
         None,
@@ -455,15 +918,15 @@ class RunCreate(BaseModel):
         description="Webhook to call upon change of run status. This is a url that accepts a POST containing the `Run` object as body. See Callbacks definition.",
         title="Status change webhook",
     )
-    streaming: Optional[StreamingMode] = Field(
+    streaming: Optional[StreamingModeModel] = Field(
         None,
         description="If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in agent ACP descriptor  under `specs.capabilities`",
         title="Streaming Mode",
     )
 
 
-class Run(BaseModel):
-    creation: RunCreate
+class Run1(BaseModel):
+    creation: RunCreate1
     run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
     agent_id: UUID = Field(
         ..., description="The agent that was used for this run.", title="Agent Id"
@@ -486,7 +949,7 @@ class Run(BaseModel):
     )
 
 
-class RunResult(BaseModel):
+class RunResultModel(BaseModel):
     type: Literal["result"] = Field(..., title="Output Type")
     run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
     status: RunStatus = Field(
@@ -497,7 +960,7 @@ class RunResult(BaseModel):
     result: OutputSchema
 
 
-class CustomRunResultUpdate(BaseModel):
+class CustomRunResultUpdateModel(BaseModel):
     type: Literal["custom"] = Field(..., title="Output Type")
     run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
     status: RunStatus = Field(
@@ -508,27 +971,9 @@ class CustomRunResultUpdate(BaseModel):
     update: StreamUpdateSchema
 
 
-class RunInterrupt(BaseModel):
-    type: Literal["interrupt"] = Field(..., title="Output Type")
+class RunInterruptModel(BaseModel):
+    type: Type8 = Field(..., title="Output Type")
     interrupt: InterruptPayloadSchema
-
-
-class AgentDependency(BaseModel):
-    name: str = Field(..., description="Name of the agent dependency", title="Name")
-    ref: AgentRef = Field(
-        ...,
-        description="Reference to the agent in the agent directory. It includes the version and the locator.",
-    )
-    deployment_option: Optional[str] = Field(
-        None,
-        description="Selected deployment option for this agent. ",
-        title="Deployment Option",
-    )
-    env_var_values: Optional[EnvVarValues] = Field(
-        None,
-        description="Environment variable values to be set for this agent.",
-        title="Environment Variable Values",
-    )
 
 
 class SourceCodeDeployment(BaseModel):
@@ -549,7 +994,7 @@ class SourceCodeDeployment(BaseModel):
 
 
 class AgentConnectProtocol(BaseModel):
-    type: Type7
+    type: Type12
     url: AnyUrl = Field(
         ..., description="URL pointing to the ACP endpoint root.", title="ACP URL"
     )
@@ -559,6 +1004,27 @@ class AgentConnectProtocol(BaseModel):
         title="Agent identifier",
     )
     authentication: Optional[SecurityScheme] = None
+
+
+class RunCreateStateful(RunCreate):
+    stream_subgraphs: Optional[bool] = Field(
+        False,
+        description="Whether to stream output from subgraphs.",
+        title="Stream Subgraphs",
+    )
+    if_not_exists: Optional[IfNotExists] = Field(
+        "reject",
+        description="How to handle missing thread. Must be either 'reject' (raise error if missing), or 'create' (create new thread).",
+        title="If Not Exists",
+    )
+
+
+class RunCreateStateless(RunCreate):
+    on_completion: Optional[OnCompletion] = Field(
+        "delete",
+        description="Whether to delete or keep the thread created for a stateless run. Must be one of 'delete' or 'keep'.",
+        title="On Completion",
+    )
 
 
 class RunOutput(RootModel[Union[RunResult, RunInterrupt, RunError]]):
@@ -576,7 +1042,21 @@ class RunOutputStream(BaseModel):
         ...,
         description="Event type. This is the constant string `agent_event` to be compatible with SSE spec. The actual type differentiation is done in the event itself.",
     )
-    data: Union[RunResult, CustomRunResultUpdate] = Field(
+    data: Union[ValueRunResultUpdate, CustomRunResultUpdate] = Field(
+        ...,
+        description="A serialized JSON data structure carried in the SSE event data field. The event can carry either a full `ValueRunResultUpdate`, if streaming mode is `values` or an `CustomRunResultUpdate` if streaming mode is `custom`",
+        discriminator="type",
+        title="Stream Event Payload",
+    )
+
+
+class RunOutputStream1(BaseModel):
+    id: str = Field(..., description="Unique identifier of the event", title="Event ID")
+    event: Event = Field(
+        ...,
+        description="Event type. This is the constant string `agent_event` to be compatible with SSE spec. The actual type differentiation is done in the event itself.",
+    )
+    data: Union[RunResultModel, CustomRunResultUpdateModel] = Field(
         ...,
         description="A serialized JSON data structure carried in the SSE event data field. The event can carry either a full `RunResult`, if streaming mode is `result` or an custom update if streaming mode is `custom`",
         discriminator="type",
@@ -592,6 +1072,28 @@ class RemoteServiceDeployment(BaseModel):
         title="Deployment Option Name",
     )
     protocol: AgentConnectProtocol
+
+
+class RunStateless(Run):
+    creation: RunCreateStateless = Field(..., description="", title="Creation")
+
+
+class RunStateful(Run):
+    creation: RunCreateStateful = Field(..., description="", title="Creation")
+
+
+class RunWaitResponseStateful(BaseModel):
+    run: Optional[RunStateful] = Field(
+        None, description="The run information.", title="Run"
+    )
+    output: Optional[RunOutput] = None
+
+
+class RunWaitResponseStateless(BaseModel):
+    run: Optional[RunStateless] = Field(
+        None, description="The run information.", title="Run"
+    )
+    output: Optional[RunOutput] = None
 
 
 class DeploymentOptions(

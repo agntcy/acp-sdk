@@ -2,8 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 from os import getenv
-from pydantic_core import CoreSchema, core_schema
-from pydantic import GetCoreSchemaHandler, BaseModel
+from pydantic import BaseModel
 from typing import Optional, Any, Dict, Union
 
 from .acp_v0.sync_client.api_client import ApiClient
