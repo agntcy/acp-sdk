@@ -119,7 +119,7 @@ check: test
 
 .PHONY: test_gha
 test_gha:
-	uv run --locked --with pytest -- \
+	uv run --locked --with pytest --group test -- \
 	  pytest --exitfirst -vv -m "not needs_acp_spec" tests/
 
 all: install generate test
