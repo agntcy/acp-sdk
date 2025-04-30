@@ -1,12 +1,10 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
-.PHONY: default install generate_acp_client \
-	generate_acp_server generate install_test test setup_test check all \
+.PHONY: default generate_acp_client \
+	generate_acp_server generate \
 	generate_async_acp_client update_python_subpackage
 
 default: test
-install: 
-	poetry sync
 
 ACP_SPEC_DIR=acp-spec
 ACP_CLIENT_DIR:=acp-sync-client-generated
@@ -67,7 +65,8 @@ generate_manifest_models: $(AGNT_WKFW_SPEC_FILE)
 	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' "$(AGNT_WKFW_SPEC_FILE)") ; \
 	AGNT_WKFW_MODEL_PACKAGE_DIR="agntcy_acp/agws_v$${ACP_SPEC_VERSION}" ; \
 	{ mkdir "$${AGNT_WKFW_MODEL_PACKAGE_DIR}" || true ; } ; \
-	poetry run datamodel-codegen \
+	uv run --with datamodel-code-generator -- \
+	  datamodel-codegen \
 		--input $(AGNT_WKFW_SPEC_FILE) \
 		--input-file-type openapi \
 		--output-model-type pydantic_v2.BaseModel \
@@ -108,12 +107,13 @@ docs docs/agntcy_acp/index.md: agntcy_acp/*.py agntcy_acp/*/*.py
 	    --template-dir docs/templates \
 	    agntcy_acp
 
-setup_test:
-	poetry sync --with test
+.PHONY: test
+test:
+	ACP_SPEC_PATH="$(ACP_SPEC_DIR)/openapi.yaml" \
+	uv run --locked --with pytest --group test -- \
+	  pytest --exitfirst -vv tests/
 
-test: setup_test
-	ACP_SPEC_PATH="$(ACP_SPEC_DIR)/openapi.yaml" poetry run pytest --exitfirst -vv tests/
-
+.PHONY: check
 check: test
 	scripts/check-models.sh
 
@@ -122,4 +122,5 @@ test_gha:
 	uv run --locked --with pytest --group test -- \
 	  pytest --exitfirst -vv -m "not needs_acp_spec" tests/
 
-all: install generate test
+.PHONY: all
+all: generate test
