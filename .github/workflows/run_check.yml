@@ -15,8 +15,7 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12.7"
-  POETRY_VERSION: "2.1.1"
-  POETRY_VIRTUALENVS_IN_PROJECT: "true"
+  UV_VERSION: "0.7.1"
 
 permissions:
   contents: read
@@ -37,12 +36,9 @@ jobs:
         python-version: ${{ env.PYTHON_VERSION }}
         update-environment: true
 
-    - name: Install Poetry
+    - name: Install uv
       run: |
-        pipx install poetry==${{ env.POETRY_VERSION }}
-
-    - name: Check poetry configuration
-      run: poetry check
+        pipx install uv==${{ env.UV_VERSION }}
 
     - name: Check code
       run: make test_gha
@@ -52,6 +48,6 @@ jobs:
       run: |
         echo "## Code Check" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- Poetry Version: ${{ env.POETRY_VERSION }}" >> $GITHUB_STEP_SUMMARY
+        echo "- uv Version: ${{ env.UV_VERSION }}" >> $GITHUB_STEP_SUMMARY
         echo "- Python Version: ${{ env.PYTHON_VERSION}}" >> $GITHUB_STEP_SUMMARY
 

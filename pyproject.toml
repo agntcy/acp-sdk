@@ -38,11 +38,19 @@ test = [
     "deepdiff >= 8.1.1",
     "pytest-asyncio >= 0.23.5",
 ]
-
 sanity = [
     "mypy >= 1.10.0",
     "ruff >= 0.4.6",
 ]
+
+[tool.poetry.group.test.dependencies]
+pytest = "*"
+deepdiff = "^8.1.1"
+pytest-asyncio = "^0.23.5"
+
+[tool.poetry.group.sanity.dependencies]
+mypy = "^1.10.0"
+ruff = "^0.4.6"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
