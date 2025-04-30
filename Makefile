@@ -98,12 +98,15 @@ update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/RE
 		"$${ACP_ASYNC_CLIENT_PACKAGE_DIR}/rest.py" \
 		"agntcy_acp/$(ACP_SUBPACKAGE_PREFIX)$${ACP_SPEC_VERSION}/$(SDK_ACP_ASYNC_PACKAGE_NAME)/"
 
-update_docs: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/README.md
-	cp -p "$(ACP_CLIENT_DIR)"/docs/*.md docs/models/ && \
-	cp -p "$(ACP_ASYNC_CLIENT_DIR)"/docs/*.md docs/models/
-
 
 generate: generate_acp_client generate_acp_server
+
+.PHONY: docs
+docs docs/agntcy_acp/index.md: agntcy_acp/*.py agntcy_acp/*/*.py
+	uv run --with pdoc3 -- \
+	  pdoc -o docs --force \
+	    --template-dir docs/templates \
+	    agntcy_acp
 
 setup_test:
 	poetry sync --with test

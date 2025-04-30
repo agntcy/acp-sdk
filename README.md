@@ -14,9 +14,9 @@ See [Getting Started Guide](https://agntcy.github.io/acp-sdk/README.md#getting-s
 
 ## Documentation
 
-See [ACP SDK Documentation](https://agntcy.github.io/acp-sdk) to deep dive.
-
-See [IoA Documentation](https://docs.agntcy.org) for more info on Internet of Agents.
+  * See [ACP SDK Documentation](https://agntcy.github.io/acp-sdk) to deep dive into using the client SDK.
+  * See [IoA Documentation](https://docs.agntcy.org) for more info on Internet of Agents.
+  * See [API Reference]() for the client SDK API reference.
 
 ## Testing
 
@@ -37,7 +37,7 @@ happen.
 
 This repo uses the following tools to build (or update) the packages:
   * jq: to parse OpenAPI JSON
-  * poetry: to manage Python dependencies
+  * uv (preferred) or poetry (deprecated): to manage Python dependencies
   * make: to store command recipes
   * docker: to run the 
   [openapi-generator-cli](https://github.com/OpenAPITools/openapi-generator-cli) tool
@@ -76,6 +76,12 @@ For a major release, follow these steps:
   3. Check for any irregularities: `git diff`
   4. Run: `make test`
 
+### Generate API documentation on code updates
+
+Use the make target:
+
+`make docs`
+
 ### Publishing
 
 Publishing the package uses a GitHub action triggered by 
@@ -108,12 +114,12 @@ See the [open issues](https://github.com/agntcy/acp-sdk/issues) for a list of pr
 
 ## Contributing
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. For detailed contributing guidelines, please see [CONTRIBUTING.md](https://github.com/agntcy/acp-sdk/blob/main/docs/CONTRIBUTING.md).
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. For detailed contributing guidelines, please see [CONTRIBUTING.md](https://github.com/agntcy/acp-sdk/blob/main/CONTRIBUTING.md).
 
 
 ## Copyright Notice
 
-[Copyright Notice and License](./LICENSE.md)
+[Copyright Notice and License](https://github.com/agntcy/acp-sdk/blob/main/LICENSE)
 
 Distributed under Apache 2.0 License. See LICENSE for more information.
 Copyright AGNTCY Contributors (https://github.com/agntcy)
