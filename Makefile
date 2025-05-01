@@ -100,12 +100,14 @@ update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/RE
 
 generate: generate_acp_client generate_acp_server
 
+.PHONY: sphinx
+sphinx docs/sphinx/agntcy_acp.rst: agntcy_acp/*.py agntcy_acp/*/*.py
+	uv run --with sphinx -- \
+	  sphinx-apidoc -o docs/sphinx/ --full agntcy_acp 'agntcy_acp.agws_v*' 'agntcy_acp.acp_v*'
+
 .PHONY: docs
-docs docs/agntcy_acp/index.md: agntcy_acp/*.py agntcy_acp/*/*.py
-	uv run --with pdoc3 -- \
-	  pdoc -o docs --force \
-	    --template-dir docs/templates \
-	    agntcy_acp
+docs docs/index.html: docs/sphinx/agntcy_acp.rst
+	$(MAKE) -C docs/sphinx html
 
 .PHONY: test
 test:

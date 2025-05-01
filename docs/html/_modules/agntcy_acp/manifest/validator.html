@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>agntcy_acp.manifest.validator &#8212; agntcy_acp  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for agntcy_acp.manifest.validator</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright AGNTCY Contributors (https://github.com/agntcy)</span>
+<span class="c1"># SPDX-License-Identifier: Apache-2.0</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentACPDescriptor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentManifest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACPDescriptorValidationException</span>
+
+
+<div class="viewcode-block" id="validate_agent_manifest_file">
+<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.validate_agent_manifest_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_agent_manifest_file</span><span class="p">(</span><span class="n">manifest_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">raise_exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentManifest</span><span class="p">:</span>
+    <span class="c1"># Load the descriptor and validate it</span>
+    <span class="n">manifest_json</span> <span class="o">=</span> <span class="n">load_json_file</span><span class="p">(</span><span class="n">manifest_file_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">validate_agent_manifest</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">,</span> <span class="n">raise_exception</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="validate_agent_descriptor_file">
+<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.validate_agent_descriptor_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_agent_descriptor_file</span><span class="p">(</span><span class="n">descriptor_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">raise_exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentACPDescriptor</span><span class="p">:</span>
+    <span class="c1"># Load the descriptor and validate it</span>
+    <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">load_json_file</span><span class="p">(</span><span class="n">descriptor_file_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">validate_agent_descriptor</span><span class="p">(</span><span class="n">descriptor_json</span><span class="p">,</span> <span class="n">raise_exception</span><span class="p">)</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_descriptor_from_manifest</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+    <span class="c1"># ACP Descriptor is an Agent Manifest without the deployment part</span>
+    <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">descriptor_json</span><span class="p">[</span><span class="s2">&quot;deployment&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">descriptor_json</span>
+
+<div class="viewcode-block" id="validate_agent_manifest">
+<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.validate_agent_manifest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_agent_manifest</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">raise_exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentManifest</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="n">AgentManifest</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
+        <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">_descriptor_from_manifest</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
+        <span class="n">validate_agent_descriptor</span><span class="p">(</span><span class="n">descriptor_json</span><span class="p">)</span>
+        <span class="c1"># TODO: add additional manifest checks</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">ACPDescriptorValidationException</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">raise_exception</span><span class="p">:</span> <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">manifest</span></div>
+
+
+<div class="viewcode-block" id="validate_agent_descriptor">
+<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.validate_agent_descriptor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_agent_descriptor</span><span class="p">(</span><span class="n">descriptor_json</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">raise_exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentACPDescriptor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># pydandic validation</span>
+        <span class="n">descriptor</span> <span class="o">=</span> <span class="n">AgentACPDescriptor</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">descriptor_json</span><span class="p">)</span>
+        <span class="c1"># advanced validation</span>
+        <span class="c1"># generate_agent_oapi(descriptor)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">ACPDescriptorValidationException</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">raise_exception</span><span class="p">:</span> <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">descriptor</span></div>
+
+
+
+<div class="viewcode-block" id="load_json_file">
+<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.load_json_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_json_file</span><span class="p">(</span><span class="n">json_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">descriptor</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">descriptor</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">agntcy_acp</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../agntcy_acp.html">agntcy_acp package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../agntcy_acp.html">agntcy_acp</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;AGNTCY Contributors.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
