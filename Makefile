@@ -103,10 +103,10 @@ generate: generate_acp_client generate_acp_server
 .PHONY: sphinx
 sphinx docs/sphinx/agntcy_acp.rst: agntcy_acp/*.py agntcy_acp/*/*.py
 	uv run --with sphinx -- \
-	  sphinx-apidoc -o docs/sphinx/ --full agntcy_acp 'agntcy_acp.agws_v*' 'agntcy_acp.acp_v*'
+	  sphinx-apidoc -o docs/sphinx/ --full agntcy_acp 'agntcy_acp/agws_v*' 'agntcy_acp/acp_v*'
 
 .PHONY: docs
-docs docs/index.html: docs/sphinx/agntcy_acp.rst
+docs docs/html/index.html: docs/sphinx/agntcy_acp.rst
 	$(MAKE) -C docs/sphinx html
 
 .PHONY: test
