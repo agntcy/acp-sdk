@@ -33,8 +33,9 @@ def test_models_generator(test_filename, model_ref_filename):
     diff = _diff_files(os.path.join(tmp_dir.name, "models.py"), ref_models)
 
     if diff:
+        diff_str = '\n'.join(diff)
         raise AssertionError(
-            f"Generated Models and ref '{ref_models}' are not identical. Differences:\n{'\n'.join(diff)}")
+            f"Generated Models and ref '{ref_models}' are not identical. Differences:\n{diff_str}")
 
 
 def _diff_files(test_file, ref_file):
