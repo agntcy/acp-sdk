@@ -8,7 +8,12 @@ from urllib3 import HTTPResponse
 
 import agntcy_acp
 from agntcy_acp import ACPClient, ApiClient, ApiClientConfiguration
-from agntcy_acp.models import RunCreateStateless, RunSearchRequest, RunStateless
+from agntcy_acp.models import (
+    RunCreateStateful,
+    RunCreateStateless,
+    RunSearchRequest,
+    RunStateless,
+)
 
 ListRunStateless = RootModel[List[RunStateless]]
 
@@ -122,3 +127,29 @@ def test_acp_client_stream_stateless_runs_api(default_api_key, default_agent_id,
         for response in stream:
             assert response is not None
             assert response.data.actual_instance.run_id == default_run_output_stream.data.actual_instance.run_id
+
+def test_acp_client_thread_run_api(mock_sync_api_client, default_api_key, default_agent_id):
+    config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
+    thread_id = 'd379d156-560b-4c97-ba04-0e88c26fe697'
+
+    with ApiClient(config) as api_client:
+        client = ACPClient(api_client)
+
+        response = client.create_thread_run(thread_id=thread_id, run_create_stateful=RunCreateStateful(agent_id=default_agent_id))
+        assert response is not None
+        run_id = response.run_id
+
+        response = client.get_thread_run(thread_id=thread_id, run_id=run_id)
+        assert response is not None
+
+        response = client.wait_for_thread_run_output(thread_id=thread_id, run_id=run_id)
+        assert response is not None
+
+        response = client.stream_thread_run_output(thread_id=thread_id, run_id=run_id)
+        assert response is not None
+
+        response = client.resume_thread_run(thread_id=thread_id, run_id=run_id, body={})
+        assert response is not None
+
+        response = client.delete_thread_run(thread_id=thread_id, run_id=run_id)
+        assert response is not None
