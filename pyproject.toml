@@ -47,6 +47,9 @@ pytest-asyncio = "^0.23.5"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 asyncio_mode = "auto"
+markers = [
+  "needs_acp_spec: mark test as needing the ACP specification"
+]
 
 [tool.poetry.scripts]
 acp = "agntcy_acp.__main__:cli"
