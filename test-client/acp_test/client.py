@@ -100,29 +100,29 @@ def _process_result(
     # Check for no modified values
     if operation.output_stream:
         op = operation.output_stream.pop(0)
-        if "output_at_least" in op:
+        if "output_exact" in op:
+            ret_val = (
+                _check_output_exact(result, op["output_exact"], op_id, op_idx)
+                and ret_val
+            )
+        elif "output_at_least" in op:
             ret_val = (
                 _check_output_at_least(
                     result_dump, op["output_at_least"], op_id, op_idx
                 )
                 and ret_val
             )
-        if "output_exact" in op:
+    else:
+        if operation.output_exact:
             ret_val = (
-                _check_output_exact(result, op["output_exact"], op_id, op_idx)
+                _check_output_exact(result, operation.output_exact, op_id, op_idx)
                 and ret_val
             )
-    else:
-        if operation.output_at_least:
+        elif operation.output_at_least:
             ret_val = (
                 _check_output_at_least(
                     result_dump, operation.output_at_least, op_id, op_idx
                 )
-                and ret_val
-            )
-        if operation.output_exact:
-            ret_val = (
-                _check_output_exact(result, operation.output_exact, op_id, op_idx)
                 and ret_val
             )
 
