@@ -178,11 +178,13 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
             api_client: Optional[ApiClient] = None,
             configuration: Optional[ApiClientConfiguration] = None,
             manifest: Optional[Union[str,Path,AgentManifest,AgentACPSpec]] = None,
+            stream_chunk_size: int = 4096,
         ):
         if api_client is None and configuration is not None:
             api_client = ApiClient(configuration)
         super().__init__(api_client)
         self.__workflow_server_update_api_client()
+        self.stream_chunk_size = stream_chunk_size
         
         if isinstance(manifest, AgentManifest):
             self.agent_acp_spec = manifest.specs
@@ -310,11 +312,13 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
             api_client: Optional[AsyncApiClient] = None,
             configuration: Optional[ApiClientConfiguration] = None,
             manifest: Optional[Union[str,Path,AgentManifest,AgentACPSpec]] = None,
+            stream_chunk_size: int = 4096,
         ):
         if api_client is None and configuration is not None:
             api_client = AsyncApiClient(configuration)
         super().__init__(api_client)
         self.__workflow_server_update_api_client()
+        self.stream_chunk_size = stream_chunk_size
         self.manifest = manifest
         self.agent_acp_spec = None
     

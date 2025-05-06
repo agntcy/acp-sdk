@@ -83,7 +83,7 @@ def _check_output_exact(
         print(f"operation {op_idx}: {op_id}:\n{mapdiff.to_json(indent=2)}")
         return False
     else:
-        return False
+        return True
 
 
 def _process_result(

@@ -44,6 +44,7 @@ class StatelessRunsApi:
         if api_client is None:
             api_client = ApiClient.get_default()
         self.api_client = api_client
+        self.stream_chunk_size = 4096
 
 
     @validate_call
@@ -411,7 +412,7 @@ class StatelessRunsApi:
             ).data
         else:
             # Handle SSE data
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
             async for event in sse_astream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,
@@ -491,7 +492,7 @@ class StatelessRunsApi:
             )
         else:
             # Handle SSE data
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
             async for event in sse_astream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,
@@ -2383,7 +2384,7 @@ class StatelessRunsApi:
             ).data
         else:
             # Handle SSE data
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
             async for event in sse_astream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,
@@ -2462,7 +2463,7 @@ class StatelessRunsApi:
             )
         # Handle SSE data
         else:
-            stream = response_data.response.content.iter_chunked(4096)
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
             async for event in sse_astream(stream):
                 yield RunOutputStream(
                     id=event.last_event_id,
