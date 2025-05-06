@@ -11,10 +11,11 @@ resolution-markers = [
 
 [[package]]
 name = "agntcy-acp"
-version = "1.1.3"
+version = "1.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "agntcy-iomapper", extra = ["langgraph"] },
+    { name = "aiofiles" },
     { name = "aiohttp" },
     { name = "aiohttp-retry" },
     { name = "click" },
@@ -23,6 +24,7 @@ dependencies = [
     { name = "openapi-spec-validator" },
     { name = "pydantic" },
     { name = "python-dateutil" },
+    { name = "pyyaml" },
     { name = "typing-extensions" },
     { name = "urllib3" },
 ]
@@ -37,6 +39,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "agntcy-iomapper", extras = ["langgraph"], specifier = ">=0.2.2" },
+    { name = "aiofiles", specifier = ">=24.1.0" },
     { name = "aiohttp", specifier = ">=3.8.4" },
     { name = "aiohttp-retry", specifier = ">=2.8.3" },
     { name = "click", specifier = ">=8.1.8" },
@@ -45,6 +48,7 @@ requires-dist = [
     { name = "openapi-spec-validator", specifier = ">=0.7.1" },
     { name = "pydantic", specifier = ">=2" },
     { name = "python-dateutil", specifier = ">=2.8.2" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "typing-extensions", specifier = ">=4.7.1" },
     { name = "urllib3", specifier = ">=1.25.3,<3.0.0" },
 ]
@@ -80,6 +84,15 @@ langgraph = [
     { name = "langchain" },
     { name = "langchain-openai" },
     { name = "langgraph" },
+]
+
+[[package]]
+name = "aiofiles"
+version = "24.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0b/03/a88171e277e8caa88a4c77808c20ebb04ba74cc4681bf1e9416c862de237/aiofiles-24.1.0.tar.gz", hash = "sha256:22a075c9e5a3810f0c2e48f3008c94d68c65d763b9b03857924c99e57355166c", size = 30247 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/45/30bb92d442636f570cb5651bc661f52b610e2eec3f891a5dc3a4c3667db0/aiofiles-24.1.0-py3-none-any.whl", hash = "sha256:b4ec55f4195e3eb5d7abd1bf7e061763e864dd4954231fb8539a0ef8bb8260e5", size = 15896 },
 ]
 
 [[package]]
