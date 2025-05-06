@@ -32,7 +32,7 @@ def mock_response_api_client(
                 amt: int | None = 2**16, 
                 decode_content: bool | None = None,
                 body = body,
-            ) -> Generator[bytes]:
+            ) -> Generator[bytes,None]:
                 sse_list = [
                     ":this is a test feed\nid: 1\n".encode(),
                     "event: agent_event\n".encode(),
