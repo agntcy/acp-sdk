@@ -45,22 +45,22 @@ root level of this repository.
   1. Run the test async client from the CLI on the stateless API set.
 
   ```
-  cd test-client ; poetry run cli --async ./examples/echo_agent_stateless.yaml
+  cd test-client ; poetry install && poetry run cli --async ./examples/echo_agent_stateless.yaml
   ```
 
   1. Run the test sync client from the CLI on the stateful API set.
 
   ```
-  cd test-client ; poetry run cli ./examples/echo_agent_stateful.yaml
+  cd test-client ; poetry install && poetry run cli ./examples/echo_agent_stateful.yaml
   ```
 
 ## Test configuration file layout
 
-The configuration file has two sections: metadata and operations
+The configuration file has two sections: `metadata` and `operations`.
 
 ### Test metadata
 
-The test metadata allows you to set the api client configuration:
+The test metadata allows you to set the API client configuration:
 
   * client_config: an agntcy_acp.ApiClientConfiguration object
   * env_prefix: a string to get values from corresponding environment 
@@ -70,7 +70,7 @@ The test metadata allows you to set the api client configuration:
     for the agent endpoint in "TEST_ENDPOINT".
 
 
-### Test operations
+### Test operations
 
 This is a list of operations that are executed in order. Each
 operation is defined by the endpoint ID from the ACP OpenAPI 
@@ -125,7 +125,7 @@ the output match is specified and met. The currently supported matches are:
   missing properties are considered an error.
   * output_exact: the result object should match exactly as specified. Note
   that datetime objects are ignored so that for example, the `created_at` field
-  of the `Run` reponse object is ignore.
+  of the `Run` response object is ignore.
 
 Note that the objects must match the structure of the models in agntcy_acp.models
 so that for example, you should provide the `actual_instance` property of the
