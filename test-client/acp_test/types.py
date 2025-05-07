@@ -1,6 +1,6 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from agntcy_acp import ApiClientConfiguration
 from pydantic import BaseModel
@@ -54,7 +54,7 @@ class TestMetadata(BaseModel):
 class TestOperation(BaseModel):
     operation_id: OperationId
     test_input: Optional[Dict[str, TestInvocation]] = None
-    output_at_least: Optional[Dict[str, Any]] = None
+    output_at_least: Optional[Union[Dict[str, Any], List]] = None
     output_exact: Optional[Dict[str, Any]] = None
     output_stream: List[Dict[str, Any]] = []
 

@@ -91,6 +91,8 @@ def _process_result(
 ) -> Tuple[bool, Any]:
     if isinstance(result, BaseModel):
         result_dump = result.model_dump(exclude_none=True)
+    elif isinstance(result, list):
+        result_dump = [r.model_dump(exclude_none=True) for r in result]
     else:
         result_dump = {}
 
