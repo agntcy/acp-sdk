@@ -7,9 +7,23 @@ operations:
     test_input:
       thread_create:
         type: agntcy_acp.models.ThreadCreate
+        arguments:
+          thread_id: null
+          metadata: {}
     output_at_least:
       status: idle
-  - operation_id: create_thread_run
+
+  - operation_id: search_threads
+    test_input:
+      thread_search_request:
+        type: agntcy_acp.models.ThreadSearchRequest
+        arguments:
+          status: idle
+          metadata: null
+    output_at_least:
+      - thread_id: "{{ results[0].thread_id }}"
+
+  - operation_id: create_and_wait_for_thread_run_output
     test_input:
       run_create_stateful:
         type: agntcy_acp.models.RunCreateStateful
@@ -23,49 +37,104 @@ operations:
           config:
             configurable:
               to_upper: true
-    output_at_least:
-      status: pending
-      thread_id: "{{ results[0].thread_id }}"
-      agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
-  - operation_id: wait_for_thread_run_output
-    test_input:
       thread_id:
         type: str
         value: "{{ results[0].thread_id }}"
-      run_id:
-        type: str
-        value: "{{ results[1].run_id }}"
     output_at_least:
       output:
         actual_instance:
           type: result
           values:
-            echo_output:
-              messages:
-                - content: "What is up, Dude?"
-                  type: human
-                - content: "WHAT IS UP, DUDE?"
-                  type: assistant
+            messages:
+              - content: "What is up, Dude?"
+                type: human
+              - content: "WHAT IS UP, DUDE?"
+                type: assistant
       run:
         status: success
-        thread_id: "{{ results[0].thread_id }}"
-        run_id: "{{ results[1].run_id }}"
-  - operation_id: get_thread_run
+
+  - operation_id: list_thread_runs
     test_input:
       thread_id:
         type: str
         value: "{{ results[0].thread_id }}"
-      run_id:
-        type: str
-        value: "{{ results[1].run_id }}"
     output_at_least:
-      thread_id: "{{ results[0].thread_id }}"
-      agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
-      run_id: "{{ results[1].run_id }}"
+      - run_id: "{{ results[-1].run.run_id }}"
+
   - operation_id: get_thread
     test_input:
       thread_id:
         type: str
         value: "{{ results[0].thread_id }}"
     output_at_least:
-      status: idle
+      values:
+        messages:
+          - content: "What is up, Dude?"
+            type: human
+          - content: "WHAT IS UP, DUDE?"
+            type: assistant
+
+  - operation_id: get_thread_history
+    test_input:
+      thread_id:
+        type: str
+        value: "{{ results[0].thread_id }}"
+      limit:
+        type: int
+        value: "10"
+    output_at_least:
+      - values:
+          messages:
+            - content: "What is up, Dude?"
+              type: human
+
+  - operation_id: create_and_wait_for_thread_run_output
+    test_input:
+      run_create_stateful:
+        type: agntcy_acp.models.RunCreateStateful
+        arguments:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+          input:
+            echo_input:
+              messages:
+                - type: human
+                  content: "Another message"
+          config:
+            configurable:
+              to_upper: true
+      thread_id:
+        type: str
+        value: "{{ results[0].thread_id }}"
+    output_at_least:
+      output:
+        actual_instance:
+          type: result
+          values:
+            messages:
+              - content: "Another message"
+                type: human
+              - content: "ANOTHER MESSAGE"
+                type: assistant
+      run:
+        status: success
+
+  - operation_id: get_thread
+    test_input:
+      thread_id:
+        type: str
+        value: "{{ results[0].thread_id }}"
+    output_at_least:
+      values:
+        messages:
+          - content: "Another message"
+            type: human
+          - content: "ANOTHER MESSAGE"
+            type: assistant
+
+  - operation_id: delete_thread
+    test_input:
+      thread_id:
+        type: str
+        value: "{{ results[0].thread_id }}"
+    output_at_least:
+      {}
