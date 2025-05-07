@@ -1,5 +1,6 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
@@ -15,7 +16,8 @@ def build_graph() -> CompiledStateGraph:
     graph_builder.add_edge(START, "echo_agent")
     graph_builder.add_edge("echo_agent", END)
 
-    return graph_builder.compile()
+    checkpointer = InMemorySaver()
+    return graph_builder.compile(checkpointer=checkpointer)
 
 
 # Compile the graph
