@@ -27,6 +27,17 @@ from agntcy_acp.acp_v0.exceptions import (
     UnprocessableEntityException,
 )
 
+# Try to import authorization components if available
+try:
+    from .auth import (
+        ACPAuthorization,
+        AuthorizationMiddleware,
+        Permission,
+        PermissionContext,
+        PermissionDeniedError,
+    )
+except ImportError:
+    pass
 
 __all__ = [
     "ACPClient",

@@ -1,0 +1,75 @@
+name: echo-agent-with-permissions
+version: 0.1.0
+description: An echo agent with permission requirements
+capabilities:
+  - text
+  - image
+specs:
+  interrupts:
+    - type: signal
+      signal: SIGTERM
+    - type: signal
+      signal: SIGINT
+  runtime:
+    - type: text
+      name: messages
+      input:
+        - type: human
+          content: string
+      output:
+        - type: agent
+          content: string
+  # New permissions section defining required permissions for this agent
+  permissions:
+    - name: use_agent
+      description: Basic permission to use this agent
+      actions:
+        - create_stateless_run
+        - get_stateless_run
+    - name: manage_threads
+      description: Permission to manage conversation threads
+      actions:
+        - create_thread
+        - get_thread
+        - create_thread_run
+        - get_thread_run
+    - name: admin
+      description: Administrative access to all agent functions
+      actions:
+        - "*"  # All actions
+  # Define roles with pre-assigned permissions
+  roles:
+    - name: viewer
+      permissions:
+        - name: use_agent
+          actions:
+            - get_stateless_run
+    - name: user
+      permissions:
+        - name: use_agent
+          actions: 
+            - create_stateless_run
+            - get_stateless_run
+        - name: manage_threads
+    - name: admin
+      permissions:
+        - name: admin
+metadata:
+  creator: Demo User
+  license: Apache-2.0
+deployment:
+  environment:
+    ENV_VAR1:
+      description: An environment variable
+      required: false
+    ENV_VAR2:
+      description: Another environment variable
+      required: false
+  deploymentOptions:
+    - name: default
+      type: container
+      port: 8000
+      # Add permission requirements to deployment options
+      required_permissions:
+        - deploy_container
+        - manage_network 

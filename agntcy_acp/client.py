@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 from pydantic import BaseModel
-from typing import Optional, Any, Dict, Union
+from typing import Optional, Any, Dict, Union, Callable
 from os import getenv
 from pathlib import Path
 import yaml
@@ -23,6 +23,18 @@ try:
 except ImportError:
     from yaml import SafeLoader
 
+# Import authorization components if available
+try:
+    from .auth import AuthorizationMiddleware, PermissionDeniedError
+except ImportError:
+    # Create stub classes if auth module is not available
+    class AuthorizationMiddleware:
+        def __init__(self, *args, **kwargs):
+            pass
+        def authorize(self, *args, **kwargs):
+            pass
+    class PermissionDeniedError(Exception):
+        pass
 
 __ENV_VAR_SPECIAL_CHAR_TABLE = str.maketrans("-.", "__")
 
@@ -179,12 +191,16 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
             configuration: Optional[ApiClientConfiguration] = None,
             manifest: Optional[Union[str,Path,AgentManifest,AgentACPSpec]] = None,
             stream_chunk_size: int = 4096,
+            auth_middleware: Optional[AuthorizationMiddleware] = None,
+            user_id_header: str = "X-User-ID"
         ):
         if api_client is None and configuration is not None:
             api_client = ApiClient(configuration)
         super().__init__(api_client)
         self.__workflow_server_update_api_client()
         self.stream_chunk_size = stream_chunk_size
+        self.auth_middleware = auth_middleware
+        self.user_id_header = user_id_header
         
         if isinstance(manifest, AgentManifest):
             self.agent_acp_spec = manifest.specs
@@ -303,6 +319,135 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         )
         return ACPClient(api_client=ApiClient(client_config))
 
+    def set_auth_middleware(self, middleware: AuthorizationMiddleware) -> None:
+        """Set the authorization middleware for permission checking.
+        
+        Args:
+            middleware: The authorization middleware to use
+        """
+        self.auth_middleware = middleware
+    
+    def set_user_id(self, user_id: str) -> None:
+        """Set the user ID for all subsequent requests.
+        
+        Args:
+            user_id: The user ID to use for authorization
+        """
+        if not self.api_client.default_headers:
+            self.api_client.default_headers = {}
+        self.api_client.default_headers[self.user_id_header] = user_id
+    
+    def get_user_id(self) -> Optional[str]:
+        """Get the current user ID from headers.
+        
+        Returns:
+            The current user ID or None if not set
+        """
+        if not self.api_client.default_headers:
+            return None
+        return self.api_client.default_headers.get(self.user_id_header)
+    
+    def _authorize(self, agent_id: str, action: str, resource_id: Optional[str] = None, 
+                  metadata: Optional[Dict[str, Any]] = None) -> None:
+        """Check authorization for an action.
+        
+        Args:
+            agent_id: The ID of the agent being accessed
+            action: The action being performed
+            resource_id: Optional ID of the specific resource
+            metadata: Additional context for authorization
+            
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if not self.auth_middleware:
+            return
+        
+        user_id = self.get_user_id()
+        if not user_id:
+            raise ValueError("User ID not set. Call set_user_id() before making requests.")
+        
+        self.auth_middleware.authorize(
+            user_id=user_id,
+            agent_id=agent_id,
+            action=action,
+            resource_id=resource_id,
+            metadata=metadata
+        )
+    
+    # Override API methods to add authorization
+    
+    def create_stateless_run(self, **kwargs):
+        """Create a stateless agent run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        agent_id = kwargs.get("agent_id")
+        if agent_id and self.auth_middleware:
+            self._authorize(agent_id=agent_id, action="create_stateless_run")
+        return super().create_stateless_run(**kwargs)
+    
+    def get_stateless_run(self, run_id, **kwargs):
+        """Get a stateless run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            # We don't know the agent_id here, so use the run_id as resource
+            self._authorize(agent_id="*", action="get_stateless_run", resource_id=run_id)
+        return super().get_stateless_run(run_id, **kwargs)
+    
+    def create_thread(self, **kwargs):
+        """Create a thread with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            self._authorize(agent_id="*", action="create_thread")
+        return super().create_thread(**kwargs)
+    
+    def get_thread(self, thread_id, **kwargs):
+        """Get a thread with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            self._authorize(agent_id="*", action="get_thread", resource_id=thread_id)
+        return super().get_thread(thread_id, **kwargs)
+    
+    def create_thread_run(self, thread_id, **kwargs):
+        """Create a thread run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        agent_id = kwargs.get("agent_id")
+        if self.auth_middleware:
+            self._authorize(
+                agent_id=agent_id or "*", 
+                action="create_thread_run", 
+                resource_id=thread_id
+            )
+        return super().create_thread_run(thread_id, **kwargs)
+    
+    def get_thread_run(self, thread_id, run_id, **kwargs):
+        """Get a thread run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            self._authorize(
+                agent_id="*", 
+                action="get_thread_run", 
+                resource_id=f"{thread_id}/{run_id}"
+            )
+        return super().get_thread_run(thread_id, run_id, **kwargs)
+
 
 class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, AsyncThreadRunsApi):
     """Async client for ACP API.
@@ -313,6 +458,8 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
             configuration: Optional[ApiClientConfiguration] = None,
             manifest: Optional[Union[str,Path,AgentManifest,AgentACPSpec]] = None,
             stream_chunk_size: int = 4096,
+            auth_middleware: Optional[AuthorizationMiddleware] = None,
+            user_id_header: str = "X-User-ID"
         ):
         if api_client is None and configuration is not None:
             api_client = AsyncApiClient(configuration)
@@ -321,6 +468,8 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
         self.stream_chunk_size = stream_chunk_size
         self.manifest = manifest
         self.agent_acp_spec = None
+        self.auth_middleware = auth_middleware
+        self.user_id_header = user_id_header
     
     def __workflow_server_update_api_client(self):
         if self.api_client.configuration.api_key is not None:
@@ -444,3 +593,132 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
             debug=debug,
         )
         return AsyncACPClient(api_client=AsyncApiClient(client_config))
+
+    def set_auth_middleware(self, middleware: AuthorizationMiddleware) -> None:
+        """Set the authorization middleware for permission checking.
+        
+        Args:
+            middleware: The authorization middleware to use
+        """
+        self.auth_middleware = middleware
+    
+    def set_user_id(self, user_id: str) -> None:
+        """Set the user ID for all subsequent requests.
+        
+        Args:
+            user_id: The user ID to use for authorization
+        """
+        if not self.api_client.default_headers:
+            self.api_client.default_headers = {}
+        self.api_client.default_headers[self.user_id_header] = user_id
+    
+    def get_user_id(self) -> Optional[str]:
+        """Get the current user ID from headers.
+        
+        Returns:
+            The current user ID or None if not set
+        """
+        if not self.api_client.default_headers:
+            return None
+        return self.api_client.default_headers.get(self.user_id_header)
+    
+    async def _authorize(self, agent_id: str, action: str, resource_id: Optional[str] = None, 
+                  metadata: Optional[Dict[str, Any]] = None) -> None:
+        """Check authorization for an action.
+        
+        Args:
+            agent_id: The ID of the agent being accessed
+            action: The action being performed
+            resource_id: Optional ID of the specific resource
+            metadata: Additional context for authorization
+            
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if not self.auth_middleware:
+            return
+        
+        user_id = self.get_user_id()
+        if not user_id:
+            raise ValueError("User ID not set. Call set_user_id() before making requests.")
+        
+        self.auth_middleware.authorize(
+            user_id=user_id,
+            agent_id=agent_id,
+            action=action,
+            resource_id=resource_id,
+            metadata=metadata
+        )
+    
+    # Override API methods to add authorization
+    
+    async def create_stateless_run(self, **kwargs):
+        """Create a stateless agent run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        agent_id = kwargs.get("agent_id")
+        if agent_id and self.auth_middleware:
+            await self._authorize(agent_id=agent_id, action="create_stateless_run")
+        return await super().create_stateless_run(**kwargs)
+    
+    async def get_stateless_run(self, run_id, **kwargs):
+        """Get a stateless run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            # We don't know the agent_id here, so use the run_id as resource
+            await self._authorize(agent_id="*", action="get_stateless_run", resource_id=run_id)
+        return await super().get_stateless_run(run_id, **kwargs)
+    
+    async def create_thread(self, **kwargs):
+        """Create a thread with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            await self._authorize(agent_id="*", action="create_thread")
+        return await super().create_thread(**kwargs)
+    
+    async def get_thread(self, thread_id, **kwargs):
+        """Get a thread with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            await self._authorize(agent_id="*", action="get_thread", resource_id=thread_id)
+        return await super().get_thread(thread_id, **kwargs)
+    
+    async def create_thread_run(self, thread_id, **kwargs):
+        """Create a thread run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        agent_id = kwargs.get("agent_id")
+        if self.auth_middleware:
+            await self._authorize(
+                agent_id=agent_id or "*", 
+                action="create_thread_run", 
+                resource_id=thread_id
+            )
+        return await super().create_thread_run(thread_id, **kwargs)
+    
+    async def get_thread_run(self, thread_id, run_id, **kwargs):
+        """Get a thread run with authorization.
+        
+        Raises:
+            PermissionDeniedError: If the user does not have permission
+        """
+        if self.auth_middleware:
+            await self._authorize(
+                agent_id="*", 
+                action="get_thread_run", 
+                resource_id=f"{thread_id}/{run_id}"
+            )
+        return await super().get_thread_run(thread_id, run_id, **kwargs)
