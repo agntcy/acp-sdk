@@ -145,11 +145,18 @@ def test_acp_client_thread_run_api(mock_sync_api_client, default_api_key, defaul
         response = client.wait_for_thread_run_output(thread_id=thread_id, run_id=run_id)
         assert response is not None
 
-        response = client.stream_thread_run_output(thread_id=thread_id, run_id=run_id)
-        assert response is not None
-
         response = client.resume_thread_run(thread_id=thread_id, run_id=run_id, body={})
         assert response is not None
 
         response = client.delete_thread_run(thread_id=thread_id, run_id=run_id)
         assert response is not None
+
+def test_acp_client_stream_thread_run_api(default_api_key, default_agent_id, default_run_output_stream, default_thread_id, monkeypatch):
+    config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
+
+    with ACPClient(configuration=config) as client:
+        mock_response_api_client(client.api_client, default_run_output_stream.data, default_api_key, monkeypatch)
+        stream = client.create_and_stream_thread_run_output(thread_id=default_thread_id, run_create_stateful=RunCreateStateful(agent_id=default_agent_id))
+        for response in stream:
+            assert response is not None
+            assert response.data.actual_instance.run_id == default_run_output_stream.data.actual_instance.run_id

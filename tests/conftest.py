@@ -24,6 +24,10 @@ def default_agent_id():
     return "bogus-agent-id"
 
 @pytest.fixture
+def default_thread_id():
+    return 'd379d156-560b-4c97-ba04-0e88c26fe697'
+
+@pytest.fixture
 def default_api_key():
     return "bogus-api-key"
 

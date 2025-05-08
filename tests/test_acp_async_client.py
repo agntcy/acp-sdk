@@ -146,9 +146,9 @@ async def test_acp_client_stream_stateless_runs_api(default_api_key, default_age
             assert response is not None
             assert response.data.actual_instance.run_id == default_run_output_stream.data.actual_instance.run_id
 
-async def test_acp_client_thread_run_api(mock_async_api_client, default_api_key, default_agent_id):
+async def test_acp_client_thread_run_api(mock_async_api_client, default_api_key, default_agent_id, default_thread_id):
     config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
-    thread_id = 'd379d156-560b-4c97-ba04-0e88c26fe697'
+    thread_id = default_thread_id
 
     async with AsyncApiClient(config) as api_client:
         client = AsyncACPClient(api_client)
@@ -163,11 +163,18 @@ async def test_acp_client_thread_run_api(mock_async_api_client, default_api_key,
         response = await client.wait_for_thread_run_output(thread_id=thread_id, run_id=run_id)
         assert response is not None
 
-        response = await client.stream_thread_run_output(thread_id=thread_id, run_id=run_id)
-        assert response is not None
-
         response = await client.resume_thread_run(thread_id=thread_id, run_id=run_id, body={})
         assert response is not None
 
         response = await client.delete_thread_run(thread_id=thread_id, run_id=run_id)
         assert response is not None
+
+async def test_acp_client_stream_thread_run_api(default_api_key, default_agent_id, default_run_output_stream, default_thread_id, monkeypatch):
+    config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
+
+    async with AsyncACPClient(configuration=config) as client:
+        mock_response_api_client(client.api_client, default_run_output_stream.data, default_api_key, monkeypatch)
+        stream = client.create_and_stream_thread_run_output(thread_id=default_thread_id, run_create_stateful=RunCreateStateful(agent_id=default_agent_id))
+        async for response in stream:
+            assert response is not None
+            assert response.data.actual_instance.run_id == default_run_output_stream.data.actual_instance.run_id

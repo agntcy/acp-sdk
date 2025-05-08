@@ -2513,7 +2513,7 @@ class ThreadRunsApi:
         # Handle errors separately
         if response_data.status != 200:
             await response_data.read()
-            return self.api_client.response_deserialize(
+            yield self.api_client.response_deserialize(
                 response_data=response_data,
                 response_types_map=_response_types_map,
             ).data
@@ -2596,7 +2596,7 @@ class ThreadRunsApi:
         # Handle errors separately
         if response_data.status != 200:
             await response_data.read()
-            return self.api_client.response_deserialize(
+            yield self.api_client.response_deserialize(
                 response_data=response_data,
                 response_types_map=_response_types_map,
             )
