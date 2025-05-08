@@ -15,7 +15,7 @@
 
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, AsyncIterator
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBool, StrictInt, StrictStr, field_validator
@@ -25,10 +25,12 @@ from agntcy_acp.acp_v0.models.run_create_stateful import RunCreateStateful
 from agntcy_acp.acp_v0.models.run_output_stream import RunOutputStream
 from agntcy_acp.acp_v0.models.run_stateful import RunStateful
 from agntcy_acp.acp_v0.models.run_wait_response_stateful import RunWaitResponseStateful
+from agntcy_acp.acp_v0.models.stream_event_payload import StreamEventPayload
 
 from agntcy_acp.acp_v0.async_client.api_client import ApiClient, RequestSerialized
 from agntcy_acp.acp_v0.api_response import ApiResponse
 from agntcy_acp.acp_v0.async_client.rest import RESTResponseType
+from agntcy_acp.server_side_events import sse_astream
 
 
 class ThreadRunsApi:
@@ -42,6 +44,7 @@ class ThreadRunsApi:
         if api_client is None:
             api_client = ApiClient.get_default()
         self.api_client = api_client
+        self.stream_chunk_size = 4096
 
 
     @validate_call
@@ -373,7 +376,7 @@ class ThreadRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RunOutputStream:
+    ) -> AsyncIterator[RunOutputStream]:
         """Create a run on a thread and stream its output
 
         Create a run on a thread and join its output stream. See 'GET /runs/{run_id}/stream' for details on the return values.
@@ -414,7 +417,6 @@ class ThreadRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "RunOutputStream",
             '404': "str",
             '409': "str",
             '422': "str",
@@ -423,11 +425,22 @@ class ThreadRunsApi:
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        # Handle errors separately
+        if response_data.status != 200:
+            await response_data.read()
+            yield self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_response_types_map,
+            ).data
+        else:
+            # Handle SSE data
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call
@@ -447,7 +460,7 @@ class ThreadRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[RunOutputStream]:
+    ) -> AsyncIterator[ApiResponse[RunOutputStream]]:
         """Create a run on a thread and stream its output
 
         Create a run on a thread and join its output stream. See 'GET /runs/{run_id}/stream' for details on the return values.
@@ -488,7 +501,6 @@ class ThreadRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "RunOutputStream",
             '404': "str",
             '409': "str",
             '422': "str",
@@ -497,11 +509,22 @@ class ThreadRunsApi:
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
+        # Handle errors separately
+        if response_data.status != 200:
+            await response_data.read()
+            yield self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_response_types_map,
+            )
+        else:
+            # Handle SSE data
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call
@@ -2439,7 +2462,7 @@ class ThreadRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RunOutputStream:
+    ) -> AsyncIterator[RunOutputStream]:
         """Stream output from Run
 
         Join the output stream of an existing run. See 'GET /runs/{run_id}/stream' for details on the return values.
@@ -2480,7 +2503,6 @@ class ThreadRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "RunOutputStream",
             '404': "str",
             '422': "str",
         }
@@ -2488,11 +2510,22 @@ class ThreadRunsApi:
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
+        # Handle errors separately
+        if response_data.status != 200:
+            await response_data.read()
+            return self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_response_types_map,
+            ).data
+        else:
+            # Handle SSE data
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call
@@ -2512,7 +2545,7 @@ class ThreadRunsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[RunOutputStream]:
+    ) -> AsyncIterator[ApiResponse[RunOutputStream]]:
         """Stream output from Run
 
         Join the output stream of an existing run. See 'GET /runs/{run_id}/stream' for details on the return values.
@@ -2553,7 +2586,6 @@ class ThreadRunsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "RunOutputStream",
             '404': "str",
             '422': "str",
         }
@@ -2561,11 +2593,22 @@ class ThreadRunsApi:
             *_param,
             _request_timeout=_request_timeout
         )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
+        # Handle errors separately
+        if response_data.status != 200:
+            await response_data.read()
+            return self.api_client.response_deserialize(
+                response_data=response_data,
+                response_types_map=_response_types_map,
+            )
+        # Handle SSE data
+        else:
+            stream = response_data.response.content.iter_chunked(self.stream_chunk_size)
+            async for event in sse_astream(stream):
+                yield RunOutputStream(
+                    id=event.last_event_id,
+                    event=event.event_type,
+                    data=StreamEventPayload.from_json(event.event_data),
+                )
 
 
     @validate_call

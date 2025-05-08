@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 from collections.abc import MutableMapping
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, Iterator, AsyncIterator, List
 from pydantic import BaseModel
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import (
     interrupt,
 )
 from langgraph.utils.runnable import RunnableCallable
-from pydantic import BaseModel
+from langgraph.types import LangGraphStreamMode
 
 from agntcy_acp import (
     ACPClient,
@@ -26,6 +26,7 @@ from agntcy_acp.models import (
     RunOutput,
     RunResult,
     RunWaitResponseStateless,
+    StreamingMode,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,6 @@ class ACPNode:
         config_path: Optional[str] = None,
         config_type=None,
         auth_header: Optional[Dict] = None,
-        use_threads: bool = False,
     ):
         """Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -117,7 +117,7 @@ class ACPNode:
         else:
             return {}
 
-    def _extract_config(self, config: Any) -> Any:
+    def _extract_config(self, config: Optional[RunnableConfig]) -> Any:
         if not config:
             return config
 
@@ -301,6 +301,98 @@ class ACPNode:
                     run_id=resume_run.run_id
                 )
         state = self._handle_run_output(state, run_output.output)
+
+    def _convert_stream_mode(
+        self, 
+        stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None],
+    ) -> Union[StreamingMode,List[StreamingMode],None]:
+        valid_acp_modes = [member.value for name, member in StreamingMode.__members__.items()]
+        if stream_mode is None:
+            return None
+        elif isinstance(stream_mode, List):
+            new_modes = [
+                elem
+                for elem in stream_mode
+                if elem in valid_acp_modes
+            ]
+            if not new_modes and stream_mode:
+                raise ValueError("unsupported stream modes: {stream_mode}")
+            return new_modes
+        elif stream_mode in valid_acp_modes:
+            return StreamingMode(stream_mode)
+        else:
+            raise ValueError(f"unsupported stream mode: {stream_mode}")
+
+    def stream(
+        self,
+        input: Union[Dict[str, Any], Any],
+        config: Optional[RunnableConfig] = None,
+        *,
+        stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None] = None,
+        **kwargs,
+    ) -> Iterator[Dict[str, Any] | Any]:
+        """Stream graph steps for a single input.
+        """
+        thread_id = self._get_thread_id(config)
+        
+        if thread_id is not None:
+            run_create = RunCreateStateful(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            with ACPClient(configuration=self.clientConfig) as acp_client:
+                for run_output in acp_client.create_and_stream_thread_run_output(thread_id, run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
+        else:
+            run_create = RunCreateStateless(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            with ACPClient(configuration=self.clientConfig) as acp_client:
+                for run_output in acp_client.create_and_stream_stateless_run_output(run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
+        
+
+    async def astream(
+        self,
+        input: Union[Dict[str, Any],Any],
+        config: Optional[RunnableConfig] = None,
+        *,
+        stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None] = None,
+        **kwargs,
+    ) -> AsyncIterator[Dict[str, Any] | Any]:
+        """Stream graph steps for a single input.
+        """
+        thread_id = self._get_thread_id(config)
+
+        if thread_id is not None:
+            run_create = RunCreateStateful(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
+                async for run_output in acp_client.create_and_stream_thread_run_output(thread_id, run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
+        else:
+            run_create = RunCreateStateless(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
+                async for run_output in acp_client.create_and_stream_stateless_run_output(run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
 
     def __call__(self, state, config):
         return RunnableCallable(self.invoke, self.ainvoke)
