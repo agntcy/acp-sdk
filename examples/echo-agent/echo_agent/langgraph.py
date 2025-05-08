@@ -20,5 +20,4 @@ def build_graph() -> CompiledStateGraph:
     return graph_builder.compile(checkpointer=checkpointer)
 
 
-# Compile the graph
 AGENT_GRAPH = build_graph()
