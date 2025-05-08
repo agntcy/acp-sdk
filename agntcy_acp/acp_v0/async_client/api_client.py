@@ -23,6 +23,7 @@ import mimetypes
 import os
 import re
 import tempfile
+import aiohttp
 
 from urllib.parse import quote
 from typing import Tuple, Optional, List, Dict, Union
@@ -116,6 +117,92 @@ class ApiClient:
     def set_default_header(self, header_name, header_value):
         self.default_headers[header_name] = header_value
 
+    async def authorize(
+        self,
+        method,
+        url,
+        subject=None,
+        resource=None,
+        action=None,
+        context=None
+    ) -> bool:
+        """Authorizes the request with the PDP server asynchronously.
+        
+        :param method: HTTP method
+        :param url: Request URL
+        :param subject: Optional subject override
+        :param resource: Optional resource override
+        :param action: Optional action override
+        :param context: Optional context override
+        :return: True if authorized, False otherwise
+        :raises: ApiException if the authorization request fails
+        """
+        if not self.configuration.authz_enabled or not self.configuration.pdp_url:
+            return True
+            
+        # Default values if not provided
+        if subject is None:
+            subject = {
+                "type": "user",
+                "id": self.configuration.username or "anonymous"
+            }
+            
+        if resource is None:
+            parsed_url = url.split('/')
+            resource_type = parsed_url[-2] if len(parsed_url) > 2 else "endpoint"
+            resource_id = parsed_url[-1] if len(parsed_url) > 1 else url
+            resource = {
+                "type": resource_type,
+                "id": resource_id
+            }
+            
+        if action is None:
+            action = {
+                "type": method.lower()
+            }
+            
+        if context is None:
+            context = {}
+            
+        # Prepare the authorization request
+        auth_request = {
+            "subject": subject,
+            "resource": resource,
+            "action": action,
+            "context": context
+        }
+        
+        # Set up headers for the PDP request
+        headers = {"Content-Type": "application/json"}
+        if self.configuration.pdp_api_key:
+            headers["Authorization"] = f"Bearer {self.configuration.pdp_api_key}"
+        
+        try:
+            # Make the authorization request asynchronously
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.configuration.pdp_url}/v1/evaluate",
+                    json=auth_request,
+                    headers=headers
+                ) as response:
+                    if response.status != 200:
+                        text = await response.text()
+                        raise ApiException(
+                            status=response.status,
+                            reason=f"Authorization failed: {text}"
+                        )
+                        
+                    # Parse the response
+                    auth_response = await response.json()
+                    return auth_response.get("decision", False)
+                    
+        except Exception as e:
+            if isinstance(e, ApiException):
+                raise e
+            raise ApiException(
+                status=0,
+                reason=f"Authorization failed: {str(e)}"
+            )
 
     _default = None
 
@@ -259,9 +346,14 @@ class ApiClient:
         header_params=None,
         body=None,
         post_params=None,
-        _request_timeout=None
+        _request_timeout=None,
+        subject=None,
+        resource=None,
+        action=None,
+        context=None
     ) -> rest.RESTResponse:
-        """Makes the HTTP request (synchronous)
+        """Makes the HTTP request (asynchronous) and optionally applies authorization
+        
         :param method: Method to call.
         :param url: Path to method endpoint.
         :param header_params: Header parameters to be
@@ -270,8 +362,23 @@ class ApiClient:
         :param post_params dict: Request post form parameters,
             for `application/x-www-form-urlencoded`, `multipart/form-data`.
         :param _request_timeout: timeout setting for this request.
+        :param subject: Optional subject for authorization
+        :param resource: Optional resource for authorization
+        :param action: Optional action for authorization
+        :param context: Optional context for authorization
         :return: RESTResponse
+        :raises: ApiException if the request fails or is not authorized
         """
+        # Check authorization first if enabled
+        if self.configuration.authz_enabled:
+            is_authorized = await self.authorize(
+                method, url, subject, resource, action, context
+            )
+            if not is_authorized:
+                raise UnauthorizedException(
+                    status=403,
+                    reason="Access denied by authorization policy"
+                )
 
         try:
             # perform request and return response

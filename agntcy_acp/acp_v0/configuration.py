@@ -19,7 +19,11 @@ import http.client as httplib
 import logging
 from logging import FileHandler
 import multiprocessing
+import os
+import platform
+import re
 import sys
+import tempfile
 from typing import Any, ClassVar, Dict, List, Literal, Optional, TypedDict, Union
 from typing_extensions import NotRequired, Self
 
@@ -164,6 +168,22 @@ class Configuration:
     :param retries: Number of retries for API requests.
     :param ca_cert_data: verify the peer using concatenated CA certificate data
       in PEM (str) or DER (bytes) format.
+    :param discard_unknown_keys: Boolean value indicating whether to discard
+      unknown properties. A server may send a response that includes additional
+      properties that are not known by the client in the following scenarios:
+      1. The client generates request body based on an outdated OpenAPI document
+      2. The server has new APIs that creates attributes that are not in the
+          current OpenAPI document
+      3. The server adds new optional parameters to existing APIs in the new
+          released OpenAPI document
+      When True, throw away the key-value pair in the response body
+      that are not defined in the OpenAPI document
+      Default is False to maintain compatibility with prior versions
+    :param disabled_client_side_validations: Comma-separated list of
+      validations to disable.
+    :param pdp_url: URL for the Policy Decision Point (PDP) server
+    :param pdp_api_key: API key for the PDP server
+    :param authz_enabled: Boolean to enable/disable authorization
 
     """
 
@@ -185,6 +205,11 @@ class Configuration:
         ssl_ca_cert: Optional[str]=None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
+        discard_unknown_keys: bool=False,
+        disabled_client_side_validations: str="",
+        pdp_url: Optional[str]=None,
+        pdp_api_key: Optional[str]=None,
+        authz_enabled: bool=False,
         *,
         debug: Optional[bool] = None,
     ) -> None:
@@ -204,7 +229,7 @@ class Configuration:
         self.ignore_operation_servers = ignore_operation_servers
         """Ignore operation servers
         """
-        self.temp_folder_path = None
+        self.temp_folder_path = tempfile.gettempdir()
         """Temp file folder for downloading files
         """
         # Authentication Settings
@@ -313,6 +338,17 @@ class Configuration:
 
         self.date_format = "%Y-%m-%d"
         """date format
+        """
+
+        # Authorization settings
+        self.pdp_url = pdp_url
+        """URL for the Policy Decision Point (PDP) server
+        """
+        self.pdp_api_key = pdp_api_key
+        """API key for the PDP server
+        """
+        self.authz_enabled = authz_enabled
+        """Boolean to enable/disable authorization
         """
 
     def __deepcopy__(self, memo:  Dict[int, Any]) -> Self:
