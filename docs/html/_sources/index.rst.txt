@@ -14,15 +14,15 @@ and communication between multi-agent systems.
 Getting Started
 ---------------
 
-See [Getting Started Guide](https://agntcy.github.io/acp-sdk/README.md#getting-started)
+See the `Getting Started Guide <https://docs.agntcy.org/pages/syntactic_sdk/agntcy_acp_sdk.html#getting-started-with-the-client>`_
 for examples using the package.
 
 
 Further Documentation
 ---------------------
 
-  * See [ACP SDK Documentation](https://agntcy.github.io/acp-sdk) to deep dive into using the client SDK.
-  * See [IoA Documentation](https://docs.agntcy.org) for more info on Internet of Agents.
+  * See `ACP SDK Documentation <https://agntcy.github.io/acp-sdk>`_ to deep dive into using the client SDK.
+  * See `IoA Documentation <https://docs.agntcy.org>`_ for more info on Internet of Agents.
 
 .. toctree::
    :maxdepth: 4

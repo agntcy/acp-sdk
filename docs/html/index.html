@@ -40,15 +40,15 @@ for both client and server implementations, enabling seamless integration
 and communication between multi-agent systems.</p>
 <section id="getting-started">
 <h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h2>
-<p>See [Getting Started Guide](<a class="reference external" href="https://agntcy.github.io/acp-sdk/README.md#getting-started">https://agntcy.github.io/acp-sdk/README.md#getting-started</a>)
+<p>See the <a class="reference external" href="https://docs.agntcy.org/pages/syntactic_sdk/agntcy_acp_sdk.html#getting-started-with-the-client">Getting Started Guide</a>
 for examples using the package.</p>
 </section>
 <section id="further-documentation">
 <h2>Further Documentation<a class="headerlink" href="#further-documentation" title="Link to this heading">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li><p>See [ACP SDK Documentation](<a class="reference external" href="https://agntcy.github.io/acp-sdk">https://agntcy.github.io/acp-sdk</a>) to deep dive into using the client SDK.</p></li>
-<li><p>See [IoA Documentation](<a class="reference external" href="https://docs.agntcy.org">https://docs.agntcy.org</a>) for more info on Internet of Agents.</p></li>
+<li><p>See <a class="reference external" href="https://agntcy.github.io/acp-sdk">ACP SDK Documentation</a> to deep dive into using the client SDK.</p></li>
+<li><p>See <a class="reference external" href="https://docs.agntcy.org">IoA Documentation</a> for more info on Internet of Agents.</p></li>
 </ul>
 </div></blockquote>
 <div class="toctree-wrapper compound">
@@ -84,10 +84,34 @@ for examples using the package.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="agntcy_acp.html#module-agntcy_acp">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ACPClient"><code class="docutils literal notranslate"><span class="pre">ACPClient</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ACPClient"><code class="docutils literal notranslate"><span class="pre">ACPClient</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ACPClient.fromConfiguration"><code class="docutils literal notranslate"><span class="pre">ACPClient.fromConfiguration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ACPClient.fromEnvPrefix"><code class="docutils literal notranslate"><span class="pre">ACPClient.fromEnvPrefix()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ACPDescriptorValidationException"><code class="docutils literal notranslate"><span class="pre">ACPDescriptorValidationException</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ACPRunException"><code class="docutils literal notranslate"><span class="pre">ACPRunException</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiAttributeError"><code class="docutils literal notranslate"><span class="pre">ApiAttributeError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient"><code class="docutils literal notranslate"><span class="pre">ApiClient</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.NATIVE_TYPES_MAPPING"><code class="docutils literal notranslate"><span class="pre">ApiClient.NATIVE_TYPES_MAPPING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.PRIMITIVE_TYPES"><code class="docutils literal notranslate"><span class="pre">ApiClient.PRIMITIVE_TYPES</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.call_api"><code class="docutils literal notranslate"><span class="pre">ApiClient.call_api()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.deserialize"><code class="docutils literal notranslate"><span class="pre">ApiClient.deserialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.files_parameters"><code class="docutils literal notranslate"><span class="pre">ApiClient.files_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.get_default"><code class="docutils literal notranslate"><span class="pre">ApiClient.get_default()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.param_serialize"><code class="docutils literal notranslate"><span class="pre">ApiClient.param_serialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.parameters_to_tuples"><code class="docutils literal notranslate"><span class="pre">ApiClient.parameters_to_tuples()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.parameters_to_url_query"><code class="docutils literal notranslate"><span class="pre">ApiClient.parameters_to_url_query()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.response_deserialize"><code class="docutils literal notranslate"><span class="pre">ApiClient.response_deserialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.sanitize_for_serialization"><code class="docutils literal notranslate"><span class="pre">ApiClient.sanitize_for_serialization()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.select_header_accept"><code class="docutils literal notranslate"><span class="pre">ApiClient.select_header_accept()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.select_header_content_type"><code class="docutils literal notranslate"><span class="pre">ApiClient.select_header_content_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.set_default"><code class="docutils literal notranslate"><span class="pre">ApiClient.set_default()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.set_default_header"><code class="docutils literal notranslate"><span class="pre">ApiClient.set_default_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.update_params_for_auth"><code class="docutils literal notranslate"><span class="pre">ApiClient.update_params_for_auth()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClient.user_agent"><code class="docutils literal notranslate"><span class="pre">ApiClient.user_agent</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClientConfiguration"><code class="docutils literal notranslate"><span class="pre">ApiClientConfiguration</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClientConfiguration.fromEnvPrefix"><code class="docutils literal notranslate"><span class="pre">ApiClientConfiguration.fromEnvPrefix()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiClientConfiguration.model_config"><code class="docutils literal notranslate"><span class="pre">ApiClientConfiguration.model_config</span></code></a></li>
@@ -108,7 +132,12 @@ for examples using the package.</p>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiTypeError"><code class="docutils literal notranslate"><span class="pre">ApiTypeError</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ApiValueError"><code class="docutils literal notranslate"><span class="pre">ApiValueError</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.AsyncACPClient"><code class="docutils literal notranslate"><span class="pre">AsyncACPClient</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.AsyncACPClient"><code class="docutils literal notranslate"><span class="pre">AsyncACPClient</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.AsyncACPClient.fromConfiguration"><code class="docutils literal notranslate"><span class="pre">AsyncACPClient.fromConfiguration()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.AsyncACPClient.fromEnvPrefix"><code class="docutils literal notranslate"><span class="pre">AsyncACPClient.fromEnvPrefix()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.AsyncApiClient"><code class="docutils literal notranslate"><span class="pre">AsyncApiClient</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.BadRequestException"><code class="docutils literal notranslate"><span class="pre">BadRequestException</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ConflictException"><code class="docutils literal notranslate"><span class="pre">ConflictException</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.html#agntcy_acp.ForbiddenException"><code class="docutils literal notranslate"><span class="pre">ForbiddenException</span></code></a></li>

@@ -159,6 +159,7 @@ class ApiClient:
     ) -> RequestSerialized:
 
         """Builds the HTTP request params needed by the request.
+        
         :param method: Method to call.
         :param resource_path: Path to method endpoint.
         :param path_params: Path parameters in the url.
@@ -262,6 +263,7 @@ class ApiClient:
         _request_timeout=None
     ) -> rest.RESTResponse:
         """Makes the HTTP request (synchronous)
+
         :param method: Method to call.
         :param url: Path to method endpoint.
         :param header_params: Header parameters to be
@@ -293,6 +295,7 @@ class ApiClient:
         response_types_map: Optional[Dict[str, ApiResponseT]]=None
     ) -> ApiResponse[ApiResponseT]:
         """Deserializes response into an object.
+
         :param response_data: RESTResponse object to be deserialized.
         :param response_types_map: dict of response types.
         :return: ApiResponse

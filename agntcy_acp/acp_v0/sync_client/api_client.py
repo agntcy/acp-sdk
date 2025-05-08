@@ -156,6 +156,7 @@ class ApiClient:
     ) -> RequestSerialized:
 
         """Builds the HTTP request params needed by the request.
+
         :param method: Method to call.
         :param resource_path: Path to method endpoint.
         :param path_params: Path parameters in the url.
@@ -259,6 +260,7 @@ class ApiClient:
         _request_timeout=None
     ) -> rest.RESTResponse:
         """Makes the HTTP request (synchronous)
+
         :param method: Method to call.
         :param url: Path to method endpoint.
         :param header_params: Header parameters to be
@@ -290,6 +292,7 @@ class ApiClient:
         response_types_map: Optional[Dict[str, ApiResponseT]]=None
     ) -> ApiResponse[ApiResponseT]:
         """Deserializes response into an object.
+
         :param response_data: RESTResponse object to be deserialized.
         :param response_types_map: dict of response types.
         :return: ApiResponse
@@ -341,7 +344,7 @@ class ApiClient:
         If obj is SecretStr, return obj.get_secret_value()
         If obj is str, int, long, float, bool, return directly.
         If obj is datetime.datetime, datetime.date
-            convert to string in iso8601 format.
+        convert to string in iso8601 format.
         If obj is decimal.Decimal return string representation.
         If obj is list, sanitize each element in the list.
         If obj is dict, return the dict.
@@ -622,7 +625,7 @@ class ApiClient:
         :body: A object representing the body of the HTTP request.
         The object type is the return value of sanitize_for_serialization().
         :param request_auth: if set, the provided settings will
-                             override the token in the configuration.
+        override the token in the configuration.
         """
         if not auth_settings:
             return

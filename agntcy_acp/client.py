@@ -100,7 +100,7 @@ class ApiClientConfiguration(Configuration,BaseModel):
         debug: Optional[bool] = None,
     ) -> "ApiClientConfiguration":
         """Construct a configuration object using environment variables as
-        default source of parameter values. For example, with env_var_prefix="MY_", 
+        default source of parameter values. For example, with env_var_prefix="MY\\_", 
         the default host parameter value would be looked up in the "MY_HOST" 
         environment variable if not provided.
 
@@ -234,7 +234,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
     ) -> "ACPClient":
         """Construct an ACPClient object using environment variables as
         default source of the API client configuration values. For example, 
-        with env_var_prefix="MY_", the default host parameter value would be 
+        with env_var_prefix="MY\\_", the default host parameter value would be 
         looked up in the "MY_HOST" environment variable if not provided.
 
         :param env_var_prefix: String used as prefix for environment variable 
@@ -278,7 +278,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         debug: Optional[bool] = None,
     ) -> "ACPClient":
         """Construct an ACPClient object using configuration values. For example, 
-        with env_var_prefix="MY_", the default host parameter value would be 
+        with env_var_prefix="MY\\_", the default host parameter value would be 
         looked up in the "MY_HOST" environment variable if not provided.
 
         :param env_var_prefix: String used as prefix for environment variable 
@@ -376,7 +376,7 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
     ) -> "AsyncACPClient":
         """Construct an AsyncACPClient object using environment variables as
         default source of the API client configuration values. For example, 
-        with env_var_prefix="MY_", the default host parameter value would be 
+        with env_var_prefix="MY\\_", the default host parameter value would be 
         looked up in the "MY_HOST" environment variable if not provided.
 
         :param env_var_prefix: String used as prefix for environment variable 
@@ -420,7 +420,7 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
         debug: Optional[bool] = None,
     ) -> "AsyncACPClient":
         """Construct an AsyncACPClient object using configuration values. For example, 
-        with env_var_prefix="MY_", the default host parameter value would be 
+        with env_var_prefix="MY\\_", the default host parameter value would be 
         looked up in the "MY_HOST" environment variable if not provided.
 
         :param env_var_prefix: String used as prefix for environment variable 

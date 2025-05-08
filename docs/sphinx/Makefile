@@ -4,7 +4,8 @@
 # You can set these variables from the command line, and also
 # from the environment for the first two.
 SPHINXOPTS    ?= 
-SPHINXBUILD   ?= uv run --with sphinx --with sphinx-markdown-builder --with sphinx-autodoc-typehints -- sphinx-build
+# FIXME: pin snowballstemmer due to bug in 3.0 release
+SPHINXBUILD   ?= uv run --with sphinx --with sphinx-markdown-builder --with sphinx-autodoc-typehints --with "snowballstemmer<3" -- sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = ../
 
