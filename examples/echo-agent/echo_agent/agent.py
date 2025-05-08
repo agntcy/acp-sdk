@@ -1,9 +1,11 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+import asyncio
 import logging
 from typing import Any, Dict
 
 from langchain_core.runnables import RunnableConfig
+from langgraph.types import interrupt
 
 from .state import AgentState, Message, MsgType
 
@@ -11,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 # Define agent function
-def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
+async def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     args = config.get("configurable", {})
     ai_response = None
 
@@ -23,7 +25,7 @@ def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
         logger.debug(f"received messages: {messages}")
         # Get last human message
         human_message = next(
-            filter(lambda m: m.type == MsgType.human, reversed(messages)),
+            filter(lambda m: m["type"] == MsgType.human, reversed(messages)),
             None,
         )
         if human_message is not None:
@@ -43,4 +45,11 @@ def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any]:
     else:
         output_messages = []
 
-    return {"messages": messages + output_messages}
+    interrupt_messages = []
+    if "interrupt" in args:
+        answer_from_human = interrupt({"question": "Do you think this is correct"})
+        await asyncio.sleep(2)
+
+        interrupt_messages.append(answer_from_human)
+
+    return {"messages": messages + output_messages + interrupt_messages}

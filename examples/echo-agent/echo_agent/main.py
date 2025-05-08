@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 import itertools
 import logging
-
+import uuid
 import click
 from langchain_core.runnables import RunnableConfig
+from langgraph.types import Command
 
 from .langgraph import AGENT_GRAPH
 from .state import AgentState, ConfigSchema, Message, MsgType
@@ -63,13 +64,10 @@ class ParamMessage(click.ParamType):
     multiple=True,
     help="Add a human message.",
 )
-def echo_server_agent(
-    to_upper,
-    to_lower,
-    human,
-    assistant,
-    log_level,
-):
+@click.option(
+    "--interrupt", is_flag=True, multiple=False, help="Add an interrupt in the flow"
+)
+def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt):
     """ """
     logging.basicConfig(level=log_level.upper())
 
@@ -94,12 +92,32 @@ def echo_server_agent(
     # Imitate input from ACP API
     input_api_object = AgentState(messages=messages).model_dump(mode="json")
 
+    config["thread_id"] = str(uuid.uuid4())
+    runnable_config = RunnableConfig(configurable=config)
+
     output_state = AGENT_GRAPH.invoke(
         AGENT_GRAPH.builder.schema.model_validate(input_api_object),
-        config=RunnableConfig(configurable=config),
+        config=runnable_config,
     )
 
     logger.debug(f"output messages: {output_state}")
+    agent_state = AgentState(messages=output_state.get("messages", []))
+
+    # Get state to check if agent is interrupted
+    current_graph_state = AGENT_GRAPH.get_state(runnable_config)
+    logger.debug(current_graph_state)
+
+    # Check if graph is interrupted by mailcomposer
+    if (
+        len(current_graph_state.tasks) > 0
+        and len(current_graph_state.tasks[0].interrupts) > 0
+    ):
+        commad = Command(resume=Message(type="human", content="Alright"))
+        # Send a signal to the graph to resume execution
+        output_state = AGENT_GRAPH.invoke(commad, config=runnable_config)
+
+        logger.info(f"output message after interrupt: {output_state}")
+
     agent_state = AgentState(messages=output_state.get("messages", []))
     print(agent_state.model_dump_json(indent=2))
 
