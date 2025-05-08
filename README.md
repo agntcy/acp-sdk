@@ -9,18 +9,20 @@ It offers tools for both client and server implementations, enabling seamless in
 
 ## Getting Started
 
-See [Getting Started Guide](https://agntcy.github.io/acp-sdk/README.md#getting-started)
+See [Getting Started Guide](https://docs.agntcy.org/pages/syntactic_sdk/agntcy_acp_sdk.html#getting-started-with-the-client)
 
 
 ## Documentation
 
   * See [ACP SDK Documentation](https://agntcy.github.io/acp-sdk) to deep dive into using the client SDK.
   * See [IoA Documentation](https://docs.agntcy.org) for more info on Internet of Agents.
-  * See [API Reference]() for the client SDK API reference.
 
 ## Testing
 
-`make test`
+Run `make test` in the root of the repo. Tool requirements:
+
+  * uv (preferred) or poetry (deprecated): to manage Python dependencies
+  * make: to store command recipes
 
 
 ## Building the package
