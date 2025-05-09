@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
+from pydantic import model_serializer
 from typing import Any, List, Optional
 from agntcy_acp.acp_v0.models.content_one_of_inner import ContentOneOfInner
 from pydantic import StrictStr, Field
@@ -128,6 +129,7 @@ class Content(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
+    @model_serializer()
     def to_dict(self) -> Optional[Union[Dict[str, Any], List[ContentOneOfInner], str]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:

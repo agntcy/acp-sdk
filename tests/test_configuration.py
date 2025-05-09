@@ -13,8 +13,10 @@ def test_client_config(monkeypatch):
 
     monkeypatch.setenv("TEST_HOST", host)
     monkeypatch.setenv("TEST_API_KEY", json.dumps({"x-api-key": api_key}))
-    
-    config = ApiClientConfiguration.fromEnvPrefix("TEST_", username=username, password=password)
+
+    config = ApiClientConfiguration.fromEnvPrefix(
+        "TEST_", username=username, password=password
+    )
     assert config is not None
     assert config.host == host
     assert config.password == password

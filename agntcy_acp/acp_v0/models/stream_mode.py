@@ -20,6 +20,7 @@ import json
 import pprint
 import re  # noqa: F401
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
+from pydantic import model_serializer
 from typing import List, Optional
 from agntcy_acp.acp_v0.models.streaming_mode import StreamingMode
 from typing import Union, Any, List, Set, TYPE_CHECKING, Optional, Dict
@@ -127,6 +128,7 @@ class StreamMode(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
+    @model_serializer()
     def to_dict(self) -> Optional[Union[Dict[str, Any], List[StreamingMode], StreamingMode]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:

@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 from collections.abc import MutableMapping
-from typing import Any, Dict, Optional
-
+from typing import Any, Dict, Optional, Union, Iterator, AsyncIterator, List
+from pydantic import BaseModel
 from langchain_core.runnables import RunnableConfig
 from langgraph.types import (
     interrupt,
 )
 from langgraph.utils.runnable import RunnableCallable
-from pydantic import BaseModel
+from langgraph.types import StreamMode as LangGraphStreamMode
 
 from agntcy_acp import (
     ACPClient,
@@ -19,12 +19,15 @@ from agntcy_acp import (
 from agntcy_acp.exceptions import ACPRunException
 from agntcy_acp.models import (
     Config,
+    RunCreateStateful,
     RunCreateStateless,
     RunError,
     RunInterrupt,
     RunOutput,
     RunResult,
+    RunWaitResponseStateful,
     RunWaitResponseStateless,
+    StreamingMode,
 )
 
 logger = logging.getLogger(__name__)
@@ -66,6 +69,7 @@ class ACPNode:
         config_path: Optional[str] = None,
         config_type=None,
         auth_header: Optional[Dict] = None,
+        use_threads: bool = False,
     ):
         """Instantiate a Langgraph node encapsulating a remote ACP agent
 
@@ -91,6 +95,7 @@ class ACPNode:
         self.configPath = config_path
         self.configType = config_type
         self.auth_header = auth_header
+        self.use_threads = use_threads
         self.previous_thread_run = {}
 
     def get_name(self):
@@ -115,7 +120,7 @@ class ACPNode:
         else:
             return {}
 
-    def _extract_config(self, config: Any) -> Any:
+    def _extract_config(self, config: Optional[RunnableConfig]) -> Any:
         if not config:
             return config
 
@@ -166,32 +171,7 @@ class ACPNode:
             setattr(output_parent, el, output_state)
         else:
             raise ValueError("object missing attribute: {el}")
-
-    def _prepare_run_create(
-        self, state: Any, config: RunnableConfig
-    ) -> RunCreateStateless:
-        agent_input = self._extract_input(state)
-        if isinstance(agent_input, BaseModel):
-            input_to_agent = agent_input.model_dump()
-        elif isinstance(agent_input, MutableMapping):
-            input_to_agent = agent_input
-        else:
-            input_to_agent = {}
-
-        agent_config = self._extract_config(config)
-        if isinstance(agent_config, BaseModel):
-            config_to_agent = agent_config.model_dump()
-        elif isinstance(agent_config, MutableMapping):
-            config_to_agent = agent_config
-        else:
-            config_to_agent = {}
-
-        return RunCreateStateless(
-            agent_id=self.agent_id,
-            input=input_to_agent,
-            config=Config(configurable=config_to_agent),
-        )
-
+    
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
             run_result: RunResult = run_output.actual_instance
@@ -210,28 +190,32 @@ class ACPNode:
 
         return state
 
-    def _get_thread_id(self, config: RunnableConfig):
+    def _generate_thread_id(self) -> str:
+        return 'abc'
+    
+    def _get_thread_id(self, config: RunnableConfig) -> Optional[str]:
         configurable = config.get("configurable", {})
         thread_id = configurable.get("thread_id", None)
         return thread_id
 
     def _handle_interrupt(
         self,
-        config: RunnableConfig,
-        run_output: RunWaitResponseStateless,
-        thread_id: str,
+        run_response: Union[RunWaitResponseStateless,RunWaitResponseStateful],
+        thread_id: Optional[str],
     ):
+        assert run_response.output is not None, "No output found for interrupt"
+
         if thread_id is None:
             raise ValueError("Thread_id is required for a interrupted run")
 
-        first_key = next(iter(run_output.output.actual_instance.interrupt))
+        first_key = next(iter(run_response.output.actual_instance.interrupt))
 
-        value = run_output.output.actual_instance.interrupt[first_key]
+        value = run_response.output.actual_instance.interrupt[first_key]
 
         previous_thread_run = self.previous_thread_run.get(thread_id, None)
 
         if previous_thread_run is None:
-            self.previous_thread_run[thread_id] = run_output
+            self.previous_thread_run[thread_id] = run_response
 
         interrupt_result = interrupt(value)
         del self.previous_thread_run[thread_id]
@@ -241,67 +225,223 @@ class ACPNode:
     def invoke(
         self,
         state: dict[str, Any] | Any,
-        config: RunnableConfig | None = None,
+        config: Optional[RunnableConfig] = None,
         **kwargs: Any,
     ) -> Any:
-
-        thread_id = self._get_thread_id(config)
         with ACPClient(configuration=self.clientConfig) as acp_client:
-            run_output = None
+            thread_id = self._get_thread_id(config)
             if thread_id is not None and thread_id in self.previous_thread_run:
-                run_output = self.previous_thread_run.get(thread_id, None)
-            else:
-                run_create = self._prepare_run_create(state, config)
-                run_output = acp_client.create_and_wait_for_stateless_run_output(
+                run_response = self.previous_thread_run[thread_id]
+            elif not self.use_threads:
+                run_create = RunCreateStateless(
+                    agent_id=self.agent_id,
+                    input=self._extract_input(state),
+                    config=Config(configurable=self._extract_config(config)),
+                )
+                run_response = acp_client.create_and_wait_for_stateless_run_output(
                     run_create
                 )
+            else:
+                if thread_id is None:
+                    thread_id = self._generate_thread_id()
+                run_create = RunCreateStateful(
+                    agent_id=self.agent_id,
+                    input=self._extract_input(state),
+                    config=Config(configurable=self._extract_config(config)),
+                )
+                run_response = acp_client.create_and_wait_for_thread_run_output(thread_id, run_create)
 
-            while isinstance(run_output.output.actual_instance, RunInterrupt):
+            run_output = run_response.output
+            if run_output is None:
+                # The spec does not require an output so count it as success.
+                return None
+
+            while isinstance(run_output.actual_instance, RunInterrupt):
                 interrupt_result = self._handle_interrupt(
-                    config=config, run_output=run_output, thread_id=thread_id
+                    run_response=run_response, thread_id=thread_id
                 )
-                resume_run = acp_client.resume_stateless_run(
-                    run_id=run_output.run.run_id, body=interrupt_result
-                )
-                run_output = acp_client.wait_for_stateless_run_output(
-                    run_id=resume_run.run_id
-                )
+                if not self.use_threads:
+                    resume_run = acp_client.resume_stateless_run(
+                        run_id=run_response.run.run_id, body=interrupt_result
+                    )
+                    run_response = acp_client.wait_for_stateless_run_output(
+                        run_id=resume_run.run_id
+                    )
+                else:
+                    resume_run = acp_client.resume_thread_run(
+                        thread_id=thread_id,
+                        run_id=run_response.run.run_id, body=interrupt_result
+                    )
+                    run_response = acp_client.wait_for_thread_run_output(
+                        thread_id=thread_id,
+                        run_id=resume_run.run_id,
+                    )
+                run_output = run_response.output
+                if run_output is None:
+                    # The spec does not require an output so count it as success.
+                    return None
 
         # output is the same between stateful and stateless
-        self._handle_run_output(state, run_output.output)
+        self._handle_run_output(state, run_output)
         return state
 
     async def ainvoke(
         self,
         state: dict[str, Any] | Any,
-        config: RunnableConfig | None = None,
+        config: Optional[RunnableConfig] = None,
         **kwargs: Any,
     ) -> Any:
         async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
             thread_id = self._get_thread_id(config)
-            run_output = None
-
             if thread_id is not None and thread_id in self.previous_thread_run:
-                run_output = self.previous_thread_run.get(thread_id, None)
-            else:
-                run_create = self._prepare_run_create(state, config)
-                run_output = await acp_client.create_and_wait_for_stateless_run_output(
+                run_response = self.previous_thread_run[thread_id]
+            elif not self.use_threads:
+                run_create = RunCreateStateless(
+                    agent_id=self.agent_id,
+                    input=self._extract_input(state),
+                    config=Config(configurable=self._extract_config(config)),
+                )
+                run_response = await acp_client.create_and_wait_for_stateless_run_output(
                     run_create
                 )
+            else:
+                if thread_id is None:
+                    thread_id = self._generate_thread_id()
+                run_create = RunCreateStateful(
+                    agent_id=self.agent_id,
+                    input=self._extract_input(state),
+                    config=Config(configurable=self._extract_config(config)),
+                )
+                run_response = await acp_client.create_and_wait_for_thread_run_output(thread_id, run_create)
+            
+            run_output = run_response.output
+            if run_output is None:
+                # The spec does not require an output so count it as success.
+                return None
 
-            while isinstance(run_output.output.actual_instance, RunInterrupt):
+            while isinstance(run_output.actual_instance, RunInterrupt):
                 interrupt_result = self._handle_interrupt(
-                    config=config, run_output=run_output, thread_id=thread_id
+                    run_response=run_response, thread_id=thread_id
                 )
+                if not self.use_threads:
+                    resume_run = await acp_client.resume_stateless_run(
+                        run_id=run_response.run.run_id, 
+                        body=interrupt_result,
+                    )
+                    run_response = await acp_client.wait_for_stateless_run_output(
+                        run_id=resume_run.run_id,
+                    )
+                else:
+                    resume_run = await acp_client.resume_thread_run(
+                        thread_id=thread_id,
+                        run_id=run_response.run.run_id, body=interrupt_result
+                    )
+                    run_response = await acp_client.wait_for_thread_run_output(
+                        thread_id=thread_id,
+                        run_id=resume_run.run_id,
+                    )
+                run_output = run_response.output
+                if run_output is None:
+                    # The spec does not require an output so count it as success.
+                    return None
 
-                resume_run = await acp_client.resume_stateless_run(
-                    run_id=run_output.run.run_id, body=interrupt_result
-                )
-                run_output = await acp_client.wait_for_stateless_run_output(
-                    run_id=resume_run.run_id
-                )
-        state = self._handle_run_output(state, run_output.output)
-        return state
+        state = self._handle_run_output(state, run_output)
+
+    def _convert_stream_mode(
+        self, 
+        stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None],
+    ) -> Union[StreamingMode,List[StreamingMode],None]:
+        valid_acp_modes = [member.value for name, member in StreamingMode.__members__.items()]
+        if stream_mode is None:
+            return None
+        elif isinstance(stream_mode, List):
+            new_modes = [
+                elem
+                for elem in stream_mode
+                if elem in valid_acp_modes
+            ]
+            if not new_modes and stream_mode:
+                raise ValueError("unsupported stream modes: {stream_mode}")
+            return new_modes
+        elif stream_mode in valid_acp_modes:
+            return StreamingMode(stream_mode)
+        else:
+            raise ValueError(f"unsupported stream mode: {stream_mode}")
+
+    def stream(
+        self,
+        input: Union[Dict[str, Any], Any],
+        config: Optional[RunnableConfig] = None,
+        *,
+        stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None] = None,
+        **kwargs,
+    ) -> Iterator[Dict[str, Any] | Any]:
+        """Stream graph steps for a single input.
+        """
+        # TODO: add support for interrupts
+        thread_id = self._get_thread_id(config)        
+        if self.use_threads:
+            if thread_id is None:
+                thread_id = self._generate_thread_id()
+            run_create = RunCreateStateful(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            with ACPClient(configuration=self.clientConfig) as acp_client:
+                for run_output in acp_client.create_and_stream_thread_run_output(thread_id, run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
+        else:
+            run_create = RunCreateStateless(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            with ACPClient(configuration=self.clientConfig) as acp_client:
+                for run_output in acp_client.create_and_stream_stateless_run_output(run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
+        
+
+    async def astream(
+        self,
+        input: Union[Dict[str, Any],Any],
+        config: Optional[RunnableConfig] = None,
+        *,
+        stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None] = None,
+        **kwargs,
+    ) -> AsyncIterator[Dict[str, Any] | Any]:
+        """Stream graph steps for a single input.
+        """
+        # TODO: add support for interrupts
+        thread_id = self._get_thread_id(config)
+        if self.use_threads:
+            if thread_id is None:
+                thread_id = self._generate_thread_id()
+            run_create = RunCreateStateful(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
+                async for run_output in acp_client.create_and_stream_thread_run_output(thread_id, run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
+        else:
+            run_create = RunCreateStateless(
+                agent_id=self.agent_id,
+                input=self._extract_input(input),
+                config=Config(configurable=self._extract_config(config)),
+                stream_mode=self._convert_stream_mode(stream_mode),
+            )
+            async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
+                async for run_output in acp_client.create_and_stream_stateless_run_output(run_create):
+                    self._handle_run_output(input, run_output.output)
+                    yield input
 
     def __call__(self, state, config):
         return RunnableCallable(self.invoke, self.ainvoke)

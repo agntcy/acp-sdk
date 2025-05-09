@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import pprint
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
+from pydantic import model_serializer
 from typing import Any, List, Optional
 from agntcy_acp.acp_v0.models.custom_run_result_update import CustomRunResultUpdate
 from agntcy_acp.acp_v0.models.value_run_result_update import ValueRunResultUpdate
@@ -124,6 +125,7 @@ class StreamEventPayload(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
+    @model_serializer()
     def to_dict(self) -> Optional[Union[Dict[str, Any], CustomRunResultUpdate, ValueRunResultUpdate]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:

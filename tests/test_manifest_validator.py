@@ -19,7 +19,7 @@ def test_manifest_validator(test_filename, test_success, error_message):
     fullpath = os.path.join(curpwd, "test_samples", test_filename)
     try:
         manifest = validate_agent_manifest_file(fullpath, raise_exception=True)
-        assert (manifest is not None)
+        assert manifest is not None
     except Exception as e:
-        assert (not test_success)
-        assert (error_message in str(e))
+        assert not test_success
+        assert error_message in str(e)
