@@ -7,6 +7,8 @@ from langgraph.constants import END, START
 from langgraph.graph import StateGraph
 from langgraph.types import Command, interrupt
 from typing_extensions import TypedDict
+from pydantic import BaseModel
+from langchain_core.runnables import RunnableConfig
 
 
 class State(TypedDict):
@@ -22,6 +24,36 @@ class State(TypedDict):
     """Human value will be updated using an interrupt."""
 
 
+class FirstInterrupt(TypedDict):
+    """The first interrupt value."""
+
+    ai_first_question: str
+    """The question asked by the AI."""
+
+    needs_answer: bool
+    """Whether the interrupt needs a non-empty answer."""
+
+
+class SecondInterrupt(TypedDict):
+    """The second interrupt value."""
+
+    ai_second_question: str
+    """The question asked by the AI."""
+
+class FirstInterruptAnswer(TypedDict):
+    """The first interrupt answer."""
+
+    answer: str
+    """The answer given by the human."""
+
+
+class SecondInterruptAnswer(TypedDict):
+    """The second interrupt answer."""
+
+    answer: str
+    """The answer given by the human."""
+
+
 async def node1(state: State):
     print(f"> Node1 input: {state['input']}")
     await asyncio.sleep(1)
@@ -30,12 +62,19 @@ async def node1(state: State):
 
 async def node2(state: State):
     print(f"> Received input: {state['ai_answer']}")
-    answer = interrupt(
+    needs_answer = True
+    answer : FirstInterruptAnswer = interrupt(
         # This value will be sent to the client
         # as part of the interrupt information.
-        {"ai_answer": "How old are you?"}
+        FirstInterrupt(
+            ai_first_question="What's your favorite color?",
+            needs_answer=needs_answer,
+        )
     )
     print(f"> Received an input from the 1st interrupt: {answer}")
+    if needs_answer and not answer["answer"].strip():
+        print("> The answer is empty, but it was required.")
+    
     await asyncio.sleep(2)
     return {"human_answer": answer}
 
@@ -44,7 +83,9 @@ async def node3(state: State):
     answer = interrupt(
         # This value will be sent to the client
         # as part of the interrupt information.
-        {"ai_answer": "What's your favorite food?"}
+        SecondInterrupt(
+            ai_second_question="What's your favorite food?",
+        )
     )
     print(f"> Received an input from the 2nd interrupt: {answer}")
     await asyncio.sleep(2)
@@ -74,23 +115,23 @@ builder.add_edge("node4", END)
 checkpointer = MemorySaver()
 graph = builder.compile(checkpointer=checkpointer)
 
-config = {
-    "configurable": {
-        "thread_id": uuid.uuid4(),
-    }
-}
+config = RunnableConfig(
+    configurable={"thread_id": uuid.uuid4()},
+)
 
 
 async def run_graph():
     async for chunk in graph.astream({"input": "something"}, config):
         print(chunk)
 
-    command = Command(resume=input("Enter the 1st interrupt answer: "))
+    first_anwer = input("Enter the 1st interrupt answer: ")
+    command = Command(resume=FirstInterruptAnswer(answer=first_anwer))
 
     async for chunk in graph.astream(command, config):
         print(chunk)
 
-    command = Command(resume=input("Enter the 2nd interrupt answer: "))
+    second_answer = input("Enter the 2nd interrupt answer: ")
+    command = Command(resume=SecondInterruptAnswer(answer=second_answer))
 
     async for chunk in graph.astream(command, config):
         print(chunk)

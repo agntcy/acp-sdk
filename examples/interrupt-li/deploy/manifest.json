@@ -60,7 +60,80 @@
       "interrupts": true,
       "callbacks": false
     },
-    "interrupts": []
+    "interrupts": [
+      {
+        "interrupt_type": "first_interrupt",
+        "interrupt_payload": {
+          "type": "object",
+          "title": "First interrupt",
+          "description": "First interrupt the agent is asking",
+          "properties": {
+            "first_question": {
+              "title": "First question",
+              "description": "Natural language question that is going to be asked by this agent",
+              "type": "string"
+            },
+            "needs_answer": {
+              "title": "Whether the agent needs an answer for this question",
+              "description": "True if the agent needs a non-empty answer for this question, False otherwise",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "first_question",
+            "needs_answer"
+          ]
+        },
+        "resume_payload": {
+          "type": "object",
+          "title": "First interrupt answer",
+          "description": "Answer to the first interrupt the agent asked",
+          "properties": {
+            "answer": {
+              "title": "Answer",
+              "description": "Text of the answer",
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ]
+        }
+      },
+      {
+        "interrupt_type": "second_interrupt",
+        "interrupt_payload": {
+          "type": "object",
+          "title": "Second interrupt",
+          "description": "Second interrupt the agent is asking",
+          "properties": {
+            "second_question": {
+              "title": "Second question",
+              "description": "Natural language question that is going to be asked by this agent",
+              "type": "string"
+            }
+          },
+          "required": [
+            "second_question"
+          ]
+        },
+        "resume_payload": {
+          "type": "object",
+          "title": "Second interrupt answer",
+          "description": "Answer to the second interrupt the agent asked",
+          "properties": {
+            "answer": {
+              "title": "Answer",
+              "description": "Text of the answer",
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ]
+        }
+      }
+    ]
   },
   "dependencies": [],
   "deployment": {
@@ -72,7 +145,17 @@
         "url": "file://.",
         "framework_config": {
           "framework_type": "llamaindex",
-          "path": "interrupt-li:interrupt_workflow"
+          "path": "interrupt-li:interrupt_workflow",
+          "interrupts": {
+            "first_interrupt" : {
+              "interrupt_ref": "interrupt_li.interrupt:FirstInterruptEvent",
+              "resume_ref": "interrupt_li.interrupt:InterruptResponseEvent"
+            },
+            "second_interrupt" : {
+              "interrupt_ref": "interrupt_li.interrupt:SecondInterruptEvent",
+              "resume_ref": "interrupt_li.interrupt:InterruptResponseEvent"
+            }
+          }
         }
       }
     ]

@@ -20,7 +20,6 @@ from llama_index.core.workflow import (
 )
 
 load_dotenv(dotenv_path=find_dotenv(usecwd=True))
-
 class HumanMessage(Event):
     human_answer: str
 
@@ -36,6 +35,16 @@ class SecondEvent(Event):
 class ThirdEvent(Event):
     ai_answer: str
 
+
+class FirstInterruptEvent(Event):
+    first_question: str
+    needs_answer: bool
+
+class SecondInterruptEvent(Event):
+    second_question: str
+
+class InterruptResponseEvent(Event):
+    answer: str
 
 class Interrupt(Workflow):
     def __init__(
@@ -67,18 +76,25 @@ class Interrupt(Workflow):
         print(f"> step_interrupt_one input : {ev.ai_answer}")
         await asyncio.sleep(1)
         # wait until we see a HumanResponseEvent
-        response = await ctx.wait_for_event(HumanResponseEvent, waiter_id="waiter_step_interrupt_one", waiter_event=InputRequiredEvent(prefix="How old are you?"))
+        needs_answer = True
+        response = await ctx.wait_for_event(
+            InterruptResponseEvent, 
+            waiter_id="waiter_step_interrupt_one",
+            waiter_event=FirstInterruptEvent(first_question="What's your favorite color?", needs_answer=needs_answer)
+        )
 
-        return SecondEvent(ai_answer=f"Received human answer: {response.response}")
+        if needs_answer and not response.answer:
+            raise ValueError("This needs a non-empty answer")
+
+        return SecondEvent(ai_answer=f"Received human answer: {response.answer}")
 
     @step
     async def step_interrupt_two(self, ctx: Context, ev: SecondEvent) -> ThirdEvent:
         print(f"> step_interrupt_two input : {ev.ai_answer}")
         await asyncio.sleep(1)
-        response = await ctx.wait_for_event(HumanResponseEvent, waiter_id="waiter_step_interrupt_two", waiter_event=InputRequiredEvent(prefix="What's your favorite food?"))
+        response = await ctx.wait_for_event(InterruptResponseEvent, waiter_id="waiter_step_interrupt_two", waiter_event=SecondInterruptEvent(second_question="What's your favorite movie?"))
 
-
-        return ThirdEvent(ai_answer=f"Received human answer: {response.response}")
+        return ThirdEvent(ai_answer=f"Received human answer: {response.answer}")
 
     @step
     async def last_step(self, ev: ThirdEvent) -> StopEvent:
@@ -88,7 +104,7 @@ class Interrupt(Workflow):
 
 
 def interrupt_workflow() -> Interrupt:
-    interrupt_workflow = Interrupt(timeout=60)
+    interrupt_workflow = Interrupt(timeout=None, verbose=True)
     return interrupt_workflow
 
 
@@ -97,39 +113,41 @@ async def main():
 
     # print(await workflow.run(email=email_example, target_audience=audience_example))
 
-    handler = workflow.run(input="Hello")
+
+    response = "Hello"
+    handler = workflow.run(input=response)
+    ctx = handler.ctx
 
     async for ev in handler.stream_events():
         print(type(ev), ev)
-        if isinstance(ev, InputRequiredEvent):
+        if isinstance(ev, FirstInterruptEvent):
             # capture keyboard input
-            response = input(ev.prefix)
+            response = input(ev.first_question)
             ctx = handler.ctx
             break
             # send our response back
-
-    handler2 = workflow.run(ctx=ctx, input="Hello")
+    
+    handler2 = workflow.run(ctx=ctx)
 
     handler2.ctx.send_event(
-        HumanResponseEvent(
-            response=response,
+        InterruptResponseEvent(
+            answer=response,
         )
     )
 
     async for ev in handler2.stream_events():
         print(type(ev), ev)
-        if isinstance(ev, InputRequiredEvent):
+        if isinstance(ev, SecondInterruptEvent):
             # capture keyboard input
-            response = input(ev.prefix)
+            response = input(ev.second_question)
             ctx = handler2.ctx
             break
 
-
-    handler3 = workflow.run(ctx=ctx, input="Hello")
+    handler3 = workflow.run(ctx=ctx)
 
     handler3.ctx.send_event(
-        HumanResponseEvent(
-            response=response,
+         InterruptResponseEvent(
+            answer=response,
         )
     )
 
