@@ -41,7 +41,6 @@ def test_interrupt_acp_node(
     default_agent_id,
     monkeypatch,
 ):
-
     agent_id = "bogus-agent-id"
     init_run_id = "bugus-run-id"
     monkeypatch.setenv("PHILOSOPHER_AGENT_HOST", "http://phil_agent")
@@ -56,7 +55,6 @@ def test_interrupt_acp_node(
         response_data,
         response_types_map=None,
     ):
-
         run = RunWaitResponseStateless(
             run=RunStateless(
                 run_id=init_run_id,

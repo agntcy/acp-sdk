@@ -13,11 +13,18 @@ from agntcy_acp import ApiClientConfiguration, AsyncACPClient, AsyncApiClient
 from agntcy_acp.models import (
     RunCreateStateful,
     RunCreateStateless,
+    RunOutput,
+    RunResult,
     RunSearchRequest,
+    RunStateful,
     RunStateless,
+    RunWaitResponseStateful,
+    RunWaitResponseStateless,
 )
 
 ListRunStateless = RootModel[List[RunStateless]]
+ListRunStateful = RootModel[List[RunStateful]]
+
 
 def mock_response_api_client(
     api_client: AsyncApiClient,
@@ -33,15 +40,14 @@ def mock_response_api_client(
                 "GET",
                 {},
             )
-            sse_list = [
-                ":this is a test feed\nid: 1\n".encode(),
-                "event: agent_event\n".encode(),
-            ] + [
-                f"data: {line}\n".encode()
-                for line in body.splitlines()
-            ] + [
-                "\n".encode()
-            ]
+            sse_list = (
+                [
+                    ":this is a test feed\nid: 1\n".encode(),
+                    "event: agent_event\n".encode(),
+                ]
+                + [f"data: {line}\n".encode() for line in body.splitlines()]
+                + ["\n".encode()]
+            )
             print(sse_list)
 
             self.response = ClientResponse(
@@ -55,7 +61,7 @@ def mock_response_api_client(
                 loop=cur_loop,
                 session=None,
             )
-            stream=StreamReader(
+            stream = StreamReader(
                 protocol=BaseProtocol(loop=cur_loop),
                 limit=100,
                 loop=cur_loop,
@@ -98,83 +104,212 @@ def mock_response_api_client(
             body = response.to_json()
         else:
             body = response.model_dump_json(by_alias=True, exclude_unset=True)
-        
+
         return RESTResponseAsync(status=200, body=body)
 
     monkeypatch.setattr(api_client, "call_api", mock_call_api)
 
 
-async def test_acp_client_stateless_runs_api(default_api_key, default_agent_id, default_run_stateless_response, monkeypatch):
+async def test_acp_client_stateless_runs_api(
+    default_api_key, default_agent_id, default_run_stateless_response, monkeypatch
+):
     config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
     run_response = default_run_stateless_response
+    run_output = RunOutput(
+        RunResult(
+            type="result",
+            values={
+                "key": "value",
+            },
+        )
+    )
 
     async with AsyncACPClient(configuration=config) as client:
-        mock_response_api_client(client.api_client, run_response, default_api_key, monkeypatch)
+        mock_response_api_client(
+            client.api_client, run_response, default_api_key, monkeypatch
+        )
 
-        response = await client.create_stateless_run(run_create_stateless=RunCreateStateless(agent_id=default_agent_id))
+        response = await client.create_stateless_run(
+            run_create_stateless=RunCreateStateless(agent_id=default_agent_id)
+        )
         assert response is not None
+        assert response.agent_id == run_response.agent_id
         assert response.run_id == run_response.run_id
-        run_id = response.run_id
+        assert response.status == run_response.status
 
+        run_id = response.run_id
         response = await client.get_stateless_run(run_id)
+        assert response.agent_id == run_response.agent_id
+        assert response.run_id == run_response.run_id
+        assert response.status == run_response.status
         assert response is not None
 
+        mock_response_api_client(
+            client.api_client,
+            RunWaitResponseStateless(run=run_response, output=run_output),
+            default_api_key,
+            monkeypatch,
+        )
         response = await client.wait_for_stateless_run_output(run_id)
         assert response is not None
+        assert response.run is not None
+        assert response.output is not None
+        assert response.run.agent_id == run_response.agent_id
+        assert response.run.run_id == run_response.run_id
+        assert response.run.status == run_response.status
+        assert response.output.actual_instance.type == run_output.actual_instance.type
 
+        mock_response_api_client(
+            client.api_client, run_response, default_api_key, monkeypatch
+        )
         response = await client.resume_stateless_run(run_id, {})
         assert response is not None
+        assert response.agent_id == run_response.agent_id
+        assert response.run_id == run_response.run_id
+        assert response.status == run_response.status
 
         list_response = ListRunStateless.model_validate([run_response])
-        mock_response_api_client(client.api_client, list_response, default_api_key, monkeypatch)
-
-        response = await client.search_stateless_runs(RunSearchRequest(agent_id=default_agent_id))
+        mock_response_api_client(
+            client.api_client, list_response, default_api_key, monkeypatch
+        )
+        response = await client.search_stateless_runs(
+            RunSearchRequest(agent_id=default_agent_id)
+        )
         assert response is not None
+        assert len(response) == 1
 
-        mock_response_api_client(client.api_client, run_response, default_api_key, monkeypatch)
+        mock_response_api_client(
+            client.api_client, run_response, default_api_key, monkeypatch
+        )
+        response = await client.delete_stateless_run(run_id)
+        assert response is None
 
-        await client.delete_stateless_run(run_id)
 
-
-async def test_acp_client_stream_stateless_runs_api(default_api_key, default_agent_id, default_run_output_stream, monkeypatch):
+async def test_acp_client_stream_stateless_runs_api(
+    default_api_key, default_agent_id, default_run_output_stream, monkeypatch
+):
     config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
 
     async with AsyncACPClient(configuration=config) as client:
-        mock_response_api_client(client.api_client, default_run_output_stream.data, default_api_key, monkeypatch)
-        stream = client.create_and_stream_stateless_run_output(run_create_stateless=RunCreateStateless(agent_id=default_agent_id))
+        mock_response_api_client(
+            client.api_client,
+            default_run_output_stream.data,
+            default_api_key,
+            monkeypatch,
+        )
+        stream = client.create_and_stream_stateless_run_output(
+            run_create_stateless=RunCreateStateless(agent_id=default_agent_id)
+        )
         async for response in stream:
             assert response is not None
-            assert response.data.actual_instance.run_id == default_run_output_stream.data.actual_instance.run_id
+            assert (
+                response.data.actual_instance.run_id
+                == default_run_output_stream.data.actual_instance.run_id
+            )
 
-async def test_acp_client_thread_run_api(mock_async_api_client, default_api_key, default_agent_id, default_thread_id):
+
+async def test_acp_client_thread_run_api(
+    default_api_key,
+    default_run_stateful_response,
+    default_agent_id,
+    default_thread_id,
+    monkeypatch,
+):
     config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
     thread_id = default_thread_id
+    run_response = default_run_stateful_response
+    run_output = RunOutput(
+        RunResult(
+            type="result",
+            values={
+                "key": "value",
+            },
+        )
+    )
 
-    async with AsyncApiClient(config) as api_client:
-        client = AsyncACPClient(api_client)
-
-        response = await client.create_thread_run(thread_id=thread_id, run_create_stateful=RunCreateStateful(agent_id=default_agent_id))
+    async with AsyncACPClient(configuration=config) as client:
+        mock_response_api_client(
+            client.api_client, run_response, default_api_key, monkeypatch
+        )
+        response = await client.create_thread_run(
+            thread_id=thread_id,
+            run_create_stateful=RunCreateStateful(agent_id=default_agent_id),
+        )
         assert response is not None
+        assert response.agent_id == run_response.agent_id
+        assert response.run_id == run_response.run_id
+        assert response.status == run_response.status
+
         run_id = response.run_id
-
         response = await client.get_thread_run(thread_id=thread_id, run_id=run_id)
+        assert response.agent_id == run_response.agent_id
+        assert response.run_id == run_response.run_id
+        assert response.status == run_response.status
         assert response is not None
 
-        response = await client.wait_for_thread_run_output(thread_id=thread_id, run_id=run_id)
+        mock_response_api_client(
+            client.api_client,
+            RunWaitResponseStateful(run=run_response, output=run_output),
+            default_api_key,
+            monkeypatch,
+        )
+        response = await client.wait_for_thread_run_output(
+            thread_id=thread_id, run_id=run_id
+        )
         assert response is not None
+        assert response.run is not None
+        assert response.output is not None
+        assert response.run.agent_id == run_response.agent_id
+        assert response.run.run_id == run_response.run_id
+        assert response.run.status == run_response.status
+        assert response.output.actual_instance.type == run_output.actual_instance.type
 
-        response = await client.resume_thread_run(thread_id=thread_id, run_id=run_id, body={})
+        mock_response_api_client(
+            client.api_client, run_response, default_api_key, monkeypatch
+        )
+        response = await client.resume_thread_run(
+            thread_id=thread_id, run_id=run_id, body={}
+        )
         assert response is not None
+        assert response.agent_id == run_response.agent_id
+        assert response.run_id == run_response.run_id
+        assert response.status == run_response.status
+
+        list_response = ListRunStateful.model_validate([run_response])
+        mock_response_api_client(
+            client.api_client, list_response, default_api_key, monkeypatch
+        )
+        response = await client.list_thread_runs(thread_id=thread_id)
+        assert response is not None
+        assert len(response) == 1
 
         response = await client.delete_thread_run(thread_id=thread_id, run_id=run_id)
-        assert response is not None
+        assert response is None
 
-async def test_acp_client_stream_thread_run_api(default_api_key, default_agent_id, default_run_output_stream, default_thread_id, monkeypatch):
+
+async def test_acp_client_stream_thread_run_api(
+    default_api_key,
+    default_agent_id,
+    default_run_output_stream,
+    default_thread_id,
+    monkeypatch,
+):
     config = ApiClientConfiguration(retries=2, api_key={"x-api-key": default_api_key})
 
     async with AsyncACPClient(configuration=config) as client:
-        mock_response_api_client(client.api_client, default_run_output_stream.data, default_api_key, monkeypatch)
-        stream = client.create_and_stream_thread_run_output(thread_id=default_thread_id, run_create_stateful=RunCreateStateful(agent_id=default_agent_id))
+        mock_response_api_client(
+            client.api_client,
+            default_run_output_stream.data,
+            default_api_key,
+            monkeypatch,
+        )
+        stream = client.create_and_stream_thread_run_output(
+            thread_id=default_thread_id,
+            run_create_stateful=RunCreateStateful(agent_id=default_agent_id),
+        )
         async for response in stream:
             assert response is not None
-            assert response.data.actual_instance.run_id == default_run_output_stream.data.actual_instance.run_id
+            assert (
+                response.data.actual_instance.run_id
+                == default_run_output_stream.data.actual_instance.run_id
+            )

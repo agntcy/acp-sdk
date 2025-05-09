@@ -20,6 +20,7 @@ import json
 import pprint
 import re  # noqa: F401
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, ValidationError, field_validator
+from pydantic import model_serializer
 from typing import Optional
 from agntcy_acp.acp_v0.models.message_any_block import MessageAnyBlock
 from agntcy_acp.acp_v0.models.message_text_block import MessageTextBlock
@@ -119,6 +120,7 @@ class ContentOneOfInner(BaseModel):
         else:
             return json.dumps(self.actual_instance)
 
+    @model_serializer()
     def to_dict(self) -> Optional[Union[Dict[str, Any], MessageAnyBlock, MessageTextBlock]]:
         """Returns the dict representation of the actual instance"""
         if self.actual_instance is None:
