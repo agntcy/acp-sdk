@@ -232,7 +232,8 @@ def generate_agent_models(descriptor: AgentACPDescriptor, path: str, model_file_
         output=Path(modelspath),
         disable_timestamp=True,
         custom_file_header=f"# Generated from ACP Descriptor {descriptor.metadata.ref.name} using datamodel_code_generator.",
-        keep_model_order=True
+        keep_model_order=True,
+        use_double_quotes=True, # match ruff formatting
     )
 
 
