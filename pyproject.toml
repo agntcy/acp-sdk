@@ -1,6 +1,6 @@
 [project]
 name = "agntcy-acp"
-version = "1.2.0"
+version = "1.2.1"
 license = "Apache-2.0"
 description = "Agent Connect Protocol SDK"
 readme = "README.md"
