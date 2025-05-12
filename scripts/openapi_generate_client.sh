@@ -11,6 +11,8 @@ GEN_PACKAGE_NAME=${GEN_PACKAGE_NAME:-acp_client_v${SPEC_VERSION}}
 SDK_SUBPACKAGE_NAME=${SDK_SUBPACKAGE_NAME:-acp_v${SPEC_VERSION}}
 OPENAPI_GENERATOR_CLI_ARGS=${OPENAPI_GENERATOR_CLI_ARGS:-"--additional-properties=library=urllib3"}
 
+mkdir "${CLIENT_DIR}" || true
+
 echo "Generating client..."
 docker run --rm \
     -v ${PWD}:/local openapitools/openapi-generator-cli generate \

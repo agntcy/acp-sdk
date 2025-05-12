@@ -390,226 +390,6 @@ class ResumePayloadSchema(BaseModel):
     pass
 
 
-class AgentRefModel(BaseModel):
-    name: str = Field(
-        ...,
-        description="Name of the agent that identifies the agent in its record",
-        title="Name",
-    )
-    version: str = Field(
-        ...,
-        description="Version of the agent in its record. Should be formatted according to semantic versioning (https://semver.org)",
-        title="Version",
-    )
-    url: Optional[AnyUrl] = Field(
-        None,
-        description="URL of the record. Can be a network location or a file.",
-        title="Agent Record URL",
-    )
-
-
-class AgentMetadata(BaseModel):
-    ref: AgentRefModel
-    description: str = Field(
-        ...,
-        description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect",
-        title="Description",
-    )
-
-
-class Streaming1(BaseModel):
-    result: Optional[bool] = Field(
-        None,
-        description="This is `true` if the agent supports result streaming. If `false` or missing, result streaming is not supported. Result streaming consists of a stream of objects of type `RunResult`, where each one sent over the stream fully replace the previous one.",
-        title="Result Streaming",
-    )
-    custom: Optional[bool] = Field(
-        None,
-        description="This is `true` if the agent supports custom objects streaming. If `false` or missing, custom streaming is not supported. Custom Objects streaming consists of a stream of object whose schema is specified by the agent ACP descriptor under `specs.custom_streaming_update`.",
-        title="Custom Objects Streaming",
-    )
-
-
-class Capabilities1(BaseModel):
-    threads: Optional[bool] = Field(
-        False,
-        description="This is `true` if the agent supports run threads. If this is `false`, then the threads tagged with `Threads` are not available. If missing, it means `false`",
-        title="Thread Support",
-    )
-    interrupts: Optional[bool] = Field(
-        False,
-        description="This is `true` if the agent runs can interrupt to request additional input and can be subsequently resumed. If missing, it means `false`",
-        title="Interrupt Support",
-    )
-    callbacks: Optional[bool] = Field(
-        False,
-        description="This is `true` if the agent supports a webhook to report run results. If this is `false`, providing a `webhook` at run creation has no effect. If missing, it means `false`",
-        title="Callback Support",
-    )
-    streaming: Optional[Streaming1] = Field(
-        None,
-        description="Supported streaming modes. If missing, streaming is not supported.  If no mode is supported attempts to stream output will result in an error.",
-        title="Streaming Modes",
-    )
-
-
-class AgentACPSpecModel(BaseModel):
-    capabilities: Capabilities1 = Field(
-        ...,
-        description="Declares what invocation features this agent is capable of.",
-        title="Agent Capabilities",
-    )
-    input: Dict[str, Any] = Field(
-        ...,
-        description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
-        examples=[
-            {
-                "type": "object",
-                "required": ["name"],
-                "properties": {
-                    "name": {"type": "string"},
-                    "address": {"type": "string"},
-                    "age": {"type": "integer", "format": "int32", "minimum": 0},
-                },
-            }
-        ],
-    )
-    output: Dict[str, Any] = Field(
-        ...,
-        description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
-        examples=[
-            {
-                "type": "object",
-                "required": ["name"],
-                "properties": None,
-                "name": {"type": "string"},
-                "address": {"type": "string"},
-                "age": {"type": "integer", "format": "int32", "minimum": 0},
-            }
-        ],
-    )
-    custom_streaming_update: Optional[Dict[str, Any]] = Field(
-        None,
-        description="This describes the format of an Update in the streaming.  Must be specified if `streaming.custom` capability is true and cannot be specified otherwise. Format follows: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
-        examples=[
-            {
-                "type": "object",
-                "required": ["name"],
-                "properties": None,
-                "name": {"type": "string"},
-                "address": {"type": "string"},
-                "age": {"type": "integer", "format": "int32", "minimum": 0},
-            }
-        ],
-    )
-    thread_state: Optional[Dict[str, Any]] = Field(
-        None,
-        description="This describes the format of ThreadState.  Cannot be specified if `threads` capability is false. If not specified, when `threads` capability is true, then the API to retrieve ThreadState from a Thread or a Run is not available. This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
-        examples=[
-            {
-                "type": "object",
-                "required": ["name"],
-                "properties": None,
-                "name": {"type": "string"},
-                "address": {"type": "string"},
-                "age": {"type": "integer", "format": "int32", "minimum": 0},
-            }
-        ],
-    )
-    config: Dict[str, Any] = Field(
-        ...,
-        description="This object contains an instance of an OpenAPI schema object, formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object",
-        examples=[
-            {
-                "type": "object",
-                "required": ["name"],
-                "properties": None,
-                "name": {"type": "string"},
-                "address": {"type": "string"},
-                "age": {"type": "integer", "format": "int32", "minimum": 0},
-            }
-        ],
-    )
-    interrupts: Optional[List[Interrupt]] = Field(
-        None,
-        description="List of possible interrupts that can be provided by the agent. If `interrupts` capability is true, this needs to have at least one item.",
-    )
-
-
-class StreamingModeModel(Enum):
-    result = "result"
-    custom = "custom"
-
-
-class Type5(Enum):
-    result = "result"
-
-
-class Type6(Enum):
-    custom = "custom"
-
-
-class Type7(Enum):
-    error = "error"
-
-
-class RunErrorModel(BaseModel):
-    type: Type7 = Field(..., title="Output Type")
-    run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
-    errcode: int = Field(..., description="code of the error", title="Error Code")
-    description: str = Field(
-        ..., description="description of the error", title="Error Description"
-    )
-
-
-class Type8(Enum):
-    interrupt = "interrupt"
-
-
-class ThreadCreate1(BaseModel):
-    agent_id: str = Field(
-        ...,
-        description="Identifier of the agent this thread is executed on",
-        title="Agent ID",
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
-        None, description="Free form metadata for this thread", title="Metadata"
-    )
-
-
-class ThreadSearchRequest1(BaseModel):
-    agent_id: Optional[UUID] = Field(
-        None,
-        description="Matches all threads associated with the specified agent ID.",
-        title="Agent Id",
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
-        None,
-        description="Matches all threads for which metadata has  keys and values equal to those specified in this object.",
-        title="Metadata Filter",
-    )
-    limit: Optional[conint(ge=1, le=1000)] = Field(
-        10, description="Maximum number to return.", title="Limit"
-    )
-    offset: Optional[conint(ge=0)] = Field(
-        0, description="Offset to start from.", title="Offset"
-    )
-
-
-class Thread1(BaseModel):
-    thread_id: str = Field(
-        ..., description="unique identifier of a thread", title="Thread ID"
-    )
-    agent_id: str = Field(
-        ...,
-        description="Identifier of the agent this thread is executed on",
-        title="Agent ID",
-    )
-    metadata: Optional[Dict[str, Any]] = Field(
-        None, description="Free form metadata for this thread", title="Metadata"
-    )
-
-
 class EnvVarValues(BaseModel):
     name: Optional[str] = Field(
         None,
@@ -626,7 +406,7 @@ class EnvVar(BaseModel):
     defaultValue: Optional[str] = None
 
 
-class Type9(Enum):
+class Type5(Enum):
     source_code = "source_code"
 
 
@@ -643,16 +423,11 @@ class FrameworkType1(Enum):
     llamaindex = "llamaindex"
 
 
-class LlamaIndexConfig(BaseModel):
-    framework_type: Literal["llamaindex"]
-    path: str
-
-
-class Type10(Enum):
+class Type6(Enum):
     remote_service = "remote_service"
 
 
-class Type11(Enum):
+class Type7(Enum):
     docker = "docker"
 
 
@@ -670,12 +445,26 @@ class DockerDeployment(BaseModel):
     )
 
 
-class Type12(Enum):
+class Type8(Enum):
     ACP = "ACP"
+
+
+class InterruptConfig(BaseModel):
+    interrupt_ref: str = Field(..., examples=["my_app.interrupts:InterruptEvent"])
+    resume_ref: str = Field(..., examples=["my_app.interrupts:ResponseEvent"])
 
 
 class SecurityScheme(BaseModel):
     pass
+
+
+class AgentMetadata(BaseModel):
+    ref: AgentRef
+    description: str = Field(
+        ...,
+        description="Description of this agent, which should include what the intended use is, what tasks it accomplishes and how uses input and configs to produce the output and any other side effect",
+        title="Description",
+    )
 
 
 class Agent(BaseModel):
@@ -883,7 +672,7 @@ class RunInterrupt(BaseModel):
 
 class AgentDependency(BaseModel):
     name: str = Field(..., description="Name of the agent dependency", title="Name")
-    ref: AgentRefModel = Field(
+    ref: AgentRef = Field(
         ...,
         description="Reference to the agent in the agent directory. It includes the version and the locator.",
     )
@@ -893,108 +682,18 @@ class AgentDependency(BaseModel):
         title="Deployment Option",
     )
     env_var_values: Optional[EnvVarValues] = Field(
-        None,
-        description="Environment variable values to be set for this agent.",
-        title="Environment Variable Values",
+        None, description="Environment variable values to be set for this agent."
     )
 
 
-class RunCreate1(BaseModel):
-    agent_id: UUID = Field(..., description="The ID of the agent.", title="Agent Id")
-    thread_id: Optional[UUID] = Field(
-        None,
-        description="Optional Thread ID wher the Run belongs to. This can be used only for agents supporting Threads.",
-        title="Agent ID",
-    )
-    input: Optional[InputSchema] = None
-    metadata: Optional[Dict[str, Any]] = Field(
-        None,
-        description="Metadata to assign to the run. Optional free format metadata to attach to the run.",
-        title="Metadata",
-    )
-    config: Optional[ConfigSchema] = None
-    webhook: Optional[AnyUrl] = Field(
-        None,
-        description="Webhook to call upon change of run status. This is a url that accepts a POST containing the `Run` object as body. See Callbacks definition.",
-        title="Status change webhook",
-    )
-    streaming: Optional[StreamingModeModel] = Field(
-        None,
-        description="If populated, indicates that the client requests to stream results with the specified streaming mode. The requested streaming mode must be one of the one supported by the agent as declared in agent ACP descriptor  under `specs.capabilities`",
-        title="Streaming Mode",
-    )
-
-
-class Run1(BaseModel):
-    creation: RunCreate1
-    run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
-    agent_id: UUID = Field(
-        ..., description="The agent that was used for this run.", title="Agent Id"
-    )
-    thread_id: Optional[UUID] = Field(
-        None,
-        description="Optional Thread ID wher the Run belongs to. This is populated only for runs on agents agents supporting Threads.",
-        title="Agent ID",
-    )
-    created_at: AwareDatetime = Field(
-        ..., description="The time the run was created.", title="Created At"
-    )
-    updated_at: AwareDatetime = Field(
-        ..., description="The last time the run was updated.", title="Updated At"
-    )
-    status: RunStatus = Field(
-        ...,
-        description="The status of the run. One of 'pending', 'error', 'success', 'timeout', 'interrupted'.",
-        title="Status",
-    )
-
-
-class RunResultModel(BaseModel):
-    type: Literal["result"] = Field(..., title="Output Type")
-    run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
-    status: RunStatus = Field(
-        ...,
-        description="Status of the Run when this result was generated. This is particurarly useful when this data structure is used for streaming results. As the server can indicate an interrupt or an error condition while streaming the result.",
-        title="Run Status",
-    )
-    result: OutputSchema
-
-
-class CustomRunResultUpdateModel(BaseModel):
-    type: Literal["custom"] = Field(..., title="Output Type")
-    run_id: UUID = Field(..., description="The ID of the run.", title="Run Id")
-    status: RunStatus = Field(
-        ...,
-        description="Status of the Run when this result was generated",
-        title="Run Status",
-    )
-    update: StreamUpdateSchema
-
-
-class RunInterruptModel(BaseModel):
-    type: Type8 = Field(..., title="Output Type")
-    interrupt: InterruptPayloadSchema
-
-
-class SourceCodeDeployment(BaseModel):
-    type: Literal["source_code"]
-    name: Optional[str] = Field(
-        None,
-        description="Name this deployment option is referred to within this agent. This is needed to indicate which one is preferred when this manifest is referred. Can be omitted, in such case selection is not possible.",
-        title="Deployment Option Name",
-    )
-    url: AnyUrl = Field(
-        ...,
-        description="Location of the source code.              Can be a local path to a directory or a tar/gz/zip file containing sources,  e.g., /path/to/your/local/folder or file:///path/to/your/local/folder. Can point to a GitHub repository, e.g., github.com/cisco-eti/agent-connect-protocol.git//examples/agents/mailcomposer  or https://github.com/cisco-eti/agent-connect-protocol.git//examples/agents/mailcomposer,  which indicates that source files can be found in the /examples/agents/mailcomposer subfolder in the repository.  You can also specify a branch, e.g., github.com/cisco-eti/agent-connect-protocol.git?ref=branch_name.",
-        title="Source Code Locator",
-    )
-    framework_config: Union[LangGraphConfig, LlamaIndexConfig] = Field(
-        ..., discriminator="framework_type"
-    )
+class LlamaIndexConfig(BaseModel):
+    framework_type: Literal["llamaindex"]
+    path: str
+    interrupts: Optional[Dict[str, InterruptConfig]] = None
 
 
 class AgentConnectProtocol(BaseModel):
-    type: Type12
+    type: Type8
     url: AnyUrl = Field(
         ..., description="URL pointing to the ACP endpoint root.", title="ACP URL"
     )
@@ -1050,17 +749,20 @@ class RunOutputStream(BaseModel):
     )
 
 
-class RunOutputStream1(BaseModel):
-    id: str = Field(..., description="Unique identifier of the event", title="Event ID")
-    event: Event = Field(
-        ...,
-        description="Event type. This is the constant string `agent_event` to be compatible with SSE spec. The actual type differentiation is done in the event itself.",
+class SourceCodeDeployment(BaseModel):
+    type: Literal["source_code"]
+    name: Optional[str] = Field(
+        None,
+        description="Name this deployment option is referred to within this agent. This is needed to indicate which one is preferred when this manifest is referred. Can be omitted, in such case selection is not possible.",
+        title="Deployment Option Name",
     )
-    data: Union[RunResultModel, CustomRunResultUpdateModel] = Field(
+    url: AnyUrl = Field(
         ...,
-        description="A serialized JSON data structure carried in the SSE event data field. The event can carry either a full `RunResult`, if streaming mode is `result` or an custom update if streaming mode is `custom`",
-        discriminator="type",
-        title="Stream Event Payload",
+        description="Location of the source code.              Can be a local path to a directory or a tar/gz/zip file containing sources,  e.g., /path/to/your/local/folder or file:///path/to/your/local/folder. Can point to a GitHub repository, e.g., github.com/cisco-eti/agent-connect-protocol.git//examples/agents/mailcomposer  or https://github.com/cisco-eti/agent-connect-protocol.git//examples/agents/mailcomposer,  which indicates that source files can be found in the /examples/agents/mailcomposer subfolder in the repository.  You can also specify a branch, e.g., github.com/cisco-eti/agent-connect-protocol.git?ref=branch_name.",
+        title="Source Code Locator",
+    )
+    framework_config: Union[LangGraphConfig, LlamaIndexConfig] = Field(
+        ..., discriminator="framework_type"
     )
 
 
