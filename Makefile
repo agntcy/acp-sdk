@@ -127,13 +127,10 @@ test_gha:
 .PHONY: all
 all: generate test
 
-setup_sanity:
-	poetry install --only sanity --no-root
-
 .PHONY: lint_check
-lint_check: setup_sanity
-	poetry run ruff check .
+lint_check: 
+	uvx ruff check .
 
 .PHONY: format_check
-format_check: setup_sanity
-	poetry run ruff format --diff .
+format_check: 
+	uvx ruff format --diff .

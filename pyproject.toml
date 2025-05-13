@@ -41,10 +41,6 @@ test = [
     "pytest-asyncio >= 0.23.5",
 ]
 
-[tool.poetry.group.sanity.dependencies]
-mypy = "^1.10.0"
-ruff = "^0.4.6"
-
 [tool.pytest.ini_options]
 pythonpath = ["."]
 asyncio_mode = "auto"

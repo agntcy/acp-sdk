@@ -26,20 +26,23 @@ jobs:
   lint-and-format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Python
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up python ${{ env.PYTHON_VERSION }}
+        id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v4
-        with:
-          poetry-version: "2.1.1"
-      - name: Install Dependencies
+          python-version: ${{ env.PYTHON_VERSION }}
+          update-environment: true
+
+      - name: Install uv
         run: |
-          poetry install
+          pipx install uv==${{ env.UV_VERSION }}
+
       - name: Lint check
         run: make lint_check
+
       - name: Format check
         run: make format_check
 
