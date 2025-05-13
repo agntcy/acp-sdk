@@ -23,6 +23,26 @@ permissions:
 # Note: consider the job names to be global if you want to require
 # them to succeed for a PR. :)
 jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v4
+        with:
+          poetry-version: "2.1.1"
+      - name: Install Dependencies
+        run: |
+          poetry install
+      - name: Lint check
+        run: make lint_check
+      - name: Format check
+        run: make format_check
+
   sdk-code-check:
     runs-on: ubuntu-latest
     steps:
@@ -50,4 +70,3 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "- uv Version: ${{ env.UV_VERSION }}" >> $GITHUB_STEP_SUMMARY
         echo "- Python Version: ${{ env.PYTHON_VERSION}}" >> $GITHUB_STEP_SUMMARY
-
