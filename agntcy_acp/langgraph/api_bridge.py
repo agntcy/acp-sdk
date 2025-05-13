@@ -42,8 +42,8 @@ class APIBridgeAgentNode(acp_node.ACPNode):
         self.apikey = apikey
         self.service_name = service_name
         # API Bridge agent requires the endpoint to end with '/'
-        if not self.service_name.endswith('/'):
-            self.service_name += '/'
+        if not self.service_name.endswith("/"):
+            self.service_name += "/"
         self.inputType = input_type
         self.outputType = output_type
         self.inputPath = input_path

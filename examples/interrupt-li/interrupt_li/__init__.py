@@ -3,4 +3,3 @@
 from .interrupt import interrupt_workflow
 
 interrupt = interrupt_workflow()
-

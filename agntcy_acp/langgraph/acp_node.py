@@ -2,14 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 import logging
 from collections.abc import MutableMapping
-from typing import Any, Dict, Optional, Union, Iterator, AsyncIterator, List
-from pydantic import BaseModel
+from typing import Any, AsyncIterator, Dict, Iterator, List, Optional, Union
+
 from langchain_core.runnables import RunnableConfig
+from langgraph.types import StreamMode as LangGraphStreamMode
 from langgraph.types import (
     interrupt,
 )
 from langgraph.utils.runnable import RunnableCallable
-from langgraph.types import StreamMode as LangGraphStreamMode
+from pydantic import BaseModel
 
 from agntcy_acp import (
     ACPClient,
@@ -171,7 +172,7 @@ class ACPNode:
             setattr(output_parent, el, output_state)
         else:
             raise ValueError("object missing attribute: {el}")
-    
+
     def _handle_run_output(self, state: Any, run_output: RunOutput):
         if isinstance(run_output.actual_instance, RunResult):
             run_result: RunResult = run_output.actual_instance
@@ -191,8 +192,8 @@ class ACPNode:
         return state
 
     def _generate_thread_id(self) -> str:
-        return 'abc'
-    
+        return "abc"
+
     def _get_thread_id(self, config: RunnableConfig) -> Optional[str]:
         configurable = config.get("configurable", {})
         thread_id = configurable.get("thread_id", None)
@@ -200,7 +201,7 @@ class ACPNode:
 
     def _handle_interrupt(
         self,
-        run_response: Union[RunWaitResponseStateless,RunWaitResponseStateful],
+        run_response: Union[RunWaitResponseStateless, RunWaitResponseStateful],
         thread_id: Optional[str],
     ):
         assert run_response.output is not None, "No output found for interrupt"
@@ -249,7 +250,9 @@ class ACPNode:
                     input=self._extract_input(state),
                     config=Config(configurable=self._extract_config(config)),
                 )
-                run_response = acp_client.create_and_wait_for_thread_run_output(thread_id, run_create)
+                run_response = acp_client.create_and_wait_for_thread_run_output(
+                    thread_id, run_create
+                )
 
             run_output = run_response.output
             if run_output is None:
@@ -270,7 +273,8 @@ class ACPNode:
                 else:
                     resume_run = acp_client.resume_thread_run(
                         thread_id=thread_id,
-                        run_id=run_response.run.run_id, body=interrupt_result
+                        run_id=run_response.run.run_id,
+                        body=interrupt_result,
                     )
                     run_response = acp_client.wait_for_thread_run_output(
                         thread_id=thread_id,
@@ -301,8 +305,10 @@ class ACPNode:
                     input=self._extract_input(state),
                     config=Config(configurable=self._extract_config(config)),
                 )
-                run_response = await acp_client.create_and_wait_for_stateless_run_output(
-                    run_create
+                run_response = (
+                    await acp_client.create_and_wait_for_stateless_run_output(
+                        run_create
+                    )
                 )
             else:
                 if thread_id is None:
@@ -312,8 +318,10 @@ class ACPNode:
                     input=self._extract_input(state),
                     config=Config(configurable=self._extract_config(config)),
                 )
-                run_response = await acp_client.create_and_wait_for_thread_run_output(thread_id, run_create)
-            
+                run_response = await acp_client.create_and_wait_for_thread_run_output(
+                    thread_id, run_create
+                )
+
             run_output = run_response.output
             if run_output is None:
                 # The spec does not require an output so count it as success.
@@ -325,7 +333,7 @@ class ACPNode:
                 )
                 if not self.use_threads:
                     resume_run = await acp_client.resume_stateless_run(
-                        run_id=run_response.run.run_id, 
+                        run_id=run_response.run.run_id,
                         body=interrupt_result,
                     )
                     run_response = await acp_client.wait_for_stateless_run_output(
@@ -334,7 +342,8 @@ class ACPNode:
                 else:
                     resume_run = await acp_client.resume_thread_run(
                         thread_id=thread_id,
-                        run_id=run_response.run.run_id, body=interrupt_result
+                        run_id=run_response.run.run_id,
+                        body=interrupt_result,
                     )
                     run_response = await acp_client.wait_for_thread_run_output(
                         thread_id=thread_id,
@@ -348,18 +357,16 @@ class ACPNode:
         state = self._handle_run_output(state, run_output)
 
     def _convert_stream_mode(
-        self, 
+        self,
         stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None],
-    ) -> Union[StreamingMode,List[StreamingMode],None]:
-        valid_acp_modes = [member.value for name, member in StreamingMode.__members__.items()]
+    ) -> Union[StreamingMode, List[StreamingMode], None]:
+        valid_acp_modes = [
+            member.value for name, member in StreamingMode.__members__.items()
+        ]
         if stream_mode is None:
             return None
         elif isinstance(stream_mode, List):
-            new_modes = [
-                elem
-                for elem in stream_mode
-                if elem in valid_acp_modes
-            ]
+            new_modes = [elem for elem in stream_mode if elem in valid_acp_modes]
             if not new_modes and stream_mode:
                 raise ValueError("unsupported stream modes: {stream_mode}")
             return new_modes
@@ -376,10 +383,9 @@ class ACPNode:
         stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None] = None,
         **kwargs,
     ) -> Iterator[Dict[str, Any] | Any]:
-        """Stream graph steps for a single input.
-        """
+        """Stream graph steps for a single input."""
         # TODO: add support for interrupts
-        thread_id = self._get_thread_id(config)        
+        thread_id = self._get_thread_id(config)
         if self.use_threads:
             if thread_id is None:
                 thread_id = self._generate_thread_id()
@@ -390,7 +396,9 @@ class ACPNode:
                 stream_mode=self._convert_stream_mode(stream_mode),
             )
             with ACPClient(configuration=self.clientConfig) as acp_client:
-                for run_output in acp_client.create_and_stream_thread_run_output(thread_id, run_create):
+                for run_output in acp_client.create_and_stream_thread_run_output(
+                    thread_id, run_create
+                ):
                     self._handle_run_output(input, run_output.output)
                     yield input
         else:
@@ -401,21 +409,21 @@ class ACPNode:
                 stream_mode=self._convert_stream_mode(stream_mode),
             )
             with ACPClient(configuration=self.clientConfig) as acp_client:
-                for run_output in acp_client.create_and_stream_stateless_run_output(run_create):
+                for run_output in acp_client.create_and_stream_stateless_run_output(
+                    run_create
+                ):
                     self._handle_run_output(input, run_output.output)
                     yield input
-        
 
     async def astream(
         self,
-        input: Union[Dict[str, Any],Any],
+        input: Union[Dict[str, Any], Any],
         config: Optional[RunnableConfig] = None,
         *,
         stream_mode: Union[LangGraphStreamMode, List[LangGraphStreamMode], None] = None,
         **kwargs,
     ) -> AsyncIterator[Dict[str, Any] | Any]:
-        """Stream graph steps for a single input.
-        """
+        """Stream graph steps for a single input."""
         # TODO: add support for interrupts
         thread_id = self._get_thread_id(config)
         if self.use_threads:
@@ -428,7 +436,9 @@ class ACPNode:
                 stream_mode=self._convert_stream_mode(stream_mode),
             )
             async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
-                async for run_output in acp_client.create_and_stream_thread_run_output(thread_id, run_create):
+                async for run_output in acp_client.create_and_stream_thread_run_output(
+                    thread_id, run_create
+                ):
                     self._handle_run_output(input, run_output.output)
                     yield input
         else:
@@ -439,7 +449,9 @@ class ACPNode:
                 stream_mode=self._convert_stream_mode(stream_mode),
             )
             async with AsyncACPClient(configuration=self.clientConfig) as acp_client:
-                async for run_output in acp_client.create_and_stream_stateless_run_output(run_create):
+                async for (
+                    run_output
+                ) in acp_client.create_and_stream_stateless_run_output(run_create):
                     self._handle_run_output(input, run_output.output)
                     yield input
 

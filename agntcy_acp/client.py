@@ -1,22 +1,28 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 import json
-from pydantic import BaseModel
-from typing import Optional, Any, Dict, Union
 from os import getenv
 from pathlib import Path
+from typing import Dict, Optional, Union
+
 import yaml
+from pydantic import BaseModel
 
 from .acp_v0 import Configuration
-from .acp_v0.configuration import ServerVariablesT
-from .acp_v0.sync_client.api_client import ApiClient
-from .acp_v0.sync_client.api import AgentsApi, ThreadsApi, StatelessRunsApi, ThreadRunsApi
-from .acp_v0.async_client.api import ThreadsApi as AsyncThreadsApi
-from .acp_v0.async_client.api import ThreadRunsApi as AsyncThreadRunsApi
-from .acp_v0.async_client.api_client import ApiClient as AsyncApiClient
-from .agws_v0.models import AgentManifest, AgentACPSpec
 from .acp_v0.async_client.api import AgentsApi as AsyncAgentsApi
 from .acp_v0.async_client.api import StatelessRunsApi as AsyncStatelessRunsApi
+from .acp_v0.async_client.api import ThreadRunsApi as AsyncThreadRunsApi
+from .acp_v0.async_client.api import ThreadsApi as AsyncThreadsApi
+from .acp_v0.async_client.api_client import ApiClient as AsyncApiClient
+from .acp_v0.configuration import ServerVariablesT
+from .acp_v0.sync_client.api import (
+    AgentsApi,
+    StatelessRunsApi,
+    ThreadRunsApi,
+    ThreadsApi,
+)
+from .acp_v0.sync_client.api_client import ApiClient
+from .agws_v0.models import AgentACPSpec, AgentManifest
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -26,11 +32,13 @@ except ImportError:
 
 __ENV_VAR_SPECIAL_CHAR_TABLE = str.maketrans("-.", "__")
 
+
 def _get_envvar_param(prefix: str, varname: str) -> Optional[str]:
     env_varname = prefix + varname.upper()
     return getenv(env_varname.translate(__ENV_VAR_SPECIAL_CHAR_TABLE), None)
 
-class ApiClientConfiguration(Configuration,BaseModel):
+
+class ApiClientConfiguration(Configuration, BaseModel):
     """This class contains various settings of the API client.
 
     :param host: Base url.
@@ -59,52 +67,65 @@ class ApiClientConfiguration(Configuration,BaseModel):
     :param debug: Debug switch.
 
     """
+
     def __init__(
-        self, 
-        host: Optional[str]=None,
-        api_key: Optional[Dict[str, str]]=None,
-        api_key_prefix: Optional[Dict[str, str]]=None,
-        username: Optional[str]=None,
-        password: Optional[str]=None,
-        access_token: Optional[str]=None,
-        server_variables: Optional[ServerVariablesT]=None,
-        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
-        ssl_ca_cert: Optional[str]=None,
+        self,
+        host: Optional[str] = None,
+        api_key: Optional[Dict[str, str]] = None,
+        api_key_prefix: Optional[Dict[str, str]] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        access_token: Optional[str] = None,
+        server_variables: Optional[ServerVariablesT] = None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
+        ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ):
-        super().__init__(host, api_key, api_key_prefix, username, password, 
-                         access_token, None, server_variables, 
-                         None, server_operation_variables, 
-                         True, ssl_ca_cert, retries, 
-                         ca_cert_data, debug=debug)
-    
+        super().__init__(
+            host,
+            api_key,
+            api_key_prefix,
+            username,
+            password,
+            access_token,
+            None,
+            server_variables,
+            None,
+            server_operation_variables,
+            True,
+            ssl_ca_cert,
+            retries,
+            ca_cert_data,
+            debug=debug,
+        )
+
     @classmethod
     def fromEnvPrefix(
         cls,
         env_var_prefix: str,
-        host: Optional[str]=None,
-        api_key: Optional[Dict[str, str]]=None,
-        api_key_prefix: Optional[Dict[str, str]]=None,
-        username: Optional[str]=None,
-        password: Optional[str]=None,
-        access_token: Optional[str]=None,
-        server_variables: Optional[ServerVariablesT]=None,
-        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
-        ssl_ca_cert: Optional[str]=None,
+        host: Optional[str] = None,
+        api_key: Optional[Dict[str, str]] = None,
+        api_key_prefix: Optional[Dict[str, str]] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        access_token: Optional[str] = None,
+        server_variables: Optional[ServerVariablesT] = None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
+        ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ) -> "ApiClientConfiguration":
         """Construct a configuration object using environment variables as
-        default source of parameter values. For example, with env_var_prefix="MY\\_", 
-        the default host parameter value would be looked up in the "MY_HOST" 
+        default source of parameter values. For example, with env_var_prefix="MY\\_",
+        the default host parameter value would be looked up in the "MY_HOST"
         environment variable if not provided.
 
-        :param env_var_prefix: String used as prefix for environment variable 
+        :param env_var_prefix: String used as prefix for environment variable
           names.
 
         :return: Configuration object
@@ -152,46 +173,46 @@ class ApiClientConfiguration(Configuration,BaseModel):
         if debug is None:
             str_value = _get_envvar_param(prefix, "debug")
             if str_value is not None:
-                debug = str_value.lower() == 'true'
+                debug = str_value.lower() == "true"
 
         return ApiClientConfiguration(
             host,
-            api_key, 
+            api_key,
             api_key_prefix,
             username,
             password,
             access_token,
-            server_variables, 
-            server_operation_variables, 
+            server_variables,
+            server_operation_variables,
             ssl_ca_cert,
-            retries, 
+            retries,
             ca_cert_data,
             debug=debug,
         )
 
 
 class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
-    """Client for ACP API.
-    """
+    """Client for ACP API."""
+
     def __init__(
-            self,
-            api_client: Optional[ApiClient] = None,
-            configuration: Optional[ApiClientConfiguration] = None,
-            manifest: Optional[Union[str,Path,AgentManifest,AgentACPSpec]] = None,
-            stream_chunk_size: int = 4096,
-        ):
+        self,
+        api_client: Optional[ApiClient] = None,
+        configuration: Optional[ApiClientConfiguration] = None,
+        manifest: Optional[Union[str, Path, AgentManifest, AgentACPSpec]] = None,
+        stream_chunk_size: int = 4096,
+    ):
         if api_client is None and configuration is not None:
             api_client = ApiClient(configuration)
         super().__init__(api_client)
         self.__workflow_server_update_api_client()
         self.stream_chunk_size = stream_chunk_size
-        
+
         if isinstance(manifest, AgentManifest):
             self.agent_acp_spec = manifest.specs
         elif isinstance(manifest, AgentACPSpec):
             self.agent_acp_spec = manifest
         elif manifest is not None:
-            with open(manifest, 'r') as mfh:
+            with open(manifest, "r") as mfh:
                 manifest_data = yaml.load(mfh, Loader=SafeLoader)
                 self.agent_acp_spec = AgentManifest.model_validate(manifest_data).specs
         else:
@@ -201,9 +222,11 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         if self.api_client.configuration.api_key is not None:
             # Check for 'x-api-key' config and move to header.
             try:
-                self.api_client.default_headers['x-api-key'] = self.api_client.configuration.api_key['x-api-key']
+                self.api_client.default_headers["x-api-key"] = (
+                    self.api_client.configuration.api_key["x-api-key"]
+                )
             except KeyError:
-                pass # ignore
+                pass  # ignore
 
     # Convenience functions to use this client as an sync context manager.
     def __enter__(self):
@@ -218,26 +241,26 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
     def fromEnvPrefix(
         cls,
         env_var_prefix: str,
-        host: Optional[str]=None,
-        api_key: Optional[Dict[str, str]]=None,
-        api_key_prefix: Optional[Dict[str, str]]=None,
-        username: Optional[str]=None,
-        password: Optional[str]=None,
-        access_token: Optional[str]=None,
-        server_variables: Optional[ServerVariablesT]=None,
-        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
-        ssl_ca_cert: Optional[str]=None,
+        host: Optional[str] = None,
+        api_key: Optional[Dict[str, str]] = None,
+        api_key_prefix: Optional[Dict[str, str]] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        access_token: Optional[str] = None,
+        server_variables: Optional[ServerVariablesT] = None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
+        ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ) -> "ACPClient":
         """Construct an ACPClient object using environment variables as
-        default source of the API client configuration values. For example, 
-        with env_var_prefix="MY\\_", the default host parameter value would be 
+        default source of the API client configuration values. For example,
+        with env_var_prefix="MY\\_", the default host parameter value would be
         looked up in the "MY_HOST" environment variable if not provided.
 
-        :param env_var_prefix: String used as prefix for environment variable 
+        :param env_var_prefix: String used as prefix for environment variable
           names.
 
         :return: ACP client object
@@ -263,25 +286,25 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
     @classmethod
     def fromConfiguration(
         cls,
-        host: Optional[str]=None,
-        api_key: Optional[Dict[str, str]]=None,
-        api_key_prefix: Optional[Dict[str, str]]=None,
-        username: Optional[str]=None,
-        password: Optional[str]=None,
-        access_token: Optional[str]=None,
-        server_variables: Optional[ServerVariablesT]=None,
-        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
-        ssl_ca_cert: Optional[str]=None,
+        host: Optional[str] = None,
+        api_key: Optional[Dict[str, str]] = None,
+        api_key_prefix: Optional[Dict[str, str]] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        access_token: Optional[str] = None,
+        server_variables: Optional[ServerVariablesT] = None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
+        ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ) -> "ACPClient":
-        """Construct an ACPClient object using configuration values. For example, 
-        with env_var_prefix="MY\\_", the default host parameter value would be 
+        """Construct an ACPClient object using configuration values. For example,
+        with env_var_prefix="MY\\_", the default host parameter value would be
         looked up in the "MY_HOST" environment variable if not provided.
 
-        :param env_var_prefix: String used as prefix for environment variable 
+        :param env_var_prefix: String used as prefix for environment variable
           names.
 
         :return: ACP client object
@@ -304,16 +327,18 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         return ACPClient(api_client=ApiClient(client_config))
 
 
-class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, AsyncThreadRunsApi):
-    """Async client for ACP API.
-    """
+class AsyncACPClient(
+    AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, AsyncThreadRunsApi
+):
+    """Async client for ACP API."""
+
     def __init__(
-            self,
-            api_client: Optional[AsyncApiClient] = None,
-            configuration: Optional[ApiClientConfiguration] = None,
-            manifest: Optional[Union[str,Path,AgentManifest,AgentACPSpec]] = None,
-            stream_chunk_size: int = 4096,
-        ):
+        self,
+        api_client: Optional[AsyncApiClient] = None,
+        configuration: Optional[ApiClientConfiguration] = None,
+        manifest: Optional[Union[str, Path, AgentManifest, AgentACPSpec]] = None,
+        stream_chunk_size: int = 4096,
+    ):
         if api_client is None and configuration is not None:
             api_client = AsyncApiClient(configuration)
         super().__init__(api_client)
@@ -321,14 +346,16 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
         self.stream_chunk_size = stream_chunk_size
         self.manifest = manifest
         self.agent_acp_spec = None
-    
+
     def __workflow_server_update_api_client(self):
         if self.api_client.configuration.api_key is not None:
             # Check for 'x-api-key' config and move to header.
             try:
-                self.api_client.default_headers['x-api-key'] = self.api_client.configuration.api_key['x-api-key']
+                self.api_client.default_headers["x-api-key"] = (
+                    self.api_client.configuration.api_key["x-api-key"]
+                )
             except KeyError:
-                pass # ignore
+                pass  # ignore
 
     async def _get_agent_acp_spec(self) -> Optional[AgentACPSpec]:
         if self.agent_acp_spec is not None:
@@ -341,7 +368,8 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
             self.agent_acp_spec = self.manifest
         else:
             import aiofiles
-            async with aiofiles.open(self.manifest, 'r') as mfh:
+
+            async with aiofiles.open(self.manifest, "r") as mfh:
                 raw_data = await mfh.read()
                 manifest_data = yaml.load(raw_data, Loader=SafeLoader)
                 self.agent_acp_spec = AgentManifest.model_validate(manifest_data).specs
@@ -360,26 +388,26 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
     def fromEnvPrefix(
         cls,
         env_var_prefix: str,
-        host: Optional[str]=None,
-        api_key: Optional[Dict[str, str]]=None,
-        api_key_prefix: Optional[Dict[str, str]]=None,
-        username: Optional[str]=None,
-        password: Optional[str]=None,
-        access_token: Optional[str]=None,
-        server_variables: Optional[ServerVariablesT]=None,
-        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
-        ssl_ca_cert: Optional[str]=None,
+        host: Optional[str] = None,
+        api_key: Optional[Dict[str, str]] = None,
+        api_key_prefix: Optional[Dict[str, str]] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        access_token: Optional[str] = None,
+        server_variables: Optional[ServerVariablesT] = None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
+        ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ) -> "AsyncACPClient":
         """Construct an AsyncACPClient object using environment variables as
-        default source of the API client configuration values. For example, 
-        with env_var_prefix="MY\\_", the default host parameter value would be 
+        default source of the API client configuration values. For example,
+        with env_var_prefix="MY\\_", the default host parameter value would be
         looked up in the "MY_HOST" environment variable if not provided.
 
-        :param env_var_prefix: String used as prefix for environment variable 
+        :param env_var_prefix: String used as prefix for environment variable
           names.
 
         :return: Async ACP client object
@@ -405,25 +433,25 @@ class AsyncACPClient(AsyncAgentsApi, AsyncStatelessRunsApi, AsyncThreadsApi, Asy
     @classmethod
     def fromConfiguration(
         cls,
-        host: Optional[str]=None,
-        api_key: Optional[Dict[str, str]]=None,
-        api_key_prefix: Optional[Dict[str, str]]=None,
-        username: Optional[str]=None,
-        password: Optional[str]=None,
-        access_token: Optional[str]=None,
-        server_variables: Optional[ServerVariablesT]=None,
-        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
-        ssl_ca_cert: Optional[str]=None,
+        host: Optional[str] = None,
+        api_key: Optional[Dict[str, str]] = None,
+        api_key_prefix: Optional[Dict[str, str]] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        access_token: Optional[str] = None,
+        server_variables: Optional[ServerVariablesT] = None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
+        ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ) -> "AsyncACPClient":
-        """Construct an AsyncACPClient object using configuration values. For example, 
-        with env_var_prefix="MY\\_", the default host parameter value would be 
+        """Construct an AsyncACPClient object using configuration values. For example,
+        with env_var_prefix="MY\\_", the default host parameter value would be
         looked up in the "MY_HOST" environment variable if not provided.
 
-        :param env_var_prefix: String used as prefix for environment variable 
+        :param env_var_prefix: String used as prefix for environment variable
           names.
 
         :return: Async ACP client object

@@ -2,13 +2,12 @@ import asyncio
 import uuid
 from typing import Optional
 
+from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.constants import END, START
 from langgraph.graph import StateGraph
 from langgraph.types import Command, interrupt
 from typing_extensions import TypedDict
-from pydantic import BaseModel
-from langchain_core.runnables import RunnableConfig
 
 
 class State(TypedDict):
@@ -40,6 +39,7 @@ class SecondInterrupt(TypedDict):
     ai_second_question: str
     """The question asked by the AI."""
 
+
 class FirstInterruptAnswer(TypedDict):
     """The first interrupt answer."""
 
@@ -63,7 +63,7 @@ async def node1(state: State):
 async def node2(state: State):
     print(f"> Received input: {state['ai_answer']}")
     needs_answer = True
-    answer : FirstInterruptAnswer = interrupt(
+    answer: FirstInterruptAnswer = interrupt(
         # This value will be sent to the client
         # as part of the interrupt information.
         FirstInterrupt(
@@ -74,7 +74,7 @@ async def node2(state: State):
     print(f"> Received an input from the 1st interrupt: {answer}")
     if needs_answer and not answer["answer"].strip():
         print("> The answer is empty, but it was required.")
-    
+
     await asyncio.sleep(2)
     return {"human_answer": answer}
 
