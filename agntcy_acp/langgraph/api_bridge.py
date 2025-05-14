@@ -61,7 +61,7 @@ class APIBridgeAgentNode(acp_node.ACPNode):
         r = requests.post(
             f"{self.hostname}/{self.service_name}",
             headers=headers,
-            data=api_bridge_input.query,
+            data=api_bridge_input["query"],
         )
         r.raise_for_status()
         response = r.text
