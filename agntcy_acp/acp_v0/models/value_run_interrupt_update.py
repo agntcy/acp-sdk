@@ -20,23 +20,33 @@ import pprint
 import re  # noqa: F401
 from typing import Any, ClassVar, Dict, List, Optional, Set
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing_extensions import Self
 
-from agntcy_acp.acp_v0.models.run_output import RunOutput
-from agntcy_acp.acp_v0.models.run_stateless import RunStateless
+from agntcy_acp.acp_v0.models.run_status import RunStatus
 
 
-class RunWaitResponseStateless(BaseModel):
+class ValueRunInterruptUpdate(BaseModel):
     """
-    RunWaitResponseStateless
+    Partial result provided as value through streaming.
     """  # noqa: E501
 
-    run: Optional[RunStateless] = Field(
-        default=None, description="The run information."
+    type: StrictStr
+    interrupt: Dict[str, Any] = Field(
+        description="This schema describes the interrupt payload. Actual schema describes a polimorphic object, which means a schema structured with `oneOf` and `discriminator`. The discriminator is the `interrupt_type`, while the schemas will be the ones defined in the agent spec under `interrupts`/`interrupt_payload` For example:          oneOf:   - $ref: '#/components/schemas/ApprovalInterruptPayload'   - $ref: '#/components/schemas/QuestionInterruptPayload' discriminator:   propertyName: interruput_type   mapping:     approval: '#/components/schemas/ApprovalInterruptPayload'     question: '#/components/schemas/QuestionInterruptPayload'"
     )
-    output: Optional[RunOutput] = None
-    __properties: ClassVar[List[str]] = ["run", "output"]
+    run_id: StrictStr = Field(description="The ID of the run.")
+    status: RunStatus = Field(
+        description="Status of the Run when this result was generated. This is particularly useful when this data structure is used for streaming results. As the server can indicate an interrupt or an error condition while streaming the result."
+    )
+    __properties: ClassVar[List[str]] = ["type", "interrupt", "run_id", "status"]
+
+    @field_validator("type")
+    def type_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(["interrupt"]):
+            raise ValueError("must be one of enum values ('interrupt')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -55,7 +65,7 @@ class RunWaitResponseStateless(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of RunWaitResponseStateless from a JSON string"""
+        """Create an instance of ValueRunInterruptUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -75,17 +85,11 @@ class RunWaitResponseStateless(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of run
-        if self.run:
-            _dict["run"] = self.run.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of output
-        if self.output:
-            _dict["output"] = self.output.to_dict()
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of RunWaitResponseStateless from a dict"""
+        """Create an instance of ValueRunInterruptUpdate from a dict"""
         if obj is None:
             return None
 
@@ -94,12 +98,10 @@ class RunWaitResponseStateless(BaseModel):
 
         _obj = cls.model_validate(
             {
-                "run": RunStateless.from_dict(obj["run"])
-                if obj.get("run") is not None
-                else None,
-                "output": RunOutput.from_dict(obj["output"])
-                if obj.get("output") is not None
-                else None,
+                "type": obj.get("type"),
+                "interrupt": obj.get("interrupt"),
+                "run_id": obj.get("run_id"),
+                "status": obj.get("status"),
             }
         )
         return _obj
