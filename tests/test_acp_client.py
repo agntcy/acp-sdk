@@ -12,12 +12,16 @@ from agntcy_acp.models import (
     RunCreateStateful,
     RunCreateStateless,
     RunOutput,
+    RunOutputStream,
     RunResult,
     RunSearchRequest,
     RunStateful,
     RunStateless,
     RunWaitResponseStateful,
     RunWaitResponseStateless,
+    StreamEventPayload,
+    ValueRunErrorUpdate,
+    ValueRunInterruptUpdate,
 )
 
 ListRunStateless = RootModel[List[RunStateless]]
@@ -286,4 +290,64 @@ def test_acp_client_stream_thread_run_api(
             assert (
                 response.data.actual_instance.run_id
                 == default_run_output_stream.data.actual_instance.run_id
+            )
+
+        interrupt_stream = RunOutputStream(
+            id="1",
+            event="agent_event",
+            data=StreamEventPayload(
+                ValueRunInterruptUpdate(
+                    type="interrupt",
+                    run_id=default_run_output_stream.data.actual_instance.run_id,
+                    status="pending",
+                    interrupt={
+                        "key": "value",
+                    },
+                )
+            ),
+        )
+        mock_response_api_client(
+            client.api_client,
+            interrupt_stream.data,
+            default_api_key,
+            monkeypatch,
+        )
+        stream = client.create_and_stream_thread_run_output(
+            thread_id=default_thread_id,
+            run_create_stateful=RunCreateStateful(agent_id=default_agent_id),
+        )
+        for response in stream:
+            assert response is not None
+            assert (
+                response.data.actual_instance.run_id
+                == interrupt_stream.data.actual_instance.run_id
+            )
+
+        error_stream = RunOutputStream(
+            id="1",
+            event="agent_event",
+            data=StreamEventPayload(
+                ValueRunErrorUpdate(
+                    type="error",
+                    run_id=default_run_output_stream.data.actual_instance.run_id,
+                    status="pending",
+                    description="I'm sorry, Dave.",
+                )
+            ),
+        )
+        mock_response_api_client(
+            client.api_client,
+            error_stream.data,
+            default_api_key,
+            monkeypatch,
+        )
+        stream = client.create_and_stream_thread_run_output(
+            thread_id=default_thread_id,
+            run_create_stateful=RunCreateStateful(agent_id=default_agent_id),
+        )
+        for response in stream:
+            assert response is not None
+            assert (
+                response.data.actual_instance.run_id
+                == error_stream.data.actual_instance.run_id
             )
