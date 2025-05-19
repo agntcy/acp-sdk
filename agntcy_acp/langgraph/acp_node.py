@@ -355,6 +355,7 @@ class ACPNode:
                     return None
 
         state = self._handle_run_output(state, run_output)
+        return state
 
     def _convert_stream_mode(
         self,

@@ -1,2 +1,8 @@
+config:
+  org.agntcy.echo_agent:
+    port: 62393
+    apiKey: 9460bf1c-cd3f-47dd-afd5-6874c6406d22
+    id: 55ba4a13-6559-4752-a080-72f5de39cb63
+
 values:
   TO_UPPER: true

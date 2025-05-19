@@ -43,6 +43,8 @@ from ..acp_v0.models import (
     ThreadSearchRequest,
     ThreadState,
     ThreadStatus,
+    ValueRunErrorUpdate,
+    ValueRunInterruptUpdate,
     ValueRunResultUpdate,
 )
 from ..agws_v0.models import (
@@ -140,5 +142,7 @@ __all__ = [
     "ThreadSearchRequest",
     "ThreadState",
     "ThreadStatus",
+    "ValueRunErrorUpdate",
+    "ValueRunInterruptUpdate",
     "ValueRunResultUpdate",
 ]
