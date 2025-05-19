@@ -944,6 +944,46 @@ components:
       - interrupted
       - error
       type: string
+    ValueRunErrorUpdate:
+      allOf:
+      - $ref: '#/components/schemas/RunError'
+      - properties:
+          status:
+            $ref: '#/components/schemas/RunStatus'
+            description: Status of the Run when this result was generated. This is
+              particularly useful when this data structure is used for streaming results.
+              As the server can indicate an interrupt or an error condition while
+              streaming the result.
+            title: Run Status
+        required:
+        - status
+        type: object
+      description: Partial result provided as value through streaming.
+      title: Value Run Error Update
+      type: object
+    ValueRunInterruptUpdate:
+      allOf:
+      - $ref: '#/components/schemas/RunInterrupt'
+      - properties:
+          run_id:
+            description: The ID of the run.
+            format: uuid
+            title: Run Id
+            type: string
+          status:
+            $ref: '#/components/schemas/RunStatus'
+            description: Status of the Run when this result was generated. This is
+              particularly useful when this data structure is used for streaming results.
+              As the server can indicate an interrupt or an error condition while
+              streaming the result.
+            title: Run Status
+        required:
+        - run_id
+        - status
+        type: object
+      description: Partial result provided as value through streaming.
+      title: Value Run Interrupt Update
+      type: object
     ValueRunResultUpdate:
       description: Partial result provided as value through streaming.
       properties:
@@ -960,7 +1000,7 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/RunStatus'
-          description: Status of the Run when this result was generated. This is particurarly
+          description: Status of the Run when this result was generated. This is particularly
             useful when this data structure is used for streaming results. As the
             server can indicate an interrupt or an error condition while streaming
             the result.
@@ -1064,7 +1104,7 @@ components:
       type: object
 info:
   title: ACP Spec for org.agntcy.sample-agent-1:0.0.1
-  version: 0.2.1
+  version: 0.2.2
 openapi: 3.1.1
 paths:
   /agents/search:
