@@ -358,6 +358,7 @@ async def test_acp_client_stream_thread_run_api(
                     run_id=default_run_output_stream.data.actual_instance.run_id,
                     status="pending",
                     description="I'm sorry, Dave.",
+                    errcode=0,
                 )
             ),
         )
