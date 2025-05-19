@@ -44,8 +44,10 @@
 <li class="toctree-l2"><a class="reference internal" href="agntcy_acp.langgraph.html#module-agntcy_acp.langgraph.acp_node">agntcy_acp.langgraph.acp_node module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode"><code class="docutils literal notranslate"><span class="pre">ACPNode</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.ainvoke"><code class="docutils literal notranslate"><span class="pre">ACPNode.ainvoke()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.astream"><code class="docutils literal notranslate"><span class="pre">ACPNode.astream()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.get_name"><code class="docutils literal notranslate"><span class="pre">ACPNode.get_name()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.invoke"><code class="docutils literal notranslate"><span class="pre">ACPNode.invoke()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.stream"><code class="docutils literal notranslate"><span class="pre">ACPNode.stream()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -352,6 +354,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.LlamaIndexConfig"><code class="docutils literal notranslate"><span class="pre">LlamaIndexConfig</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.LlamaIndexConfig.framework_type"><code class="docutils literal notranslate"><span class="pre">LlamaIndexConfig.framework_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.LlamaIndexConfig.interrupts"><code class="docutils literal notranslate"><span class="pre">LlamaIndexConfig.interrupts</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.LlamaIndexConfig.model_config"><code class="docutils literal notranslate"><span class="pre">LlamaIndexConfig.model_config</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.LlamaIndexConfig.path"><code class="docutils literal notranslate"><span class="pre">LlamaIndexConfig.path</span></code></a></li>
 </ul>
@@ -654,6 +657,8 @@
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.one_of_schemas"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.one_of_schemas</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.oneof_schema_1_validator"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.oneof_schema_1_validator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.oneof_schema_2_validator"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.oneof_schema_2_validator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.oneof_schema_3_validator"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.oneof_schema_3_validator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.oneof_schema_4_validator"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.oneof_schema_4_validator</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.to_dict"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.to_dict()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.to_json"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.to_json()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="agntcy_acp.models.html#agntcy_acp.models.StreamEventPayload.to_str"><code class="docutils literal notranslate"><span class="pre">StreamEventPayload.to_str()</span></code></a></li>
@@ -842,12 +847,12 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="agntcy_acp.ACPClient.fromConfiguration">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_operation_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssl_ca_cert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/client.html#ACPClient.fromConfiguration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.ACPClient.fromConfiguration" title="Link to this definition">¶</a></dt>
-<dd><p>Construct an ACPClient object using configuration values. For example, 
-with env_var_prefix=”MY_”, the default host parameter value would be 
+<dd><p>Construct an ACPClient object using configuration values. For example,
+with env_var_prefix=”MY_”, the default host parameter value would be
 looked up in the “MY_HOST” environment variable if not provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>env_var_prefix</strong> – String used as prefix for environment variable 
+<dd class="field-odd"><p><strong>env_var_prefix</strong> – String used as prefix for environment variable
 names.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -863,12 +868,12 @@ names.</p>
 <dt class="sig sig-object py" id="agntcy_acp.ACPClient.fromEnvPrefix">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromEnvPrefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_var_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_operation_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssl_ca_cert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/client.html#ACPClient.fromEnvPrefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.ACPClient.fromEnvPrefix" title="Link to this definition">¶</a></dt>
 <dd><p>Construct an ACPClient object using environment variables as
-default source of the API client configuration values. For example, 
-with env_var_prefix=”MY_”, the default host parameter value would be 
+default source of the API client configuration values. For example,
+with env_var_prefix=”MY_”, the default host parameter value would be
 looked up in the “MY_HOST” environment variable if not provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>env_var_prefix</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String used as prefix for environment variable 
+<dd class="field-odd"><p><strong>env_var_prefix</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String used as prefix for environment variable
 names.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1175,25 +1180,24 @@ If obj is OpenAPI model, return the properties dict.</p>
 <li><p><strong>headers</strong> – Header parameters dict to be updated.</p></li>
 <li><p><strong>queries</strong> – Query parameters tuple list to be updated.</p></li>
 <li><p><strong>auth_settings</strong> – Authentication setting identifiers list.</p></li>
+<li><p><strong>request_auth</strong> – if set, the provided settings will
+override the token in the configuration.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-even">Resource_path<span class="colon">:</span></dt>
+<dd class="field-even"><p>A string representation of the HTTP request resource path.</p>
 </dd>
-<dt class="field-odd">Resource_path<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A string representation of the HTTP request resource path.</p>
+<dt class="field-odd">Method<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representation of the HTTP request method.</p>
 </dd>
-<dt class="field-even">Method<span class="colon">:</span></dt>
-<dd class="field-even"><p>A string representation of the HTTP request method.</p>
+<dt class="field-even">Body<span class="colon">:</span></dt>
+<dd class="field-even"><p>A object representing the body of the HTTP request.
+The object type is the return value of sanitize_for_serialization().</p>
 </dd>
-<dt class="field-odd">Body<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A object representing the body of the HTTP request.</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
-<p>The object type is the return value of sanitize_for_serialization().
-:type request_auth: 
-:param request_auth: if set, the provided settings will
-override the token in the configuration.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1243,12 +1247,12 @@ in PEM (str) or DER (bytes) format.</p></li>
 <dt class="sig sig-object py" id="agntcy_acp.ApiClientConfiguration.fromEnvPrefix">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromEnvPrefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_var_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_operation_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssl_ca_cert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/client.html#ApiClientConfiguration.fromEnvPrefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.ApiClientConfiguration.fromEnvPrefix" title="Link to this definition">¶</a></dt>
 <dd><p>Construct a configuration object using environment variables as
-default source of parameter values. For example, with env_var_prefix=”MY_”, 
-the default host parameter value would be looked up in the “MY_HOST” 
+default source of parameter values. For example, with env_var_prefix=”MY_”,
+the default host parameter value would be looked up in the “MY_HOST”
 environment variable if not provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>env_var_prefix</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String used as prefix for environment variable 
+<dd class="field-odd"><p><strong>env_var_prefix</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String used as prefix for environment variable
 names.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1343,12 +1347,12 @@ names.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="agntcy_acp.AsyncACPClient.fromConfiguration">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromConfiguration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_operation_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssl_ca_cert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/client.html#AsyncACPClient.fromConfiguration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.AsyncACPClient.fromConfiguration" title="Link to this definition">¶</a></dt>
-<dd><p>Construct an AsyncACPClient object using configuration values. For example, 
-with env_var_prefix=”MY_”, the default host parameter value would be 
+<dd><p>Construct an AsyncACPClient object using configuration values. For example,
+with env_var_prefix=”MY_”, the default host parameter value would be
 looked up in the “MY_HOST” environment variable if not provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>env_var_prefix</strong> – String used as prefix for environment variable 
+<dd class="field-odd"><p><strong>env_var_prefix</strong> – String used as prefix for environment variable
 names.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1364,12 +1368,12 @@ names.</p>
 <dt class="sig sig-object py" id="agntcy_acp.AsyncACPClient.fromEnvPrefix">
 <em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromEnvPrefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_var_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">api_key_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_operation_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssl_ca_cert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ca_cert_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/client.html#AsyncACPClient.fromEnvPrefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.AsyncACPClient.fromEnvPrefix" title="Link to this definition">¶</a></dt>
 <dd><p>Construct an AsyncACPClient object using environment variables as
-default source of the API client configuration values. For example, 
-with env_var_prefix=”MY_”, the default host parameter value would be 
+default source of the API client configuration values. For example,
+with env_var_prefix=”MY_”, the default host parameter value would be
 looked up in the “MY_HOST” environment variable if not provided.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>env_var_prefix</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String used as prefix for environment variable 
+<dd class="field-odd"><p><strong>env_var_prefix</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – String used as prefix for environment variable
 names.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

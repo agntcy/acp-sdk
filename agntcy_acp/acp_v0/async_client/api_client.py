@@ -612,9 +612,9 @@ class ApiClient:
         :resource_path: A string representation of the HTTP request resource path.
         :method: A string representation of the HTTP request method.
         :body: A object representing the body of the HTTP request.
-        The object type is the return value of sanitize_for_serialization().
+            The object type is the return value of sanitize_for_serialization().
         :param request_auth: if set, the provided settings will
-        override the token in the configuration.
+            override the token in the configuration.
         """
         if not auth_settings:
             return

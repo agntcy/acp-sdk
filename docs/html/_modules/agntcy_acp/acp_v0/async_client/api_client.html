@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>agntcy_acp.acp_v0.sync_client.api_client &#8212; ACP SDK documentation</title>
+    <title>agntcy_acp.acp_v0.async_client.api_client &#8212; ACP SDK documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=5ecbeea2" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/basic.css?v=b08954a9" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css?v=27fed22d" />
@@ -30,7 +30,7 @@
 
           <div class="body" role="main">
             
-  <h1>Source code for agntcy_acp.acp_v0.sync_client.api_client</h1><div class="highlight"><pre>
+  <h1>Source code for agntcy_acp.acp_v0.async_client.api_client</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright AGNTCY Contributors (https://github.com/agntcy)</span>
 <span class="c1"># SPDX-License-Identifier: Apache-2.0</span>
 <span class="c1"># coding: utf-8</span>
@@ -74,8 +74,6 @@
 <span class="n">RequestSerialized</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 
 
-<div class="viewcode-block" id="ApiClient">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ApiClient</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic API client for OpenAPI client library builds.</span>
 
@@ -123,11 +121,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">user_agent</span> <span class="o">=</span> <span class="s2">&quot;OpenAPI-Generator/1.0.0/python&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client_side_validation</span> <span class="o">=</span> <span class="n">configuration</span><span class="o">.</span><span class="n">client_side_validation</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
-        <span class="k">pass</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="fm">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">user_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -138,16 +139,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">user_agent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_headers</span><span class="p">[</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="ApiClient.set_default_header">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.set_default_header">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_default_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header_name</span><span class="p">,</span> <span class="n">header_value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">default_headers</span><span class="p">[</span><span class="n">header_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">header_value</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_headers</span><span class="p">[</span><span class="n">header_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">header_value</span>
 
     <span class="n">_default</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="ApiClient.get_default">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.get_default">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return new instance of ApiClient.</span>
@@ -160,11 +156,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_default</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_default</span>
 
-
-<div class="viewcode-block" id="ApiClient.set_default">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.set_default">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">set_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set default instance of ApiClient.</span>
@@ -173,11 +166,8 @@
 
 <span class="sd">        :param default: object of ApiClient.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span>
 
-
-<div class="viewcode-block" id="ApiClient.param_serialize">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.param_serialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">param_serialize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">method</span><span class="p">,</span>
@@ -276,12 +266,9 @@
             <span class="n">url_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters_to_url_query</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">collection_formats</span><span class="p">)</span>
             <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;?&quot;</span> <span class="o">+</span> <span class="n">url_query</span>
 
-        <span class="k">return</span> <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">header_params</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">post_params</span></div>
+        <span class="k">return</span> <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">header_params</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">post_params</span>
 
-
-<div class="viewcode-block" id="ApiClient.call_api">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.call_api">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">call_api</span><span class="p">(</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">call_api</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">method</span><span class="p">,</span>
         <span class="n">url</span><span class="p">,</span>
@@ -306,7 +293,7 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># perform request and return response</span>
-            <span class="n">response_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
+            <span class="n">response_data</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">rest_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
                 <span class="n">method</span><span class="p">,</span>
                 <span class="n">url</span><span class="p">,</span>
                 <span class="n">headers</span><span class="o">=</span><span class="n">header_params</span><span class="p">,</span>
@@ -318,11 +305,8 @@
         <span class="k">except</span> <span class="n">ApiException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">e</span>
 
-        <span class="k">return</span> <span class="n">response_data</span></div>
+        <span class="k">return</span> <span class="n">response_data</span>
 
-
-<div class="viewcode-block" id="ApiClient.response_deserialize">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.response_deserialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">response_deserialize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">response_data</span><span class="p">:</span> <span class="n">rest</span><span class="o">.</span><span class="n">RESTResponse</span><span class="p">,</span>
@@ -381,11 +365,8 @@
             <span class="n">data</span><span class="o">=</span><span class="n">return_data</span><span class="p">,</span>
             <span class="n">headers</span><span class="o">=</span><span class="n">response_data</span><span class="o">.</span><span class="n">getheaders</span><span class="p">(),</span>
             <span class="n">raw_data</span><span class="o">=</span><span class="n">response_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
 
-
-<div class="viewcode-block" id="ApiClient.sanitize_for_serialization">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.sanitize_for_serialization">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">sanitize_for_serialization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Builds a JSON POST object.</span>
 
@@ -434,11 +415,8 @@
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">key</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sanitize_for_serialization</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="p">}</span></div>
+        <span class="p">}</span>
 
-
-<div class="viewcode-block" id="ApiClient.deserialize">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.deserialize">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">deserialize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">response_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">response_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="p">):</span>
@@ -474,8 +452,7 @@
                 <span class="n">status</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Unsupported content type: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">content_type</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deserialize</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">response_type</span><span class="p">)</span></div>
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deserialize</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">response_type</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">klass</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Deserializes dict, list, str into an object.</span>
@@ -522,8 +499,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__deserialize_model</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">klass</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ApiClient.parameters_to_tuples">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.parameters_to_tuples">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_tuples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">collection_formats</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get parameters as list of tuples, formatting collections.</span>
 
@@ -551,11 +526,8 @@
                     <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">v</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">new_params</span></div>
+        <span class="k">return</span> <span class="n">new_params</span>
 
-
-<div class="viewcode-block" id="ApiClient.parameters_to_url_query">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.parameters_to_url_query">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">parameters_to_url_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">collection_formats</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get parameters as list of tuples, formatting collections.</span>
 
@@ -593,11 +565,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))))</span>
 
-        <span class="k">return</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;=&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">new_params</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;=&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">new_params</span><span class="p">])</span>
 
-
-<div class="viewcode-block" id="ApiClient.files_parameters">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.files_parameters">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">files_parameters</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">files</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">bytes</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]],</span>
@@ -626,11 +595,8 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported file value&quot;</span><span class="p">)</span>
             <span class="n">mimetype</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="s2">&quot;application/octet-stream&quot;</span>
             <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">k</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">filename</span><span class="p">,</span> <span class="n">filedata</span><span class="p">,</span> <span class="n">mimetype</span><span class="p">])]))</span>
-        <span class="k">return</span> <span class="n">params</span></div>
+        <span class="k">return</span> <span class="n">params</span>
 
-
-<div class="viewcode-block" id="ApiClient.select_header_accept">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.select_header_accept">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">select_header_accept</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accepts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns `Accept` based on an array of accepts provided.</span>
 
@@ -644,11 +610,8 @@
             <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">accept</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">accept</span>
 
-        <span class="k">return</span> <span class="n">accepts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">accepts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-
-<div class="viewcode-block" id="ApiClient.select_header_content_type">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.select_header_content_type">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">select_header_content_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content_types</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns `Content-Type` based on an array of content_types provided.</span>
 
@@ -662,11 +625,8 @@
             <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">content_type</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">content_type</span>
 
-        <span class="k">return</span> <span class="n">content_types</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">content_types</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-
-<div class="viewcode-block" id="ApiClient.update_params_for_auth">
-<a class="viewcode-back" href="../../../../agntcy_acp.html#agntcy_acp.ApiClient.update_params_for_auth">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">update_params_for_auth</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">headers</span><span class="p">,</span>
@@ -685,9 +645,9 @@
 <span class="sd">        :resource_path: A string representation of the HTTP request resource path.</span>
 <span class="sd">        :method: A string representation of the HTTP request method.</span>
 <span class="sd">        :body: A object representing the body of the HTTP request.</span>
-<span class="sd">            The object type is the return value of sanitize_for_serialization().</span>
+<span class="sd">        The object type is the return value of sanitize_for_serialization().</span>
 <span class="sd">        :param request_auth: if set, the provided settings will</span>
-<span class="sd">            override the token in the configuration.</span>
+<span class="sd">        override the token in the configuration.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">auth_settings</span><span class="p">:</span>
             <span class="k">return</span>
@@ -702,8 +662,7 @@
                 <span class="k">if</span> <span class="n">auth_setting</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_apply_auth_params</span><span class="p">(</span>
                         <span class="n">headers</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">resource_path</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">auth_setting</span>
-                    <span class="p">)</span></div>
-
+                    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_apply_auth_params</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">queries</span><span class="p">,</span> <span class="n">resource_path</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">auth_setting</span>
@@ -833,8 +792,7 @@
 <span class="sd">        :return: model object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="n">klass</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
-
+        <span class="k">return</span> <span class="n">klass</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 
           </div>

@@ -34,22 +34,28 @@
 <span></span><span class="c1"># Copyright AGNTCY Contributors (https://github.com/agntcy)</span>
 <span class="c1"># SPDX-License-Identifier: Apache-2.0</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">os</span><span class="w"> </span><span class="kn">import</span> <span class="n">getenv</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0</span><span class="w"> </span><span class="kn">import</span> <span class="n">Configuration</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServerVariablesT</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.sync_client.api_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiClient</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.sync_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentsApi</span><span class="p">,</span> <span class="n">ThreadsApi</span><span class="p">,</span> <span class="n">StatelessRunsApi</span><span class="p">,</span> <span class="n">ThreadRunsApi</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadsApi</span> <span class="k">as</span> <span class="n">AsyncThreadsApi</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadRunsApi</span> <span class="k">as</span> <span class="n">AsyncThreadRunsApi</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiClient</span> <span class="k">as</span> <span class="n">AsyncApiClient</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.agws_v0.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentManifest</span><span class="p">,</span> <span class="n">AgentACPSpec</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentsApi</span> <span class="k">as</span> <span class="n">AsyncAgentsApi</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">StatelessRunsApi</span> <span class="k">as</span> <span class="n">AsyncStatelessRunsApi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadRunsApi</span> <span class="k">as</span> <span class="n">AsyncThreadRunsApi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadsApi</span> <span class="k">as</span> <span class="n">AsyncThreadsApi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.async_client.api_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiClient</span> <span class="k">as</span> <span class="n">AsyncApiClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">ServerVariablesT</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.sync_client.api</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AgentsApi</span><span class="p">,</span>
+    <span class="n">StatelessRunsApi</span><span class="p">,</span>
+    <span class="n">ThreadRunsApi</span><span class="p">,</span>
+    <span class="n">ThreadsApi</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.acp_v0.sync_client.api_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApiClient</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.agws_v0.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentACPSpec</span><span class="p">,</span> <span class="n">AgentManifest</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">yaml</span><span class="w"> </span><span class="kn">import</span> <span class="n">CSafeLoader</span> <span class="k">as</span> <span class="n">SafeLoader</span>
@@ -59,13 +65,15 @@
 
 <span class="n">__ENV_VAR_SPECIAL_CHAR_TABLE</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="s2">&quot;-.&quot;</span><span class="p">,</span> <span class="s2">&quot;__&quot;</span><span class="p">)</span>
 
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_envvar_param</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="n">env_varname</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">varname</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">getenv</span><span class="p">(</span><span class="n">env_varname</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">__ENV_VAR_SPECIAL_CHAR_TABLE</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
 
+
 <div class="viewcode-block" id="ApiClientConfiguration">
 <a class="viewcode-back" href="../../agntcy_acp.html#agntcy_acp.ApiClientConfiguration">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ApiClientConfiguration</span><span class="p">(</span><span class="n">Configuration</span><span class="p">,</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ApiClientConfiguration</span><span class="p">(</span><span class="n">Configuration</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class contains various settings of the API client.</span>
 
 <span class="sd">    :param host: Base url.</span>
@@ -94,54 +102,67 @@
 <span class="sd">    :param debug: Debug switch.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> 
-        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">retries</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ca_cert_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">api_key_prefix</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> 
-                         <span class="n">access_token</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">server_variables</span><span class="p">,</span> 
-                         <span class="kc">None</span><span class="p">,</span> <span class="n">server_operation_variables</span><span class="p">,</span> 
-                         <span class="kc">True</span><span class="p">,</span> <span class="n">ssl_ca_cert</span><span class="p">,</span> <span class="n">retries</span><span class="p">,</span> 
-                         <span class="n">ca_cert_data</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">)</span>
-    
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">host</span><span class="p">,</span>
+            <span class="n">api_key</span><span class="p">,</span>
+            <span class="n">api_key_prefix</span><span class="p">,</span>
+            <span class="n">username</span><span class="p">,</span>
+            <span class="n">password</span><span class="p">,</span>
+            <span class="n">access_token</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="n">server_variables</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="n">server_operation_variables</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">,</span>
+            <span class="n">ssl_ca_cert</span><span class="p">,</span>
+            <span class="n">retries</span><span class="p">,</span>
+            <span class="n">ca_cert_data</span><span class="p">,</span>
+            <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+        <span class="p">)</span>
+
 <div class="viewcode-block" id="ApiClientConfiguration.fromEnvPrefix">
 <a class="viewcode-back" href="../../agntcy_acp.html#agntcy_acp.ApiClientConfiguration.fromEnvPrefix">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fromEnvPrefix</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">env_var_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">retries</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ca_cert_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ApiClientConfiguration&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a configuration object using environment variables as</span>
-<span class="sd">        default source of parameter values. For example, with env_var_prefix=&quot;MY\\_&quot;, </span>
-<span class="sd">        the default host parameter value would be looked up in the &quot;MY_HOST&quot; </span>
+<span class="sd">        default source of parameter values. For example, with env_var_prefix=&quot;MY\\_&quot;,</span>
+<span class="sd">        the default host parameter value would be looked up in the &quot;MY_HOST&quot;</span>
 <span class="sd">        environment variable if not provided.</span>
 
-<span class="sd">        :param env_var_prefix: String used as prefix for environment variable </span>
+<span class="sd">        :param env_var_prefix: String used as prefix for environment variable</span>
 <span class="sd">          names.</span>
 
 <span class="sd">        :return: Configuration object</span>
@@ -189,19 +210,19 @@
         <span class="k">if</span> <span class="n">debug</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">str_value</span> <span class="o">=</span> <span class="n">_get_envvar_param</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;debug&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">str_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">debug</span> <span class="o">=</span> <span class="n">str_value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+                <span class="n">debug</span> <span class="o">=</span> <span class="n">str_value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span>
 
         <span class="k">return</span> <span class="n">ApiClientConfiguration</span><span class="p">(</span>
             <span class="n">host</span><span class="p">,</span>
-            <span class="n">api_key</span><span class="p">,</span> 
+            <span class="n">api_key</span><span class="p">,</span>
             <span class="n">api_key_prefix</span><span class="p">,</span>
             <span class="n">username</span><span class="p">,</span>
             <span class="n">password</span><span class="p">,</span>
             <span class="n">access_token</span><span class="p">,</span>
-            <span class="n">server_variables</span><span class="p">,</span> 
-            <span class="n">server_operation_variables</span><span class="p">,</span> 
+            <span class="n">server_variables</span><span class="p">,</span>
+            <span class="n">server_operation_variables</span><span class="p">,</span>
             <span class="n">ssl_ca_cert</span><span class="p">,</span>
-            <span class="n">retries</span><span class="p">,</span> 
+            <span class="n">retries</span><span class="p">,</span>
             <span class="n">ca_cert_data</span><span class="p">,</span>
             <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -212,27 +233,27 @@
 <div class="viewcode-block" id="ACPClient">
 <a class="viewcode-back" href="../../agntcy_acp.html#agntcy_acp.ACPClient">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ACPClient</span><span class="p">(</span><span class="n">AgentsApi</span><span class="p">,</span> <span class="n">StatelessRunsApi</span><span class="p">,</span> <span class="n">ThreadsApi</span><span class="p">,</span> <span class="n">ThreadRunsApi</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Client for ACP API.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Client for ACP API.&quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">api_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ApiClient</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">configuration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ApiClientConfiguration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">manifest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Path</span><span class="p">,</span><span class="n">AgentManifest</span><span class="p">,</span><span class="n">AgentACPSpec</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">stream_chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span>
-        <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">api_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ApiClient</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">configuration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ApiClientConfiguration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">manifest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">AgentManifest</span><span class="p">,</span> <span class="n">AgentACPSpec</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stream_chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">api_client</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">configuration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">api_client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">api_client</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__workflow_server_update_api_client</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stream_chunk_size</span> <span class="o">=</span> <span class="n">stream_chunk_size</span>
-        
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">AgentManifest</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">agent_acp_spec</span> <span class="o">=</span> <span class="n">manifest</span><span class="o">.</span><span class="n">specs</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">AgentACPSpec</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">agent_acp_spec</span> <span class="o">=</span> <span class="n">manifest</span>
         <span class="k">elif</span> <span class="n">manifest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mfh</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mfh</span><span class="p">:</span>
                 <span class="n">manifest_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">mfh</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">SafeLoader</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">agent_acp_spec</span> <span class="o">=</span> <span class="n">AgentManifest</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">manifest_data</span><span class="p">)</span><span class="o">.</span><span class="n">specs</span>
         <span class="k">else</span><span class="p">:</span>
@@ -242,9 +263,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Check for &#39;x-api-key&#39; config and move to header.</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">default_headers</span><span class="p">[</span><span class="s1">&#39;x-api-key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">api_key</span><span class="p">[</span><span class="s1">&#39;x-api-key&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">default_headers</span><span class="p">[</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">api_key</span><span class="p">[</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">pass</span> <span class="c1"># ignore</span>
+                <span class="k">pass</span>  <span class="c1"># ignore</span>
 
     <span class="c1"># Convenience functions to use this client as an sync context manager.</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -261,26 +284,26 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">fromEnvPrefix</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">env_var_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">retries</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ca_cert_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ACPClient&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct an ACPClient object using environment variables as</span>
-<span class="sd">        default source of the API client configuration values. For example, </span>
-<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be </span>
+<span class="sd">        default source of the API client configuration values. For example,</span>
+<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be</span>
 <span class="sd">        looked up in the &quot;MY_HOST&quot; environment variable if not provided.</span>
 
-<span class="sd">        :param env_var_prefix: String used as prefix for environment variable </span>
+<span class="sd">        :param env_var_prefix: String used as prefix for environment variable</span>
 <span class="sd">          names.</span>
 
 <span class="sd">        :return: ACP client object</span>
@@ -309,25 +332,25 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fromConfiguration</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">retries</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ca_cert_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ACPClient&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct an ACPClient object using configuration values. For example, </span>
-<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct an ACPClient object using configuration values. For example,</span>
+<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be</span>
 <span class="sd">        looked up in the &quot;MY_HOST&quot; environment variable if not provided.</span>
 
-<span class="sd">        :param env_var_prefix: String used as prefix for environment variable </span>
+<span class="sd">        :param env_var_prefix: String used as prefix for environment variable</span>
 <span class="sd">          names.</span>
 
 <span class="sd">        :return: ACP client object</span>
@@ -354,16 +377,18 @@
 
 <div class="viewcode-block" id="AsyncACPClient">
 <a class="viewcode-back" href="../../agntcy_acp.html#agntcy_acp.AsyncACPClient">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AsyncACPClient</span><span class="p">(</span><span class="n">AsyncAgentsApi</span><span class="p">,</span> <span class="n">AsyncStatelessRunsApi</span><span class="p">,</span> <span class="n">AsyncThreadsApi</span><span class="p">,</span> <span class="n">AsyncThreadRunsApi</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async client for ACP API.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsyncACPClient</span><span class="p">(</span>
+    <span class="n">AsyncAgentsApi</span><span class="p">,</span> <span class="n">AsyncStatelessRunsApi</span><span class="p">,</span> <span class="n">AsyncThreadsApi</span><span class="p">,</span> <span class="n">AsyncThreadRunsApi</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Async client for ACP API.&quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">api_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AsyncApiClient</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">configuration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ApiClientConfiguration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">manifest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Path</span><span class="p">,</span><span class="n">AgentManifest</span><span class="p">,</span><span class="n">AgentACPSpec</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">stream_chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span>
-        <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">api_client</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AsyncApiClient</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">configuration</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ApiClientConfiguration</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">manifest</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">AgentManifest</span><span class="p">,</span> <span class="n">AgentACPSpec</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stream_chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="n">api_client</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">configuration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">api_client</span> <span class="o">=</span> <span class="n">AsyncApiClient</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">api_client</span><span class="p">)</span>
@@ -371,14 +396,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stream_chunk_size</span> <span class="o">=</span> <span class="n">stream_chunk_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span> <span class="o">=</span> <span class="n">manifest</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">agent_acp_spec</span> <span class="o">=</span> <span class="kc">None</span>
-    
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__workflow_server_update_api_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Check for &#39;x-api-key&#39; config and move to header.</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">default_headers</span><span class="p">[</span><span class="s1">&#39;x-api-key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">api_key</span><span class="p">[</span><span class="s1">&#39;x-api-key&#39;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">default_headers</span><span class="p">[</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">api_key</span><span class="p">[</span><span class="s2">&quot;x-api-key&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">pass</span> <span class="c1"># ignore</span>
+                <span class="k">pass</span>  <span class="c1"># ignore</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_agent_acp_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AgentACPSpec</span><span class="p">]:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">agent_acp_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -391,7 +418,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">agent_acp_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">aiofiles</span>
-            <span class="k">async</span> <span class="k">with</span> <span class="n">aiofiles</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mfh</span><span class="p">:</span>
+
+            <span class="k">async</span> <span class="k">with</span> <span class="n">aiofiles</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mfh</span><span class="p">:</span>
                 <span class="n">raw_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">mfh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                 <span class="n">manifest_data</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">SafeLoader</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">agent_acp_spec</span> <span class="o">=</span> <span class="n">AgentManifest</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">manifest_data</span><span class="p">)</span><span class="o">.</span><span class="n">specs</span>
@@ -412,26 +440,26 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">fromEnvPrefix</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">env_var_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">retries</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ca_cert_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AsyncACPClient&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct an AsyncACPClient object using environment variables as</span>
-<span class="sd">        default source of the API client configuration values. For example, </span>
-<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be </span>
+<span class="sd">        default source of the API client configuration values. For example,</span>
+<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be</span>
 <span class="sd">        looked up in the &quot;MY_HOST&quot; environment variable if not provided.</span>
 
-<span class="sd">        :param env_var_prefix: String used as prefix for environment variable </span>
+<span class="sd">        :param env_var_prefix: String used as prefix for environment variable</span>
 <span class="sd">          names.</span>
 
 <span class="sd">        :return: Async ACP client object</span>
@@ -460,25 +488,25 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fromConfiguration</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">host</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key_prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">access_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ServerVariablesT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">server_operation_variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ServerVariablesT</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssl_ca_cert</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">retries</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ca_cert_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">debug</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AsyncACPClient&quot;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct an AsyncACPClient object using configuration values. For example, </span>
-<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct an AsyncACPClient object using configuration values. For example,</span>
+<span class="sd">        with env_var_prefix=&quot;MY\\_&quot;, the default host parameter value would be</span>
 <span class="sd">        looked up in the &quot;MY_HOST&quot; environment variable if not provided.</span>
 
-<span class="sd">        :param env_var_prefix: String used as prefix for environment variable </span>
+<span class="sd">        :param env_var_prefix: String used as prefix for environment variable</span>
 <span class="sd">          names.</span>
 
 <span class="sd">        :return: Async ACP client object</span>

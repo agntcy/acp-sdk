@@ -35,27 +35,34 @@
 <span class="c1"># SPDX-License-Identifier: Apache-2.0</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutableMapping</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">AsyncIterator</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.runnables</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunnableConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">StreamMode</span> <span class="k">as</span> <span class="n">LangGraphStreamMode</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">interrupt</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">langgraph.utils.runnable</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunnableCallable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ACPClient</span><span class="p">,</span>
-    <span class="n">ApiClient</span><span class="p">,</span>
-    <span class="n">AsyncACPClient</span><span class="p">,</span>
-    <span class="n">AsyncApiClient</span><span class="p">,</span>
     <span class="n">ApiClientConfiguration</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Config</span><span class="p">,</span>
-    <span class="n">RunCreateStateless</span><span class="p">,</span> 
-    <span class="n">RunResult</span><span class="p">,</span> 
-    <span class="n">RunOutput</span><span class="p">,</span> 
-    <span class="n">RunError</span><span class="p">,</span> 
-    <span class="n">RunInterrupt</span><span class="p">,</span>
+    <span class="n">AsyncACPClient</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACPRunException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Config</span><span class="p">,</span>
+    <span class="n">RunCreateStateful</span><span class="p">,</span>
+    <span class="n">RunCreateStateless</span><span class="p">,</span>
+    <span class="n">RunError</span><span class="p">,</span>
+    <span class="n">RunInterrupt</span><span class="p">,</span>
+    <span class="n">RunOutput</span><span class="p">,</span>
+    <span class="n">RunResult</span><span class="p">,</span>
+    <span class="n">RunWaitResponseStateful</span><span class="p">,</span>
+    <span class="n">RunWaitResponseStateless</span><span class="p">,</span>
+    <span class="n">StreamingMode</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -98,6 +105,7 @@
         <span class="n">config_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">config_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">auth_header</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_threads</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate a Langgraph node encapsulating a remote ACP agent</span>
 
@@ -123,6 +131,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">configPath</span> <span class="o">=</span> <span class="n">config_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">configType</span> <span class="o">=</span> <span class="n">config_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auth_header</span> <span class="o">=</span> <span class="n">auth_header</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_threads</span> <span class="o">=</span> <span class="n">use_threads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="ACPNode.get_name">
 <a class="viewcode-back" href="../../../agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.get_name">[docs]</a>
@@ -133,7 +143,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_extract_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">state</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">state</span>
-        
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputPath</span><span class="p">:</span>
                 <span class="n">state</span> <span class="o">=</span> <span class="n">_extract_element</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputPath</span><span class="p">)</span>
@@ -149,16 +159,18 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{}</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RunnableConfig</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">config</span>
-        
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">configPath</span><span class="p">:</span>
                 <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;configurable&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ACP Node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="si">}</span><span class="s2">. Unable to extract config: missing key </span><span class="se">\&quot;</span><span class="s2">configurable</span><span class="se">\&quot;</span><span class="s2"> in RunnableConfig&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;ACP Node </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="si">}</span><span class="s1">. Unable to extract config: missing key &quot;configurable&quot; in RunnableConfig&#39;</span>
+                    <span class="p">)</span>
                     <span class="k">return</span> <span class="kc">None</span>
 
                 <span class="n">config</span> <span class="o">=</span> <span class="n">_extract_element</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;configurable&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">configPath</span><span class="p">)</span>
@@ -190,7 +202,7 @@
                 <span class="n">output_parent</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">output_parent</span><span class="p">,</span> <span class="n">el</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;object missing attribute: </span><span class="si">{el}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
+
         <span class="n">el</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputPath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_parent</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">):</span>
             <span class="n">output_parent</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_state</span>
@@ -198,30 +210,7 @@
             <span class="nb">setattr</span><span class="p">(</span><span class="n">output_parent</span><span class="p">,</span> <span class="n">el</span><span class="p">,</span> <span class="n">output_state</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;object missing attribute: </span><span class="si">{el}</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_run_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RunnableConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunCreateStateless</span><span class="p">:</span>
-        <span class="n">agent_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent_input</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">):</span>
-            <span class="n">input_to_agent</span> <span class="o">=</span> <span class="n">agent_input</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent_input</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">):</span>
-            <span class="n">input_to_agent</span> <span class="o">=</span> <span class="n">agent_input</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">input_to_agent</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">agent_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent_config</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">):</span>
-            <span class="n">config_to_agent</span> <span class="o">=</span> <span class="n">agent_config</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">agent_config</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">):</span>
-            <span class="n">config_to_agent</span> <span class="o">=</span> <span class="n">agent_config</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">config_to_agent</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">return</span> <span class="n">RunCreateStateless</span><span class="p">(</span>
-            <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
-            <span class="nb">input</span><span class="o">=</span><span class="n">input_to_agent</span><span class="p">,</span>
-            <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="n">config_to_agent</span><span class="p">),</span>
-        <span class="p">)</span>
-    
     <span class="k">def</span><span class="w"> </span><span class="nf">_handle_run_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">run_output</span><span class="p">:</span> <span class="n">RunOutput</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">run_output</span><span class="o">.</span><span class="n">actual_instance</span><span class="p">,</span> <span class="n">RunResult</span><span class="p">):</span>
             <span class="n">run_result</span><span class="p">:</span> <span class="n">RunResult</span> <span class="o">=</span> <span class="n">run_output</span><span class="o">.</span><span class="n">actual_instance</span>
@@ -230,33 +219,290 @@
             <span class="n">run_error</span><span class="p">:</span> <span class="n">RunError</span> <span class="o">=</span> <span class="n">run_output</span><span class="o">.</span><span class="n">actual_instance</span>
             <span class="k">raise</span> <span class="n">ACPRunException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Run Failed: </span><span class="si">{</span><span class="n">run_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">run_output</span><span class="o">.</span><span class="n">actual_instance</span><span class="p">,</span> <span class="n">RunInterrupt</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ACPRunException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ACP Server returned a unsupporteed interrupt response: </span><span class="si">{</span><span class="n">run_output</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># This case is handled in the invokes</span>
+            <span class="k">pass</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ACPRunException</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ACP Server returned a unsupporteed response: </span><span class="si">{</span><span class="n">run_output</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ACPRunException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;ACP Server returned a unsupporteed response: </span><span class="si">{</span><span class="n">run_output</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">state</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_thread_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;abc&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_thread_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RunnableConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">configurable</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;configurable&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">thread_id</span> <span class="o">=</span> <span class="n">configurable</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;thread_id&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">thread_id</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_interrupt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">run_response</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RunWaitResponseStateless</span><span class="p">,</span> <span class="n">RunWaitResponseStateful</span><span class="p">],</span>
+        <span class="n">thread_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="k">assert</span> <span class="n">run_response</span><span class="o">.</span><span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;No output found for interrupt&quot;</span>
+
+        <span class="k">if</span> <span class="n">thread_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Thread_id is required for a interrupted run&quot;</span><span class="p">)</span>
+
+        <span class="n">first_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">run_response</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">actual_instance</span><span class="o">.</span><span class="n">interrupt</span><span class="p">))</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="n">run_response</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">actual_instance</span><span class="o">.</span><span class="n">interrupt</span><span class="p">[</span><span class="n">first_key</span><span class="p">]</span>
+
+        <span class="n">previous_thread_run</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">thread_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">previous_thread_run</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_response</span>
+
+        <span class="n">interrupt_result</span> <span class="o">=</span> <span class="n">interrupt</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">interrupt_result</span>
+
 <div class="viewcode-block" id="ACPNode.invoke">
 <a class="viewcode-back" href="../../../agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.invoke">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RunnableConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="n">run_create</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_run_create</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RunnableConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">ACPClient</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clientConfig</span><span class="p">)</span> <span class="k">as</span> <span class="n">acp_client</span><span class="p">:</span>
-            <span class="n">run_output</span> <span class="o">=</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_wait_for_stateless_run_output</span><span class="p">(</span><span class="n">run_create</span><span class="p">)</span>
-        
+            <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thread_id</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">thread_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">thread_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span><span class="p">:</span>
+                <span class="n">run_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_threads</span><span class="p">:</span>
+                <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateless</span><span class="p">(</span>
+                    <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                    <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
+                    <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="p">)</span>
+                <span class="n">run_response</span> <span class="o">=</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_wait_for_stateless_run_output</span><span class="p">(</span>
+                    <span class="n">run_create</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">thread_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_thread_id</span><span class="p">()</span>
+                <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateful</span><span class="p">(</span>
+                    <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                    <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
+                    <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="p">)</span>
+                <span class="n">run_response</span> <span class="o">=</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_wait_for_thread_run_output</span><span class="p">(</span>
+                    <span class="n">thread_id</span><span class="p">,</span> <span class="n">run_create</span>
+                <span class="p">)</span>
+
+            <span class="n">run_output</span> <span class="o">=</span> <span class="n">run_response</span><span class="o">.</span><span class="n">output</span>
+            <span class="k">if</span> <span class="n">run_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># The spec does not require an output so count it as success.</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">run_output</span><span class="o">.</span><span class="n">actual_instance</span><span class="p">,</span> <span class="n">RunInterrupt</span><span class="p">):</span>
+                <span class="n">interrupt_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_interrupt</span><span class="p">(</span>
+                    <span class="n">run_response</span><span class="o">=</span><span class="n">run_response</span><span class="p">,</span> <span class="n">thread_id</span><span class="o">=</span><span class="n">thread_id</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_threads</span><span class="p">:</span>
+                    <span class="n">resume_run</span> <span class="o">=</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">resume_stateless_run</span><span class="p">(</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">run_response</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">interrupt_result</span>
+                    <span class="p">)</span>
+                    <span class="n">run_response</span> <span class="o">=</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">wait_for_stateless_run_output</span><span class="p">(</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">resume_run</span><span class="o">.</span><span class="n">run_id</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">resume_run</span> <span class="o">=</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">resume_thread_run</span><span class="p">(</span>
+                        <span class="n">thread_id</span><span class="o">=</span><span class="n">thread_id</span><span class="p">,</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">run_response</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                        <span class="n">body</span><span class="o">=</span><span class="n">interrupt_result</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">run_response</span> <span class="o">=</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">wait_for_thread_run_output</span><span class="p">(</span>
+                        <span class="n">thread_id</span><span class="o">=</span><span class="n">thread_id</span><span class="p">,</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">resume_run</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="n">run_output</span> <span class="o">=</span> <span class="n">run_response</span><span class="o">.</span><span class="n">output</span>
+                <span class="k">if</span> <span class="n">run_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># The spec does not require an output so count it as success.</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
         <span class="c1"># output is the same between stateful and stateless</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">run_output</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">run_output</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">state</span></div>
 
 
 <div class="viewcode-block" id="ACPNode.ainvoke">
 <a class="viewcode-back" href="../../../agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.ainvoke">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">ainvoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RunnableConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="n">run_create</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_run_create</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">ainvoke</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">state</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RunnableConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">async</span> <span class="k">with</span> <span class="n">AsyncACPClient</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clientConfig</span><span class="p">)</span> <span class="k">as</span> <span class="n">acp_client</span><span class="p">:</span>
-            <span class="n">run_output</span> <span class="o">=</span> <span class="k">await</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_wait_for_stateless_run_output</span><span class="p">(</span><span class="n">run_create</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">run_output</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">state</span></div>
+            <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thread_id</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">thread_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">thread_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span><span class="p">:</span>
+                <span class="n">run_response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_thread_run</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_threads</span><span class="p">:</span>
+                <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateless</span><span class="p">(</span>
+                    <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                    <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
+                    <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="p">)</span>
+                <span class="n">run_response</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="k">await</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_wait_for_stateless_run_output</span><span class="p">(</span>
+                        <span class="n">run_create</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">thread_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_thread_id</span><span class="p">()</span>
+                <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateful</span><span class="p">(</span>
+                    <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                    <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="n">state</span><span class="p">),</span>
+                    <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="p">)</span>
+                <span class="n">run_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_wait_for_thread_run_output</span><span class="p">(</span>
+                    <span class="n">thread_id</span><span class="p">,</span> <span class="n">run_create</span>
+                <span class="p">)</span>
+
+            <span class="n">run_output</span> <span class="o">=</span> <span class="n">run_response</span><span class="o">.</span><span class="n">output</span>
+            <span class="k">if</span> <span class="n">run_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># The spec does not require an output so count it as success.</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="k">while</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">run_output</span><span class="o">.</span><span class="n">actual_instance</span><span class="p">,</span> <span class="n">RunInterrupt</span><span class="p">):</span>
+                <span class="n">interrupt_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_interrupt</span><span class="p">(</span>
+                    <span class="n">run_response</span><span class="o">=</span><span class="n">run_response</span><span class="p">,</span> <span class="n">thread_id</span><span class="o">=</span><span class="n">thread_id</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_threads</span><span class="p">:</span>
+                    <span class="n">resume_run</span> <span class="o">=</span> <span class="k">await</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">resume_stateless_run</span><span class="p">(</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">run_response</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                        <span class="n">body</span><span class="o">=</span><span class="n">interrupt_result</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">run_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">wait_for_stateless_run_output</span><span class="p">(</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">resume_run</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">resume_run</span> <span class="o">=</span> <span class="k">await</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">resume_thread_run</span><span class="p">(</span>
+                        <span class="n">thread_id</span><span class="o">=</span><span class="n">thread_id</span><span class="p">,</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">run_response</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                        <span class="n">body</span><span class="o">=</span><span class="n">interrupt_result</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">run_response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">wait_for_thread_run_output</span><span class="p">(</span>
+                        <span class="n">thread_id</span><span class="o">=</span><span class="n">thread_id</span><span class="p">,</span>
+                        <span class="n">run_id</span><span class="o">=</span><span class="n">resume_run</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="n">run_output</span> <span class="o">=</span> <span class="n">run_response</span><span class="o">.</span><span class="n">output</span>
+                <span class="k">if</span> <span class="n">run_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># The spec does not require an output so count it as success.</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">run_output</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_convert_stream_mode</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stream_mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LangGraphStreamMode</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">LangGraphStreamMode</span><span class="p">],</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">StreamingMode</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">StreamingMode</span><span class="p">],</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="n">valid_acp_modes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">member</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">StreamingMode</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">stream_mode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stream_mode</span><span class="p">,</span> <span class="n">List</span><span class="p">):</span>
+            <span class="n">new_modes</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">stream_mode</span> <span class="k">if</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">valid_acp_modes</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">new_modes</span> <span class="ow">and</span> <span class="n">stream_mode</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unsupported stream modes: </span><span class="si">{stream_mode}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_modes</span>
+        <span class="k">elif</span> <span class="n">stream_mode</span> <span class="ow">in</span> <span class="n">valid_acp_modes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">StreamingMode</span><span class="p">(</span><span class="n">stream_mode</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unsupported stream mode: </span><span class="si">{</span><span class="n">stream_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ACPNode.stream">
+<a class="viewcode-back" href="../../../agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.stream">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stream</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RunnableConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">stream_mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LangGraphStreamMode</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">LangGraphStreamMode</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stream graph steps for a single input.&quot;&quot;&quot;</span>
+        <span class="c1"># TODO: add support for interrupts</span>
+        <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thread_id</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_threads</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">thread_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_thread_id</span><span class="p">()</span>
+            <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateful</span><span class="p">(</span>
+                <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="nb">input</span><span class="p">),</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="n">stream_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_convert_stream_mode</span><span class="p">(</span><span class="n">stream_mode</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">with</span> <span class="n">ACPClient</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clientConfig</span><span class="p">)</span> <span class="k">as</span> <span class="n">acp_client</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">run_output</span> <span class="ow">in</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_stream_thread_run_output</span><span class="p">(</span>
+                    <span class="n">thread_id</span><span class="p">,</span> <span class="n">run_create</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">run_output</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="nb">input</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateless</span><span class="p">(</span>
+                <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="nb">input</span><span class="p">),</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="n">stream_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_convert_stream_mode</span><span class="p">(</span><span class="n">stream_mode</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">with</span> <span class="n">ACPClient</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clientConfig</span><span class="p">)</span> <span class="k">as</span> <span class="n">acp_client</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">run_output</span> <span class="ow">in</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_stream_stateless_run_output</span><span class="p">(</span>
+                    <span class="n">run_create</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">run_output</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="nb">input</span></div>
+
+
+<div class="viewcode-block" id="ACPNode.astream">
+<a class="viewcode-back" href="../../../agntcy_acp.langgraph.html#agntcy_acp.langgraph.acp_node.ACPNode.astream">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">astream</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="nb">input</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RunnableConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">stream_mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LangGraphStreamMode</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">LangGraphStreamMode</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stream graph steps for a single input.&quot;&quot;&quot;</span>
+        <span class="c1"># TODO: add support for interrupts</span>
+        <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_thread_id</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_threads</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">thread_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">thread_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_thread_id</span><span class="p">()</span>
+            <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateful</span><span class="p">(</span>
+                <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="nb">input</span><span class="p">),</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="n">stream_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_convert_stream_mode</span><span class="p">(</span><span class="n">stream_mode</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">AsyncACPClient</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clientConfig</span><span class="p">)</span> <span class="k">as</span> <span class="n">acp_client</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">for</span> <span class="n">run_output</span> <span class="ow">in</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_stream_thread_run_output</span><span class="p">(</span>
+                    <span class="n">thread_id</span><span class="p">,</span> <span class="n">run_create</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">run_output</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="nb">input</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">run_create</span> <span class="o">=</span> <span class="n">RunCreateStateless</span><span class="p">(</span>
+                <span class="n">agent_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent_id</span><span class="p">,</span>
+                <span class="nb">input</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_input</span><span class="p">(</span><span class="nb">input</span><span class="p">),</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">Config</span><span class="p">(</span><span class="n">configurable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_extract_config</span><span class="p">(</span><span class="n">config</span><span class="p">)),</span>
+                <span class="n">stream_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_convert_stream_mode</span><span class="p">(</span><span class="n">stream_mode</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">AsyncACPClient</span><span class="p">(</span><span class="n">configuration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clientConfig</span><span class="p">)</span> <span class="k">as</span> <span class="n">acp_client</span><span class="p">:</span>
+                <span class="k">async</span> <span class="k">for</span> <span class="p">(</span>
+                    <span class="n">run_output</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="n">acp_client</span><span class="o">.</span><span class="n">create_and_stream_stateless_run_output</span><span class="p">(</span><span class="n">run_create</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_handle_run_output</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">run_output</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+                    <span class="k">yield</span> <span class="nb">input</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>

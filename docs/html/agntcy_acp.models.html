@@ -522,7 +522,7 @@ are ignored.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="agntcy_acp.models.AgentConnectProtocol.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type12</span></em><a class="headerlink" href="#agntcy_acp.models.AgentConnectProtocol.type" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type8</span></em><a class="headerlink" href="#agntcy_acp.models.AgentConnectProtocol.type" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -559,7 +559,7 @@ are ignored.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="agntcy_acp.models.AgentDependency.ref">
-<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AgentRefModel</span></em><a class="headerlink" href="#agntcy_acp.models.AgentDependency.ref" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AgentRef</span></em><a class="headerlink" href="#agntcy_acp.models.AgentDependency.ref" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1517,6 +1517,11 @@ are ignored.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="agntcy_acp.models.LlamaIndexConfig.framework_type">
 <span class="sig-name descname"><span class="pre">framework_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal['llamaindex']</span></em><a class="headerlink" href="#agntcy_acp.models.LlamaIndexConfig.framework_type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.LlamaIndexConfig.interrupts">
+<span class="sig-name descname"><span class="pre">interrupts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Dict[str,</span> <span class="pre">InterruptConfig]]</span></em><a class="headerlink" href="#agntcy_acp.models.LlamaIndexConfig.interrupts" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -3445,7 +3450,7 @@ are ignored.</p></li>
 <p>A serialized JSON data structure carried in the SSE event data field. The event can carry either a full <cite>ValueRunResultUpdate</cite>, if streaming mode is <cite>values</cite> or an <cite>CustomRunResultUpdate</cite> if streaming mode is <cite>custom</cite></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="agntcy_acp.models.StreamEventPayload.actual_instance">
-<span class="sig-name descname"><span class="pre">actual_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Union[CustomRunResultUpdate,</span> <span class="pre">ValueRunResultUpdate]]</span></em><a class="headerlink" href="#agntcy_acp.models.StreamEventPayload.actual_instance" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">actual_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Union[CustomRunResultUpdate,</span> <span class="pre">ValueRunErrorUpdate,</span> <span class="pre">ValueRunInterruptUpdate,</span> <span class="pre">ValueRunResultUpdate]]</span></em><a class="headerlink" href="#agntcy_acp.models.StreamEventPayload.actual_instance" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -3500,13 +3505,23 @@ are ignored.</p></li>
 <span class="sig-name descname"><span class="pre">oneof_schema_2_validator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[CustomRunResultUpdate]</span></em><a class="headerlink" href="#agntcy_acp.models.StreamEventPayload.oneof_schema_2_validator" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.StreamEventPayload.oneof_schema_3_validator">
+<span class="sig-name descname"><span class="pre">oneof_schema_3_validator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[ValueRunInterruptUpdate]</span></em><a class="headerlink" href="#agntcy_acp.models.StreamEventPayload.oneof_schema_3_validator" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.StreamEventPayload.oneof_schema_4_validator">
+<span class="sig-name descname"><span class="pre">oneof_schema_4_validator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[ValueRunErrorUpdate]</span></em><a class="headerlink" href="#agntcy_acp.models.StreamEventPayload.oneof_schema_4_validator" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="agntcy_acp.models.StreamEventPayload.to_dict">
 <span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/stream_event_payload.html#StreamEventPayload.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.StreamEventPayload.to_dict" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the dict representation of the actual instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>], <a class="reference internal" href="#agntcy_acp.models.CustomRunResultUpdate" title="agntcy_acp.acp_v0.models.custom_run_result_update.CustomRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomRunResultUpdate</span></code></a>, <a class="reference internal" href="#agntcy_acp.models.ValueRunResultUpdate" title="agntcy_acp.acp_v0.models.value_run_result_update.ValueRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunResultUpdate</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>], <a class="reference internal" href="#agntcy_acp.models.CustomRunResultUpdate" title="agntcy_acp.acp_v0.models.custom_run_result_update.CustomRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomRunResultUpdate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunErrorUpdate</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunInterruptUpdate</span></code>, <a class="reference internal" href="#agntcy_acp.models.ValueRunResultUpdate" title="agntcy_acp.acp_v0.models.value_run_result_update.ValueRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunResultUpdate</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
