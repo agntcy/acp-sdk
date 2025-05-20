@@ -1,6 +1,8 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
+import asyncio
 import itertools
+from functools import wraps
 import logging
 import uuid
 
@@ -13,6 +15,11 @@ from .state import AgentState, ConfigSchema, Message, MsgType
 
 logger = logging.getLogger(__name__)
 
+def coro(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return asyncio.run(f(*args, **kwargs))
+    return wrapper
 
 class ParamMessage(click.ParamType):
     name = "message"
@@ -66,13 +73,19 @@ class ParamMessage(click.ParamType):
     help="Add a human message.",
 )
 @click.option(
-    "--interrupt", is_flag=True, multiple=False, help="Add an interrupt in the flow"
+    "--interrupt", envvar="INTERRUPT", is_flag=True, multiple=False, help="Add an interrupt in the flow"
 )
-def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt):
+@coro
+async def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt):
     """ """
     logging.basicConfig(level=log_level.upper())
 
-    config = ConfigSchema(to_lower=to_lower, to_upper=to_upper)
+    if to_lower:
+        logger.debug("should lower")
+    elif to_upper:
+        logger.debug("should upper")
+
+    config = ConfigSchema(to_lower=to_lower, to_upper=to_upper, interrupt=interrupt)
     if human is not None and assistant is not None:
         # Interleave list starting with human. Stops at shortest list.
         messages = list(itertools.chain(*zip(human, assistant)))
@@ -96,7 +109,7 @@ def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt
     config["thread_id"] = str(uuid.uuid4())
     runnable_config = RunnableConfig(configurable=config)
 
-    output_state = AGENT_GRAPH.invoke(
+    output_state = await AGENT_GRAPH.ainvoke(
         AGENT_GRAPH.builder.schema.model_validate(input_api_object),
         config=runnable_config,
     )
@@ -108,14 +121,14 @@ def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt
     current_graph_state = AGENT_GRAPH.get_state(runnable_config)
     logger.debug(current_graph_state)
 
-    # Check if graph is interrupted by mailcomposer
+    # Check if graph is interrupted
     if (
         len(current_graph_state.tasks) > 0
         and len(current_graph_state.tasks[0].interrupts) > 0
     ):
-        command = Command(resume=Message(type="human", content="Alright"))
+        command = Command(resume=agent_state.messages)
         # Send a signal to the graph to resume execution
-        output_state = AGENT_GRAPH.invoke(command, config=runnable_config)
+        output_state = await AGENT_GRAPH.ainvoke(command, config=runnable_config)
 
         logger.info(f"output message after interrupt: {output_state}")
 
@@ -124,4 +137,4 @@ def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt
 
 
 if __name__ == "__main__":
-    echo_server_agent()  # type: ignore
+    asyncio.run(echo_server_agent())  # type: ignore

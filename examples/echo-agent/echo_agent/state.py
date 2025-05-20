@@ -22,6 +22,7 @@ class Message(BaseModel):
 class ConfigSchema(TypedDict):
     to_upper: bool
     to_lower: bool
+    interrupt: bool
 
 
 MessageList = RootModel[List[Message]]

@@ -147,12 +147,119 @@
                   "description": "If true, convert text to lower before echoing.",
                   "type": "boolean",
                   "default": false
+                },
+                "interrupt": {
+                  "title": "interrupt",
+                  "description": "If true, send an interrupt echo message instead of output.",
+                  "type": "boolean",
+                  "default": false
                 }
               },
               "title": "ConfigSchema",
               "type": "object"
             }
           },
+          "interrupts": [
+            {
+              "interrupt_type": "echo_interrupt",
+              "interrupt_payload": {
+                "title": "Interrupt Payload",
+                "description": "Input message echoed as interrupt payload.",
+                "properties": {
+                  "messages": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "properties": {
+                            "type": {
+                              "enum": [
+                                "human",
+                                "assistant",
+                                "ai"
+                              ],
+                              "title": "Type",
+                              "type": "string",
+                              "description": "indicates the originator of the message, a human or an assistant"
+                            },
+                            "content": {
+                              "description": "the content of the message",
+                              "title": "Content",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "content"
+                          ],
+                          "title": "Message",
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Messages"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "messages"
+                ],
+                "type": "object"
+              },
+              "resume_payload": {
+                "title": "Resume Payload",
+                "description": "Next input message for echo output.",
+                "properties": {
+                  "messages": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "properties": {
+                            "type": {
+                              "enum": [
+                                "human",
+                                "assistant",
+                                "ai"
+                              ],
+                              "title": "Type",
+                              "type": "string",
+                              "description": "indicates the originator of the message, a human or an assistant"
+                            },
+                            "content": {
+                              "description": "the content of the message",
+                              "title": "Content",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "content"
+                          ],
+                          "title": "Message",
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Messages"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "messages"
+                ],
+                "type": "object"
+              }
+            }
+          ],
           "deployment": {
             "deployment_options": [
               {
@@ -173,10 +280,14 @@
               {
                 "desc": "If true-ish, convert text to upper before echoing. Superseded by config.",
                 "name": "TO_UPPER"
+              },
+              {
+                "desc": "If true-ish, echo text first as interrupt. Superseded by config.",
+                "name": "INTERRUPT"
               }
             ]
           }
         }
       }
     ]
-  }
+}

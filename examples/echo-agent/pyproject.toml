@@ -1,6 +1,6 @@
 [project]
 name = "echo_agent"
-version = "0.2.1"
+version = "0.3.0"
 license = "Apache-2.0"
 description = "Echoes input to output."
 readme = "README.md"
@@ -10,16 +10,12 @@ authors = [
 maintainers = [
     { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
-
-[tool.poetry.dependencies]
-python = ">=3.9.0,<4.0"
-langgraph = "^0.3.5"
-pydantic = ">= 2"
-click = "^8.1.8"
-
-[tool.poetry.group.sanity.dependencies]
-mypy = "^1.10.0"
-ruff = "^0.4.6"
+requires-python = ">=3.9.0, <4.0"
+dependencies = [
+    "langgraph >= 0.3.5",
+    "pydantic >= 2",
+    "click >= 8.1.8",
+]
 
 [tool.poetry.scripts]
 echo_agent = "echo_agent.main:echo_server_agent"
