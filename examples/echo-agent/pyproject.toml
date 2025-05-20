@@ -1,7 +1,7 @@
 [project]
 name = "echo_agent"
 version = "0.3.0"
-license = "Apache-2.0"
+license-files = [ "LICENSE" ]
 description = "Echoes input to output."
 readme = "README.md"
 authors = [
@@ -16,6 +16,9 @@ dependencies = [
     "pydantic >= 2",
     "click >= 8.1.8",
 ]
+
+[project.scripts]
+echo-agent = "echo_agent.main:echo_server_agent"
 
 [tool.ruff]
 lint.select = ["E", "F", "I", "TID251"]
@@ -41,3 +44,12 @@ warn_redundant_casts = true
 allow_redefinition = true
 # https://mypy.readthedocs.io/en/stable/config_file.html
 disable_error_code = "typeddict-item, return-value, override, has-type"
+
+[tool.uv.build-backend]
+source-exclude = [
+    "/deploy"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

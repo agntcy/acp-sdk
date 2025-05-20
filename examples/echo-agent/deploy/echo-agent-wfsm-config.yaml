@@ -1,8 +1,7 @@
 config:
   org.agntcy.echo_agent:
-    port: 8080
     apiKey: 910ffe03-3aca-48c0-aa40-66ab54bbf79a
     id: 91b76349-cba0-4e3c-8252-e94fff20de4f
-
-values:
-  TO_UPPER: true
+    port: 58609
+    envVars:
+      TO_UPPER: true

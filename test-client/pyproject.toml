@@ -1,7 +1,7 @@
 [project]
 name = "acp-test"
-version = "0.2.0"
-license = "Apache-2.0"
+version = "0.2.1"
+license-files = [ "LICENSE" ]
 description = "ACP test client"
 readme = "README.md"
 authors = [
@@ -10,30 +10,18 @@ authors = [
 maintainers = [
     { name = "AGNTCY Internet of Agents Collective", email = "pypi@agntcy.io" },
 ]
+requires-python = ">=3.9.0, <4.0"
+dependencies = [
+    "click >= 8.1",
+    "pydantic >= 2",
+    "agntcy_acp >= 1.4",
+    "pyyaml >= 6.0",
+    "python-dotenv >= 1.1",
+    "jinja2 >= 3.1",
+    "deepdiff >= 8.4",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.9.0,<4.0"
-click = "^8.1.8"
-pydantic = ">= 2"
-agntcy_acp = { path = "../", develop = true }
-pyyaml = "^6.0.2"
-python-dotenv = "^1.1.0"
-jinja2 = "^3.1.6"
-
-[tool.poetry.group.test.dependencies]
-pytest = "*"
-pytest-asyncio = "^0.23.5"
-deepdiff = "^8.4.2"
-
-[tool.poetry.group.sanity.dependencies]
-mypy = "^1.10.0"
-ruff = "^0.4.6"
-
-[tool.pytest.ini_options]
-pythonpath = ["."]
-asyncio_mode = "auto"
-
-[tool.poetry.scripts]
+[tool.scripts]
 cli = "acp_test.main:execute_test_file"
 
 [tool.ruff]
@@ -61,6 +49,10 @@ allow_redefinition = true
 # https://mypy.readthedocs.io/en/stable/config_file.html
 disable_error_code = "typeddict-item, return-value, override, has-type"
 
+[tool.hatch.metadata]
+# allow build to include local agntcy_acp package
+allow-direct-references = true
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

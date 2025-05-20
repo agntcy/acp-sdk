@@ -22,36 +22,31 @@ Agent from the `examples/echo-agent/` directory in this repo. Note
 that all commands in this example are run with paths relative to the 
 root level of this repository.
 
-  1. Start the echo agent using the workflow server 
+  1. Make sure that the [workflow server manager](https://docs.agntcy.org/pages/agws/workflow_server_manager.html#getting-started) cli (wfsm) is added to your path.
+
+  2. Start the echo agent using the workflow server 
   manager.
 
-  ```
-  cd examples/echo-agent ; wfsm deploy --manifestPath deploy/echo-agent-manifest.json --configPath deploy/echo-agent-wfsm-config.yaml
+  ```shell
+  cd examples/echo-agent ; wfsm deploy --manifestPath deploy/echo-agent-manifest.json --configPath deploy/echo-agent-wfsm-config.yaml --dryRun=false
   ```
 
-  1. Configure the test variables to match the server
+  3. Configure the test variables to match the server
   deployment. These can be stored in a `.env` file or
-  supplied on the command line. The "WORKFLOW_SERVER_" values 
-  will need to be taken from the output of workflow-server in the 
-  previous step.
+  supplied on the command line. The `test-client/.env.example` file 
+  contains settings matching the supplied default config for the echo-agent
+  in `examples/echo-agent/deploy/echo-agent-wfsm-config`.
 
-  ```
-  cat test-client/.env 
-  ECHO_AGENT_API_KEY='{"x-api-key": "WORKFLOW_SERVER_API_KEY"}'
-  ECHO_AGENT_ENDPOINT='WORKFLOW_SERVER_ENDPOINT'
-  ECHO_AGENT_AGENT_ID="WORKFLOW_SERVER_AGENT_ID"
-  ```
+  4. Run the test async client from the CLI on the stateless API set.
 
-  1. Run the test async client from the CLI on the stateless API set.
-
-  ```
-  cd test-client ; poetry install && poetry run cli --async ./examples/echo_agent_stateless.yaml
+  ```shell
+  cd test-client ; uv sync && uv run cli --async ./examples/echo_agent_stateless.yaml
   ```
 
-  1. Run the test sync client from the CLI on the stateful API set.
+  5. Run the test sync client from the CLI on the stateful API set.
 
-  ```
-  cd test-client ; poetry install && poetry run cli ./examples/echo_agent_stateful.yaml
+  ```shell
+  cd test-client ; uv sync && uv run cli ./examples/echo_agent_stateful.yaml
   ```
 
 ## Test configuration file layout
