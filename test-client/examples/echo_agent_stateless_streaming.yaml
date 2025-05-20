@@ -20,15 +20,14 @@ operations:
       - output_at_least:
           event: agent_event
           data:
-            actual_instance:
-              type: values
-              status: pending
-              values:
-                messages:
-                  - content: "What is up, Dude?"
-                    type: human
-                  - content: "WHAT IS UP, DUDE?"
-                    type: assistant
+            type: values
+            status: pending
+            values:
+              messages:
+                - content: "What is up, Dude?"
+                  type: human
+                - content: "WHAT IS UP, DUDE?"
+                  type: assistant
   - operation_id: create_stateless_run
     test_input:
       run_create_stateless:
@@ -53,15 +52,14 @@ operations:
     output_at_least:
       event: agent_event
       data:
-        actual_instance:
-          type: values
-          status: success
-          values:
-            messages:
-              - content: "What is up, Dude?"
-                type: human
-              - content: "what is up, dude?"
-                type: assistant
+        type: values
+        status: success
+        values:
+          messages:
+            - content: "What is up, Dude?"
+              type: human
+            - content: "what is up, dude?"
+              type: assistant
   - operation_id: get_stateless_run
     test_input:
       run_id:
