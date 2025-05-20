@@ -31,11 +31,11 @@ async def echo_agent(state: AgentState, config: RunnableConfig) -> Dict[str, Any
             to_upper = args.get("to_upper", os.getenv("TO_UPPER"))
             if to_upper is not None and bool(to_upper):
                 ai_response = ai_response.upper()
-            
+
             to_lower = args.get("to_lower", os.getenv("TO_LOWER"))
             if to_lower is not None and bool(to_lower):
-                    ai_response = ai_response.lower()
-            
+                ai_response = ai_response.lower()
+
             output_messages = [Message(type=MsgType.assistant, content=ai_response)]
 
     if args.get("interrupt", False):

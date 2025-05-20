@@ -17,9 +17,6 @@ dependencies = [
     "click >= 8.1.8",
 ]
 
-[tool.poetry.scripts]
-echo_agent = "echo_agent.main:echo_server_agent"
-
 [tool.ruff]
 lint.select = ["E", "F", "I", "TID251"]
 lint.ignore = ["E501"]
@@ -44,7 +41,3 @@ warn_redundant_casts = true
 allow_redefinition = true
 # https://mypy.readthedocs.io/en/stable/config_file.html
 disable_error_code = "typeddict-item, return-value, override, has-type"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

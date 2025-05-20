@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 import itertools
-from functools import wraps
 import logging
 import uuid
+from functools import wraps
 
 import click
 from langchain_core.runnables import RunnableConfig
@@ -15,11 +15,14 @@ from .state import AgentState, ConfigSchema, Message, MsgType
 
 logger = logging.getLogger(__name__)
 
+
 def coro(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         return asyncio.run(f(*args, **kwargs))
+
     return wrapper
+
 
 class ParamMessage(click.ParamType):
     name = "message"
@@ -73,7 +76,11 @@ class ParamMessage(click.ParamType):
     help="Add a human message.",
 )
 @click.option(
-    "--interrupt", envvar="INTERRUPT", is_flag=True, multiple=False, help="Add an interrupt in the flow"
+    "--interrupt",
+    envvar="INTERRUPT",
+    is_flag=True,
+    multiple=False,
+    help="Add an interrupt in the flow",
 )
 @coro
 async def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt):
