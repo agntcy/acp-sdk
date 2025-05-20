@@ -285,11 +285,19 @@ def test_acp_client_stream_thread_run_api(
             thread_id=default_thread_id,
             run_create_stateful=RunCreateStateful(agent_id=default_agent_id),
         )
+        prev_id = -1
         for response in stream:
             assert response is not None
+            assert response.event == "agent_event"
+            assert int(response.id) > prev_id
+            prev_id = int(response.id)
             assert (
                 response.data.actual_instance.run_id
                 == default_run_output_stream.data.actual_instance.run_id
+            )
+            assert response.data.actual_instance.status == default_run_output_stream.data.actual_instance.status
+            assert(
+                response.data.actual_instance.values == default_run_output_stream.data.actual_instance.values
             )
 
         interrupt_stream = RunOutputStream(
@@ -316,11 +324,23 @@ def test_acp_client_stream_thread_run_api(
             thread_id=default_thread_id,
             run_create_stateful=RunCreateStateful(agent_id=default_agent_id),
         )
+        prev_id = -1
         for response in stream:
             assert response is not None
             assert (
                 response.data.actual_instance.run_id
                 == interrupt_stream.data.actual_instance.run_id
+            )
+            assert response.event == "agent_event"
+            assert int(response.id) > prev_id
+            prev_id = int(response.id)
+            assert (
+                response.data.actual_instance.run_id
+                == interrupt_stream.data.actual_instance.run_id
+            )
+            assert response.data.actual_instance.status == interrupt_stream.data.actual_instance.status
+            assert(
+                response.data.actual_instance.interrupt == interrupt_stream.data.actual_instance.interrupt
             )
 
         error_stream = RunOutputStream(
@@ -346,9 +366,21 @@ def test_acp_client_stream_thread_run_api(
             thread_id=default_thread_id,
             run_create_stateful=RunCreateStateful(agent_id=default_agent_id),
         )
+        prev_id = -1
         for response in stream:
             assert response is not None
             assert (
                 response.data.actual_instance.run_id
                 == error_stream.data.actual_instance.run_id
+            )
+            assert response.event == "agent_event"
+            assert int(response.id) > prev_id
+            prev_id = int(response.id)
+            assert (
+                response.data.actual_instance.run_id
+                == error_stream.data.actual_instance.run_id
+            )
+            assert response.data.actual_instance.status == error_stream.data.actual_instance.status
+            assert(
+                response.data.actual_instance.description == error_stream.data.actual_instance.description
             )
