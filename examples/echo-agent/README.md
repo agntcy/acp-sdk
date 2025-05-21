@@ -14,8 +14,10 @@ support testable outcomes.
 
 It also supports the following configuration:
 
-  * interrupt: when true, echo data as interrupt once, before 
-  echoing resume as output
+  * interrupt_count: when set, echo data as interrupt this many 
+  times before echoing resume as output
+  * sleep_secs: when set, sleep this long after receiving a resume
+  * log_level: amount of logging for the run
 
 ## Prerequisites
 

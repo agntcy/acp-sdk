@@ -3,6 +3,7 @@ metadata:
     retries: 3
   env_prefix: ECHO_AGENT_
 operations:
+  # 0 operation
   - operation_id: create_and_wait_for_stateless_run_output
     test_input:
       run_create_stateless:
@@ -27,6 +28,9 @@ operations:
               type: assistant
       run:
         status: success
+        agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+
+  # 1 operation
   - operation_id: create_stateless_run
     test_input:
       run_create_stateless:
@@ -42,6 +46,9 @@ operations:
               to_upper: true
     output_at_least:
       status: pending
+      agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+
+  # 2 operation
   - operation_id: wait_for_stateless_run_output
     test_input:
       run_id:
@@ -50,3 +57,79 @@ operations:
     output_at_least:
       run:
         status: success
+        agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+
+  # 3 operation
+  - operation_id: create_and_wait_for_stateless_run_output
+    test_input:
+      run_create_stateless:
+        type: agntcy_acp.models.RunCreateStateless
+        arguments:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+          input:
+            messages:
+              - type: human
+                content: "What is up, Dude?"
+          config:
+            configurable:
+              to_upper: true
+              interrupt_count: 1
+              log_level: debug
+    output_at_least:
+      output:
+        type: interrupt
+        interrupt:
+          echo_interrupt:
+            messages:
+              - content: "What is up, Dude?"
+                type: human
+              - content: "WHAT IS UP, DUDE?"
+                type: assistant
+      run:
+        status: interrupted
+        agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+
+  # 4 operation
+  - operation_id: resume_stateless_run
+    test_input:
+      run_id:
+        type: str
+        value: "{{ results[-1].run.run_id }}"
+      body:
+        type: dict
+        arguments:
+          messages:
+            - content: "What is up, Dude?"
+              type: human
+            - content: "WHAT IS UP, DUDE?"
+              type: assistant
+            - content: "Nothing, bro"
+              type: human
+    output_at_least:
+      status: pending
+      run_id: "{{ results[-1].run.run_id }}"
+      agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+
+  # 5 operation
+  - operation_id: wait_for_stateless_run_output
+    test_input:
+      run_id:
+        type: str
+        value: "{{ results[-1].run_id }}"
+    output_at_least:
+      output:
+        type: result
+        values:
+          messages:
+            - content: "What is up, Dude?"
+              type: human
+            - content: "WHAT IS UP, DUDE?"
+              type: assistant
+            - content: "Nothing, bro"
+              type: human
+            - content: "NOTHING, BRO"
+              type: assistant
+      run:
+        status: success
+        run_id: "{{ results[-1].run_id }}"
+        agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"

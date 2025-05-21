@@ -148,11 +148,34 @@
                   "type": "boolean",
                   "default": false
                 },
-                "interrupt": {
-                  "title": "interrupt",
-                  "description": "If true, send an interrupt echo message instead of output.",
-                  "type": "boolean",
-                  "default": false
+                "interrupt_count": {
+                  "title": "interrupt_count",
+                  "description": "Number of times to send an interrupt echo message instead of output.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000,
+                  "default": 0
+                },
+                "sleep_secs": {
+                  "title": "sleep_secs",
+                  "description": "Number of seconds to sleep after receiving a resume message.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000,
+                  "default": 1
+                },
+                "log_level": {
+                  "title": "log_level",
+                  "description": "Level of logging for this run.",
+                  "type": "string",
+                  "default": "warning",
+                  "enum": [
+                    "critical",
+                    "error",
+                    "warning",
+                    "info",
+                    "debug"
+                  ]
                 }
               },
               "title": "ConfigSchema",
@@ -282,8 +305,12 @@
                 "name": "TO_UPPER"
               },
               {
-                "desc": "If true-ish, echo text first as interrupt. Superseded by config.",
-                "name": "INTERRUPT"
+                "desc": "If positive number, echo text that many times as interrupt. Superseded by config.",
+                "name": "INTERRUPT_COUNT"
+              },
+              {
+                "desc": "If positive number and interrupts are sent, sleep number of secs after receiving a resume. Superseded by config.",
+                "name": "SLEEP_SECS"
               }
             ]
           }

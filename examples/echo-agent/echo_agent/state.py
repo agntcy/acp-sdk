@@ -1,7 +1,7 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 from enum import Enum
-from typing import List, TypedDict
+from typing import List, Optional, TypedDict
 
 from pydantic import BaseModel, Field, RootModel
 
@@ -22,11 +22,33 @@ class Message(BaseModel):
 class ConfigSchema(TypedDict):
     to_upper: bool
     to_lower: bool
-    interrupt: bool
+    interrupt_count: int
+    sleep_secs: int
+    log_level: str
 
 
-MessageList = RootModel[List[Message]]
+type MessageList = RootModel[List[Message]]
 
 
-class AgentState(BaseModel):
-    messages: List[Message]
+class EchoInterrupt(TypedDict):
+    messages: Optional[List[Message]]
+
+
+class EchoResume(TypedDict):
+    messages: Optional[List[Message]]
+
+
+# Graph input
+class InputState(BaseModel):
+    messages: Optional[List[Message]]
+
+
+# Input + local config variables and defaults
+class AgentState(InputState):
+    to_upper: bool = Field(False)
+    to_lower: bool = Field(False)
+    sleep_secs: int = Field(1)
+    interrupt_left: int = Field(
+        0,
+        description="Number of times to send an interrupt echo message instead of output.",
+    )

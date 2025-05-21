@@ -41,18 +41,14 @@ class ParamMessage(click.ParamType):
 @click.command(short_help="Validate agent ACP descriptor")
 @click.option(
     "--to-upper",
-    envvar="TO_UPPER",
     is_flag=True,
     show_envvar=True,
-    default=False,
     help="Convert input to upper case.",
 )
 @click.option(
     "--to-lower",
-    envvar="TO_LOWER",
     is_flag=True,
     show_envvar=True,
-    default=False,
     help="Convert input to lower case.",
 )
 @click.option(
@@ -60,7 +56,6 @@ class ParamMessage(click.ParamType):
     type=click.Choice(
         ["critical", "error", "warning", "info", "debug"], case_sensitive=False
     ),
-    default="info",
     help="Set logging level.",
 )
 @click.option(
@@ -76,23 +71,40 @@ class ParamMessage(click.ParamType):
     help="Add a human message.",
 )
 @click.option(
-    "--interrupt",
-    envvar="INTERRUPT",
-    is_flag=True,
-    multiple=False,
-    help="Add an interrupt in the flow",
+    "--interrupt-count",
+    type=click.IntRange(0, 1000),
+    help="Add count number interrupts in the flow",
+)
+@click.option(
+    "--sleep-secs",
+    type=click.IntRange(0, 1000),
+    help="Agent should sleep for provided secs after receiving a resume from interrupt",
 )
 @coro
-async def echo_server_agent(to_upper, to_lower, human, assistant, log_level, interrupt):
+async def echo_server_agent(
+    to_upper, to_lower, human, assistant, log_level, interrupt_count, sleep_secs
+):
     """ """
-    logging.basicConfig(level=log_level.upper())
+    config = ConfigSchema()
+    if log_level is not None:
+        logging.basicConfig(level=log_level.upper())
+        config["log_level"] = log_level
+    if to_lower is not None:
+        config["to_lower"] = to_lower
+    if to_upper is not None:
+        config["to_upper"] = to_upper
+    if interrupt_count is not None:
+        config["interrupt_count"] = interrupt_count
+    if sleep_secs is not None:
+        config["sleep_secs"] = sleep_secs
+
+    logger.debug(f"config: {config}")
 
     if to_lower:
         logger.debug("should lower")
     elif to_upper:
         logger.debug("should upper")
 
-    config = ConfigSchema(to_lower=to_lower, to_upper=to_upper, interrupt=interrupt)
     if human is not None and assistant is not None:
         # Interleave list starting with human. Stops at shortest list.
         messages = list(itertools.chain(*zip(human, assistant)))
@@ -108,7 +120,7 @@ async def echo_server_agent(to_upper, to_lower, human, assistant, log_level, int
     else:
         messages = []
 
-    logger.debug(f"input messages: {messages}")
+    logger.debug(f"main: input messages: {messages}")
 
     # Imitate input from ACP API
     input_api_object = AgentState(messages=messages).model_dump(mode="json")
@@ -121,7 +133,7 @@ async def echo_server_agent(to_upper, to_lower, human, assistant, log_level, int
         config=runnable_config,
     )
 
-    logger.debug(f"output messages: {output_state}")
+    logger.debug(f"main: output messages: {output_state}")
     agent_state = AgentState(messages=output_state.get("messages", []))
 
     # Get state to check if agent is interrupted
@@ -140,7 +152,7 @@ async def echo_server_agent(to_upper, to_lower, human, assistant, log_level, int
         logger.info(f"output message after interrupt: {output_state}")
 
     agent_state = AgentState(messages=output_state.get("messages", []))
-    print(agent_state.model_dump_json(indent=2))
+    print(agent_state.model_dump_json(indent=2, include=("messages")))
 
 
 if __name__ == "__main__":

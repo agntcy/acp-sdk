@@ -678,7 +678,6 @@ class StatelessRunsApi:
             *_param, _request_timeout=_request_timeout
         )
         await response_data.read()
-        print(f"response: {response_data.data}")
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,

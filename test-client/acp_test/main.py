@@ -150,6 +150,6 @@ def execute_test_file(
 
     num_successes = len(tests.operations) - len(fails)
     print(
-        f"Finished: Successes: {num_successes}, Failures: {json.dumps(fails) if len(fails) > 0 else 0}"
+        f"Finished: Successes: {num_successes}, Failures: {len(fails)}{': ' + json.dumps(fails) if len(fails) > 0 else ''}"
     )
     sys.exit(0 if len(fails) == 0 else 1)
