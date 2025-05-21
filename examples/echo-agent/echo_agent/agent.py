@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 import logging
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
 from langgraph.types import interrupt
 from pydantic import RootModel
@@ -25,7 +25,7 @@ def _add_echo_message(
         None,
     )
     if human_message is None:
-        logger.debug(f"no human message found")
+        logger.debug("no human message found")
         return messages
 
     ai_response = human_message.content
@@ -52,10 +52,7 @@ async def echo_agent(state: AgentState) -> Dict[str, Any]:
         resume_input = interrupt({"messages": all_messages.model_dump(mode="json")})
         await asyncio.sleep(state.sleep_secs)
 
-        resume_messages = [
-            Message(**msg)
-            for msg in resume_input.get("messages", [])
-        ]
+        resume_messages = [Message(**msg) for msg in resume_input.get("messages", [])]
 
         output_messages = _add_echo_message(
             resume_messages, state.to_upper, state.to_lower

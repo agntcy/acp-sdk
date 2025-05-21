@@ -32,7 +32,7 @@ def setup_config(state: AgentState, config: RunnableConfig) -> AgentState:
     state.interrupt_left = interrupt_count
 
     logger = logging.getLogger("echo_agent.agent")
-    logger.setLevel(args.get("log_level", "warning").upper())    
+    logger.setLevel(args.get("log_level", "warning").upper())
     logger.debug(f"agent config: {state}")
     return state
 

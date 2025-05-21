@@ -295,9 +295,13 @@ def test_acp_client_stream_thread_run_api(
                 response.data.actual_instance.run_id
                 == default_run_output_stream.data.actual_instance.run_id
             )
-            assert response.data.actual_instance.status == default_run_output_stream.data.actual_instance.status
-            assert(
-                response.data.actual_instance.values == default_run_output_stream.data.actual_instance.values
+            assert (
+                response.data.actual_instance.status
+                == default_run_output_stream.data.actual_instance.status
+            )
+            assert (
+                response.data.actual_instance.values
+                == default_run_output_stream.data.actual_instance.values
             )
 
         interrupt_stream = RunOutputStream(
@@ -338,9 +342,13 @@ def test_acp_client_stream_thread_run_api(
                 response.data.actual_instance.run_id
                 == interrupt_stream.data.actual_instance.run_id
             )
-            assert response.data.actual_instance.status == interrupt_stream.data.actual_instance.status
-            assert(
-                response.data.actual_instance.interrupt == interrupt_stream.data.actual_instance.interrupt
+            assert (
+                response.data.actual_instance.status
+                == interrupt_stream.data.actual_instance.status
+            )
+            assert (
+                response.data.actual_instance.interrupt
+                == interrupt_stream.data.actual_instance.interrupt
             )
 
         error_stream = RunOutputStream(
@@ -380,7 +388,11 @@ def test_acp_client_stream_thread_run_api(
                 response.data.actual_instance.run_id
                 == error_stream.data.actual_instance.run_id
             )
-            assert response.data.actual_instance.status == error_stream.data.actual_instance.status
-            assert(
-                response.data.actual_instance.description == error_stream.data.actual_instance.description
+            assert (
+                response.data.actual_instance.status
+                == error_stream.data.actual_instance.status
+            )
+            assert (
+                response.data.actual_instance.description
+                == error_stream.data.actual_instance.description
             )
