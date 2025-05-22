@@ -1,6 +1,6 @@
 [project]
 name = "agntcy-acp"
-version = "1.4.1"
+version = "1.4.2"
 license = "Apache-2.0"
 description = "Agent Connect Protocol SDK"
 readme = "README.md"
@@ -12,7 +12,6 @@ maintainers = [
 ]
 requires-python = ">=3.9.0, <4.0"
 dependencies = [
-    "click >= 8.1.8",
     "openapi-spec-validator >= 0.7.1",
     "datamodel-code-generator >= 0.25.6",
     "pyyaml >= 6.0.2",
@@ -24,9 +23,12 @@ dependencies = [
     "typing-extensions >= 4.7.1",
     "aiohttp >= 3.8.4",
     "aiohttp-retry >= 2.8.3",
-    "agntcy-iomapper[langgraph] >= 0.2.2",
-    "langgraph >= 0.3.16",
 ]
+
+[project.optional-dependencies]
+langgraph=["langgraph >= 0.3.16"]
+iomapper_langgraph=["agntcy-iomapper[langgraph] >= 0.2.2"]
+cli=["click >= 8.1.8"]
 
 [project.urls]
 Homepage = "https://github.com/agntcy/acp-sdk"
@@ -39,6 +41,8 @@ test = [
     "pytest >= 8.3",
     "deepdiff >= 8.1.1",
     "pytest-asyncio >= 0.23.5",
+    "langgraph >= 0.3.16",
+    "agntcy-iomapper[langgraph] >= 0.2.2"
 ]
 
 [tool.pytest.ini_options]

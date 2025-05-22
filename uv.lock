@@ -11,16 +11,13 @@ resolution-markers = [
 
 [[package]]
 name = "agntcy-acp"
-version = "1.4.1"
+version = "1.4.2"
 source = { editable = "." }
 dependencies = [
-    { name = "agntcy-iomapper", extra = ["langgraph"] },
     { name = "aiofiles" },
     { name = "aiohttp" },
     { name = "aiohttp-retry" },
-    { name = "click" },
     { name = "datamodel-code-generator" },
-    { name = "langgraph" },
     { name = "openapi-spec-validator" },
     { name = "pydantic" },
     { name = "python-dateutil" },
@@ -29,22 +26,35 @@ dependencies = [
     { name = "urllib3" },
 ]
 
+[package.optional-dependencies]
+cli = [
+    { name = "click" },
+]
+iomapper-langgraph = [
+    { name = "agntcy-iomapper", extra = ["langgraph"] },
+]
+langgraph = [
+    { name = "langgraph" },
+]
+
 [package.dev-dependencies]
 test = [
+    { name = "agntcy-iomapper", extra = ["langgraph"] },
     { name = "deepdiff" },
+    { name = "langgraph" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agntcy-iomapper", extras = ["langgraph"], specifier = ">=0.2.2" },
+    { name = "agntcy-iomapper", extras = ["langgraph"], marker = "extra == 'iomapper-langgraph'", specifier = ">=0.2.2" },
     { name = "aiofiles", specifier = ">=24.1.0" },
     { name = "aiohttp", specifier = ">=3.8.4" },
     { name = "aiohttp-retry", specifier = ">=2.8.3" },
-    { name = "click", specifier = ">=8.1.8" },
+    { name = "click", marker = "extra == 'cli'", specifier = ">=8.1.8" },
     { name = "datamodel-code-generator", specifier = ">=0.25.6" },
-    { name = "langgraph", specifier = ">=0.3.16" },
+    { name = "langgraph", marker = "extra == 'langgraph'", specifier = ">=0.3.16" },
     { name = "openapi-spec-validator", specifier = ">=0.7.1" },
     { name = "pydantic", specifier = ">=2" },
     { name = "python-dateutil", specifier = ">=2.8.2" },
@@ -52,10 +62,13 @@ requires-dist = [
     { name = "typing-extensions", specifier = ">=4.7.1" },
     { name = "urllib3", specifier = ">=1.25.3,<3.0.0" },
 ]
+provides-extras = ["langgraph", "iomapper-langgraph", "cli"]
 
 [package.metadata.requires-dev]
 test = [
+    { name = "agntcy-iomapper", extras = ["langgraph"], specifier = ">=0.2.2" },
     { name = "deepdiff", specifier = ">=8.1.1" },
+    { name = "langgraph", specifier = ">=0.3.16" },
     { name = "pytest", specifier = ">=8.3" },
     { name = "pytest-asyncio", specifier = ">=0.23.5" },
 ]
