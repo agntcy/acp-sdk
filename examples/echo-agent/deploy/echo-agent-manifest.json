@@ -1,186 +1,185 @@
 {
-    "authors": [
-        "Cisco Systems"
-    ],
-    "created_at": "2025-05-21T00:00:00Z",
-    "name": "org.agntcy.echo_agent",
-    "description": "Provides a test interface to echo input to output.",
-    "version": "0.1.0",    
-    "schema_version": "0.3.1",
-    "locators": [
-        {        
-            "url": "github.com/agntcy/acp-sdk.git//examples/echo-agent",            
-            "type": "source-code"
-        }
-    ],
-    "skills": [
-        {
-            "class_uid": 10201
-        }
-    ],    
-    "extensions": [
-        {
-        "name": "oasf.agntcy.org/feature/runtime/manifest",
-        "data": {
-          "acp": {
-            "capabilities": {
-              "threads": true,
-              "interrupts": true,
-              "callbacks": false
-            },
-            "input": {
-              "$defs": {
-                "Message": {
-                  "properties": {
-                    "type": {
-                      "$ref": "#/$defs/Type",
-                      "description": "indicates the originator of the message, a human or an assistant"
-                    },
-                    "content": {
-                      "description": "the content of the message",
-                      "title": "Content",
-                      "type": "string"
-                    }
+  "authors": [
+    "Cisco Systems"
+  ],
+  "created_at": "2025-05-21T00:00:00Z",
+  "name": "org.agntcy.echo_agent",
+  "description": "Provides a test interface to echo input to output.",
+  "version": "0.1.0",
+  "schema_version": "0.3.1",
+  "locators": [
+    {
+      "url": "github.com/agntcy/acp-sdk.git//examples/echo-agent",
+      "type": "source-code"
+    }
+  ],
+  "skills": [
+    {
+      "class_uid": 10201
+    }
+  ],
+  "extensions": [
+    {
+      "name": "oasf.agntcy.org/feature/runtime/manifest",
+      "data": {
+        "acp": {
+          "capabilities": {
+            "threads": true,
+            "interrupts": true,
+            "callbacks": false
+          },
+          "input": {
+            "$defs": {
+              "Message": {
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/Type",
+                    "description": "indicates the originator of the message, a human or an assistant"
                   },
-                  "required": [
-                    "type",
-                    "content"
-                  ],
-                  "title": "Message",
-                  "type": "object"
+                  "content": {
+                    "description": "the content of the message",
+                    "title": "Content",
+                    "type": "string"
+                  }
                 },
-                "Type": {
-                  "enum": [
-                    "human",
-                    "assistant",
-                    "ai"
-                  ],
-                  "title": "Type",
-                  "type": "string"
-                }
+                "required": [
+                  "type",
+                  "content"
+                ],
+                "title": "Message",
+                "type": "object"
               },
-              "properties": {
-                "messages": {
-                  "anyOf": [
-                    {
-                      "items": {
-                        "$ref": "#/$defs/Message"
-                      },
-                      "type": "array"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "title": "Messages"
-                }
-              },
-              "additionalProperties": false,
-              "required": [
-                "messages"
-              ],
-              "title": "InputState",
-              "type": "object"
+              "Type": {
+                "enum": [
+                  "human",
+                  "assistant",
+                  "ai"
+                ],
+                "title": "Type",
+                "type": "string"
+              }
             },
-            "output": {
-              "$defs": {
-                "Message": {
-                  "properties": {
-                    "type": {
-                      "$ref": "#/$defs/Type",
-                      "description": "indicates the originator of the message, a human or an assistant"
+            "properties": {
+              "messages": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/Message"
                     },
-                    "content": {
-                      "description": "the content of the message",
-                      "title": "Content",
-                      "type": "string"
-                    }
+                    "type": "array"
                   },
-                  "required": [
-                    "type",
-                    "content"
-                  ],
-                  "title": "Message",
-                  "type": "object"
-                },
-                "Type": {
-                  "enum": [
-                    "human",
-                    "assistant",
-                    "ai"
-                  ],
-                  "title": "Type",
-                  "type": "string"
-                }
-              },
-              "properties": {
-                "messages": {
-                  "anyOf": [
-                    {
-                      "items": {
-                        "$ref": "#/$defs/Message"
-                      },
-                      "type": "array"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "title": "Messages"
-                }
-              },
-              "title": "OutputState",
-              "type": "object"
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Messages"
+              }
             },
-            "config": {
-              "properties": {
-                "to_upper": {
-                  "title": "to_upper",
-                  "description": "If true, convert text to upper before echoing.",
-                  "type": "boolean",
-                  "default": false
+            "additionalProperties": false,
+            "required": [
+              "messages"
+            ],
+            "title": "InputState",
+            "type": "object"
+          },
+          "output": {
+            "$defs": {
+              "Message": {
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/Type",
+                    "description": "indicates the originator of the message, a human or an assistant"
+                  },
+                  "content": {
+                    "description": "the content of the message",
+                    "title": "Content",
+                    "type": "string"
+                  }
                 },
-                "to_lower": {
-                  "title": "to_lower",
-                  "description": "If true, convert text to lower before echoing.",
-                  "type": "boolean",
-                  "default": false
-                },
-                "interrupt_count": {
-                  "title": "interrupt_count",
-                  "description": "Number of times to send an interrupt echo message instead of output.",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 1000,
-                  "default": 0
-                },
-                "sleep_secs": {
-                  "title": "sleep_secs",
-                  "description": "Number of seconds to sleep after receiving a resume message.",
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 1000,
-                  "default": 1
-                },
-                "log_level": {
-                  "title": "log_level",
-                  "description": "Level of logging for this run.",
-                  "type": "string",
-                  "default": "warning",
-                  "enum": [
-                    "critical",
-                    "error",
-                    "warning",
-                    "info",
-                    "debug"
-                  ]
-                }
+                "required": [
+                  "type",
+                  "content"
+                ],
+                "title": "Message",
+                "type": "object"
               },
-              "title": "ConfigSchema",
-              "type": "object"
-            }
+              "Type": {
+                "enum": [
+                  "human",
+                  "assistant",
+                  "ai"
+                ],
+                "title": "Type",
+                "type": "string"
+              }
+            },
+            "properties": {
+              "messages": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/Message"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Messages"
+              }
+            },
+            "title": "OutputState",
+            "type": "object"
+          },
+          "config": {
+            "properties": {
+              "to_upper": {
+                "title": "to_upper",
+                "description": "If true, convert text to upper before echoing.",
+                "type": "boolean",
+                "default": false
+              },
+              "to_lower": {
+                "title": "to_lower",
+                "description": "If true, convert text to lower before echoing.",
+                "type": "boolean",
+                "default": false
+              },
+              "interrupt_count": {
+                "title": "interrupt_count",
+                "description": "Number of times to send an interrupt echo message instead of output.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000,
+                "default": 0
+              },
+              "sleep_secs": {
+                "title": "sleep_secs",
+                "description": "Number of seconds to sleep after receiving a resume message.",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000,
+                "default": 1
+              },
+              "log_level": {
+                "title": "log_level",
+                "description": "Level of logging for this run.",
+                "type": "string",
+                "default": "warning",
+                "enum": [
+                  "critical",
+                  "error",
+                  "warning",
+                  "info",
+                  "debug"
+                ]
+              }
+            },
+            "title": "ConfigSchema",
+            "type": "object"
           },
           "interrupts": [
             {
@@ -282,39 +281,40 @@
                 "type": "object"
               }
             }
+          ]
+        },
+        "deployment": {
+          "deployment_options": [
+            {
+              "type": "source_code",
+              "name": "source_code_local",
+              "url": "..",
+              "framework_config": {
+                "framework_type": "langgraph",
+                "graph": "echo_agent.langgraph:AGENT_GRAPH"
+              }
+            }
           ],
-          "deployment": {
-            "deployment_options": [
-              {
-                "type": "source_code",
-                "name": "source_code_local",
-                "url": "..",
-                "framework_config": {
-                  "framework_type": "langgraph",
-                  "graph": "echo_agent.langgraph:AGENT_GRAPH"
-                }
-              }
-            ],
-            "env_vars": [
-              {
-                "desc": "If true-ish, convert text to lower before echoing. Superseded by config.",
-                "name": "TO_LOWER"
-              },
-              {
-                "desc": "If true-ish, convert text to upper before echoing. Superseded by config.",
-                "name": "TO_UPPER"
-              },
-              {
-                "desc": "If positive number, echo text that many times as interrupt. Superseded by config.",
-                "name": "INTERRUPT_COUNT"
-              },
-              {
-                "desc": "If positive number and interrupts are sent, sleep number of secs after receiving a resume. Superseded by config.",
-                "name": "SLEEP_SECS"
-              }
-            ]
-          }
+          "env_vars": [
+            {
+              "desc": "If true-ish, convert text to lower before echoing. Superseded by config.",
+              "name": "TO_LOWER"
+            },
+            {
+              "desc": "If true-ish, convert text to upper before echoing. Superseded by config.",
+              "name": "TO_UPPER"
+            },
+            {
+              "desc": "If positive number, echo text that many times as interrupt. Superseded by config.",
+              "name": "INTERRUPT_COUNT"
+            },
+            {
+              "desc": "If positive number and interrupts are sent, sleep number of secs after receiving a resume. Superseded by config.",
+              "name": "SLEEP_SECS"
+            }
+          ]
         }
       }
-    ]
+    }
+  ]
 }

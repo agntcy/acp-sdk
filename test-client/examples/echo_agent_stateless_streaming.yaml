@@ -1,8 +1,10 @@
 metadata:
   client_config:
-    retries: 3
+    retries: 1
+    timeout: [ 1, 1 ]
   env_prefix: ECHO_AGENT_
 operations:
+  # 0 operation
   - operation_id: create_and_stream_stateless_run_output
     test_input:
       run_create_stateless:
@@ -29,6 +31,7 @@ operations:
                 - content: "WHAT IS UP, DUDE?"
                   type: assistant
 
+  # 1 operation
   - operation_id: create_stateless_run
     test_input:
       run_create_stateless:
@@ -46,31 +49,26 @@ operations:
     output_at_least:
       status: pending
 
+  # 2 operation
   - operation_id: stream_stateless_run_output
     test_input:
       run_id:
         type: str
-        value: "{{ results[1].run_id }}"
-    output_at_least:
-      event: agent_event
-      data:
-        type: values
-        status: success
-        values:
-          messages:
-            - content: "What is up, Dude?"
-              type: human
-            - content: "what is up, dude?"
-              type: assistant
+        value: "{{ results[-1].run_id }}"
+    output_stream:
+      - output_at_least:
+        event: agent_event
+        data:
+          type: values
+          status: success
+          values:
+            messages:
+              - content: "What is up, Dude?"
+                type: human
+              - content: "what is up, dude?"
+                type: assistant
 
-  - operation_id: get_stateless_run
-    test_input:
-      run_id:
-        type: str
-        value: "{{ results[1].run_id }}"
-    output_at_least:
-      status: success
-
+  # 4 operation
   - operation_id: create_and_stream_stateless_run_output
     test_input:
       run_create_stateless:
@@ -84,7 +82,9 @@ operations:
           config:
             configurable:
               to_upper: true
-              interrupt: true
+              interrupt_count: 1
+              sleep_secs: 1
+              log_level: debug
     output_stream:
       - output_at_least:
           event: agent_event

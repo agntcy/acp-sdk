@@ -58,8 +58,20 @@ operations:
       run:
         status: success
         agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
+        run_id: "{{ results[-1].run_id }}"
+        creation:
+          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
 
   # 3 operation
+  - operation_id: get_stateless_run
+    test_input:
+      run_id:
+        type: str
+        value: "{{ results[-1].run.run_id }}"
+    output_at_least:
+      status: success
+
+  # 4 operation
   - operation_id: create_and_wait_for_stateless_run_output
     test_input:
       run_create_stateless:
@@ -74,7 +86,6 @@ operations:
             configurable:
               to_upper: true
               interrupt_count: 1
-              log_level: debug
     output_at_least:
       output:
         type: interrupt
@@ -89,7 +100,7 @@ operations:
         status: interrupted
         agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
 
-  # 4 operation
+  # 5 operation
   - operation_id: resume_stateless_run
     test_input:
       run_id:
@@ -110,7 +121,7 @@ operations:
       run_id: "{{ results[-1].run.run_id }}"
       agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
 
-  # 5 operation
+  # 6 operation
   - operation_id: wait_for_stateless_run_output
     test_input:
       run_id:

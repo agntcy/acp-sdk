@@ -3,12 +3,11 @@
 import json
 from os import getenv
 from pathlib import Path
-from typing import Dict, Optional, Union
-
-import yaml
+from typing import Dict, List, Optional, Union
 from pydantic import BaseModel
+import yaml
 
-from .acp_v0 import Configuration
+from .acp_v0.configuration import Configuration
 from .acp_v0.async_client.api import AgentsApi as AsyncAgentsApi
 from .acp_v0.async_client.api import StatelessRunsApi as AsyncStatelessRunsApi
 from .acp_v0.async_client.api import ThreadRunsApi as AsyncThreadRunsApi
@@ -38,7 +37,7 @@ def _get_envvar_param(prefix: str, varname: str) -> Optional[str]:
     return getenv(env_varname.translate(__ENV_VAR_SPECIAL_CHAR_TABLE), None)
 
 
-class ApiClientConfiguration(Configuration, BaseModel):
+class ApiClientConfiguration(Configuration,BaseModel):
     """This class contains various settings of the API client.
 
     :param host: Base url.
@@ -62,6 +61,8 @@ class ApiClientConfiguration(Configuration, BaseModel):
     :param ssl_ca_cert: str - the path to a file of concatenated CA certificates
       in PEM format.
     :param retries: Number of retries for API requests.
+    :param timeout: Int, float for total timeout number of seconds or tuple of
+      both for (connect, read) timeouts.
     :param ca_cert_data: verify the peer using concatenated CA certificate data
       in PEM (str) or DER (bytes) format.
     :param debug: Debug switch.
@@ -80,6 +81,7 @@ class ApiClientConfiguration(Configuration, BaseModel):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
+        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -98,6 +100,7 @@ class ApiClientConfiguration(Configuration, BaseModel):
             True,
             ssl_ca_cert,
             retries,
+            timeout,
             ca_cert_data,
             debug=debug,
         )
@@ -116,6 +119,7 @@ class ApiClientConfiguration(Configuration, BaseModel):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
+        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -166,6 +170,10 @@ class ApiClientConfiguration(Configuration, BaseModel):
             str_value = _get_envvar_param(prefix, "retries")
             if str_value is not None:
                 retries = int(str_value)
+        if timeout is None:
+            str_value = _get_envvar_param(prefix, "timeout")
+            if str_value is not None:
+                timeout = json.loads(str_value)
         if ca_cert_data is None:
             str_value = _get_envvar_param(prefix, "ca_cert_data")
             if str_value is not None:
@@ -186,6 +194,7 @@ class ApiClientConfiguration(Configuration, BaseModel):
             server_operation_variables,
             ssl_ca_cert,
             retries,
+            timeout,
             ca_cert_data,
             debug=debug,
         )
@@ -251,6 +260,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
+        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -278,6 +288,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
             server_operation_variables,
             ssl_ca_cert,
             retries,
+            timeout,
             ca_cert_data,
             debug=debug,
         )
@@ -296,6 +307,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
+        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -321,6 +333,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
             server_operation_variables,
             ssl_ca_cert,
             retries,
+            timeout,
             ca_cert_data,
             debug=debug,
         )
@@ -398,6 +411,7 @@ class AsyncACPClient(
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
+        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -425,6 +439,7 @@ class AsyncACPClient(
             server_operation_variables,
             ssl_ca_cert,
             retries,
+            timeout,
             ca_cert_data,
             debug=debug,
         )
@@ -443,6 +458,7 @@ class AsyncACPClient(
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
+        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -468,6 +484,7 @@ class AsyncACPClient(
             server_operation_variables,
             ssl_ca_cert,
             retries,
+            timeout,
             ca_cert_data,
             debug=debug,
         )
