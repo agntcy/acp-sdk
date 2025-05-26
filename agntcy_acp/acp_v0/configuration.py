@@ -190,7 +190,7 @@ class Configuration:
         ignore_operation_servers: bool = False,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
-        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
+        timeout: Optional[Union[List[Union[int, float]], int, float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,

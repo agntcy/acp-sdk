@@ -4,16 +4,16 @@ import json
 from os import getenv
 from pathlib import Path
 from typing import Dict, List, Optional, Union
-from pydantic import BaseModel
-import yaml
 
-from .acp_v0.configuration import Configuration
+import yaml
+from pydantic import BaseModel
+
 from .acp_v0.async_client.api import AgentsApi as AsyncAgentsApi
 from .acp_v0.async_client.api import StatelessRunsApi as AsyncStatelessRunsApi
 from .acp_v0.async_client.api import ThreadRunsApi as AsyncThreadRunsApi
 from .acp_v0.async_client.api import ThreadsApi as AsyncThreadsApi
 from .acp_v0.async_client.api_client import ApiClient as AsyncApiClient
-from .acp_v0.configuration import ServerVariablesT
+from .acp_v0.configuration import Configuration, ServerVariablesT
 from .acp_v0.sync_client.api import (
     AgentsApi,
     StatelessRunsApi,
@@ -37,7 +37,7 @@ def _get_envvar_param(prefix: str, varname: str) -> Optional[str]:
     return getenv(env_varname.translate(__ENV_VAR_SPECIAL_CHAR_TABLE), None)
 
 
-class ApiClientConfiguration(Configuration,BaseModel):
+class ApiClientConfiguration(Configuration, BaseModel):
     """This class contains various settings of the API client.
 
     :param host: Base url.
@@ -81,7 +81,7 @@ class ApiClientConfiguration(Configuration,BaseModel):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
-        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
+        timeout: Optional[Union[List[Union[int, float]], int, float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -119,7 +119,7 @@ class ApiClientConfiguration(Configuration,BaseModel):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
-        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
+        timeout: Optional[Union[List[Union[int, float]], int, float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -260,7 +260,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
-        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
+        timeout: Optional[Union[List[Union[int, float]], int, float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -307,7 +307,7 @@ class ACPClient(AgentsApi, StatelessRunsApi, ThreadsApi, ThreadRunsApi):
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
-        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
+        timeout: Optional[Union[List[Union[int, float]], int, float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -411,7 +411,7 @@ class AsyncACPClient(
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
-        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
+        timeout: Optional[Union[List[Union[int, float]], int, float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
@@ -458,7 +458,7 @@ class AsyncACPClient(
         server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
         ssl_ca_cert: Optional[str] = None,
         retries: Optional[int] = None,
-        timeout: Optional[Union[List[Union[int,float]],int,float]] = None,
+        timeout: Optional[Union[List[Union[int, float]], int, float]] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,

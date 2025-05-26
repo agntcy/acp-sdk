@@ -73,9 +73,11 @@ class RESTClientObject:
 
         self.retries = configuration.retries
 
-        if isinstance(configuration.timeout,list) and len(configuration.timeout) == 2:
-            self.timeout = aiohttp.ClientTimeout(connect=configuration.timeout[0], sock_read=configuration.timeout[1])
-        elif isinstance(configuration.timeout, (float,int)):
+        if isinstance(configuration.timeout, list) and len(configuration.timeout) == 2:
+            self.timeout = aiohttp.ClientTimeout(
+                connect=configuration.timeout[0], sock_read=configuration.timeout[1]
+            )
+        elif isinstance(configuration.timeout, (float, int)):
             self.timeout = aiohttp.ClientTimeout(total=configuration.timeout)
         else:
             self.timeout = None

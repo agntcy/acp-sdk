@@ -93,9 +93,14 @@ class RESTClientObject:
             pool_args["maxsize"] = configuration.connection_pool_maxsize
 
         if configuration.timeout is not None:
-            if isinstance(configuration.timeout, list) and len(configuration.timeout) == 2:
-                pool_args["timeout"] = urllib3.Timeout(connect=configuration.timeout[0], read=configuration.timeout[1])
-            elif isinstance(configuration.timeout, (float,int)):
+            if (
+                isinstance(configuration.timeout, list)
+                and len(configuration.timeout) == 2
+            ):
+                pool_args["timeout"] = urllib3.Timeout(
+                    connect=configuration.timeout[0], read=configuration.timeout[1]
+                )
+            elif isinstance(configuration.timeout, (float, int)):
                 pool_args["timeout"] = urllib3.Timeout(configuration.timeout)
 
         # https pool manager
