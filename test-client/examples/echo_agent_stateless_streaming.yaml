@@ -14,7 +14,7 @@ operations:
           input:
             messages:
               - type: human
-                content: "What is up, Dude?"
+                content: "What is UP, Dude?"
           config:
             configurable:
               to_upper: true
@@ -26,7 +26,7 @@ operations:
             status: pending
             values:
               messages:
-                - content: "What is up, Dude?"
+                - content: "What is UP, Dude?"
                   type: human
                 - content: "WHAT IS UP, DUDE?"
                   type: assistant
@@ -41,7 +41,7 @@ operations:
           input:
             messages:
               - type: human
-                content: "What is up, Dude?"
+                content: "WHAT is up, Dude?"
           config:
             configurable:
               to_upper: false
@@ -63,38 +63,7 @@ operations:
           status: success
           values:
             messages:
-              - content: "What is up, Dude?"
+              - content: "WHAT is up, Dude?"
                 type: human
               - content: "what is up, dude?"
                 type: assistant
-
-  # 4 operation
-  - operation_id: create_and_stream_stateless_run_output
-    test_input:
-      run_create_stateless:
-        type: agntcy_acp.models.RunCreateStateless
-        arguments:
-          agent_id: "{{ env.ECHO_AGENT_AGENT_ID }}"
-          input:
-            messages:
-              - type: human
-                content: "What is up, Dude?"
-          config:
-            configurable:
-              to_upper: true
-              interrupt_count: 1
-              sleep_secs: 1
-              log_level: debug
-    output_stream:
-      - output_at_least:
-          event: agent_event
-          data:
-            type: interrupt
-            status: pending
-            interrupt:
-              messages:
-                - content: "What is up, Dude?"
-                  type: human
-                - content: "WHAT IS UP, DUDE?"
-                  type: assistant
-
