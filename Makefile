@@ -51,26 +51,28 @@ generate_acp_async_client $(ACP_ASYNC_CLIENT_DIR)/README.md : $(ACP_SPEC_FILE)
 	uvx ruff format "$(ACP_ASYNC_CLIENT_DIR)/agntcy_acp/acp_v$${SPEC_VERSION}"
 
 AGENT_WORKFLOW_DIR:=workflow-srv-mgr
-AGNT_WKFW_SPEC_FILE:=$(AGENT_WORKFLOW_DIR)/wfsm/spec/manifest.yaml
+AGNT_WKFW_SPEC_FILE:=$(AGENT_WORKFLOW_DIR)/wfsm/spec/manifest.json
 
 $(AGNT_WKFW_SPEC_FILE):
 	git submodule update $(AGENT_WORKFLOW_DIR)
 
 generate_manifest_models: $(AGNT_WKFW_SPEC_FILE)
-	ACP_SPEC_VERSION=$$(yq '.info.version | sub("\.\d+", "")' "$(AGNT_WKFW_SPEC_FILE)") ; \
+	ACP_SPEC_VERSION=$$(jq -r '.info.version | capture("(?<version>\\d+)\\.\\d+"; "") | .version' "$(AGNT_WKFW_SPEC_FILE)") ; \
 	AGNT_WKFW_MODEL_PACKAGE_DIR="agntcy_acp/agws_v$${ACP_SPEC_VERSION}" ; \
 	{ mkdir "$${AGNT_WKFW_MODEL_PACKAGE_DIR}" || true ; } ; \
 	uv run --with datamodel-code-generator -- \
 	  datamodel-codegen \
+	    --use-double-quotes \
 		--input $(AGNT_WKFW_SPEC_FILE) \
 		--input-file-type openapi \
 		--output-model-type pydantic_v2.BaseModel \
 		--output "$${AGNT_WKFW_MODEL_PACKAGE_DIR}"/models.py \
 		--disable-timestamp && \
 	cp .spdx_header "$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
-	echo VERSION="\""$$(yq '.info.version' "$(AGNT_WKFW_SPEC_FILE)")"\"" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
-	echo MAJOR_VERSION="\"$${ACP_SPEC_VERSION}\"" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
-	echo MINOR_VERSION="\""$$(yq '.info.version | sub("\d+\.", "")' "$(AGNT_WKFW_SPEC_FILE)")"\"" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py"
+	echo VERSION=$$(jq '.info.version' "$(AGNT_WKFW_SPEC_FILE)") >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
+	echo MAJOR_VERSION=\"$${ACP_SPEC_VERSION}\" >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
+	echo MINOR_VERSION=$$(jq '.info.version | capture("\\d+\\.(?<version>\\d+)"; "") | .version' "$(AGNT_WKFW_SPEC_FILE)") >>"$${AGNT_WKFW_MODEL_PACKAGE_DIR}/spec_version.py" && \
+	uvx ruff format "$${AGNT_WKFW_MODEL_PACKAGE_DIR}"
 
 update_python_subpackage: $(ACP_CLIENT_DIR)/README.md $(ACP_ASYNC_CLIENT_DIR)/README.md
 	ACP_SPEC_VERSION=$$(jq -r '.info.version | capture("(?<version>\\d+)\\.\\d+"; "") | .version' $(ACP_SPEC_FILE)) ; \
