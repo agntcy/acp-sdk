@@ -35,26 +35,21 @@
 <span class="c1"># SPDX-License-Identifier: Apache-2.0</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datamodel_code_generator</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openapi_spec_validator</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">openapi_spec_validator.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_from_filename</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..agws_v0</span><span class="w"> </span><span class="kn">import</span> <span class="n">OASF_EXTENSION_NAME_MANIFEST</span><span class="p">,</span> <span class="n">AgentManifest</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACPDescriptorValidationException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AgentACPDescriptor</span><span class="p">,</span>
     <span class="n">AgentACPSpec</span><span class="p">,</span>
     <span class="n">StreamingMode</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">CLIENT_SCRIPT_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;scripts/create_acp_client.sh&quot;</span>
 <span class="p">)</span>
 
 
@@ -66,24 +61,22 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_thread_runs</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_thread_runs</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPSpec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
     <span class="c1"># Manipulate the spec according to the thread capability flag in the descriptor</span>
 
-    <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">threads</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">thread_state</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">threads</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">thread_state</span><span class="p">:</span>
             <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;ThreadStateSchema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">_convert_descriptor_schema</span><span class="p">(</span>
-                    <span class="s2">&quot;ThreadStateSchema&quot;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">thread_state</span>
-                <span class="p">)</span>
+                <span class="n">_convert_descriptor_schema</span><span class="p">(</span><span class="s2">&quot;ThreadStateSchema&quot;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">thread_state</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="c1"># else:</span>
         <span class="c1">#    # No thread schema defined, hence no support to retrieve thread state</span>
         <span class="c1">#    del spec_dict[&#39;paths&#39;][&#39;/threads/{thread_id}/state&#39;]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Threads are not enabled</span>
-        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">thread_state</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">thread_state</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ACPDescriptorValidationException</span><span class="p">(</span>
-                <span class="s2">&quot;Cannot define `specs.thread_state` if `specs.capabilities.threads` is `false`&quot;</span>
+                <span class="s2">&quot;Cannot define `thread_state` if `capabilities.threads` is `false`&quot;</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Remove all threads paths</span>
@@ -97,44 +90,42 @@
             <span class="p">}</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_interrupts</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_interrupts</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPSpec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
     <span class="c1"># Manipulate the spec according to the interrupts capability flag in the descriptor</span>
 
-    <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">interrupts</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">interrupts</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">interrupts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">interrupts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">interrupts</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">interrupts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ACPDescriptorValidationException</span><span class="p">(</span>
                 <span class="s2">&quot;Missing interrupt definitions with `spec.capabilities.interrupts=true`&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Add the interrupt payload and resume payload types for the schemas declared in the descriptor</span>
-        <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;InterruptPayloadSchema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">interrupt_payload_schema</span> <span class="o">=</span> <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;InterruptPayloadSchema&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;oneOf&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;discriminator&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;propertyName&quot;</span><span class="p">:</span> <span class="s2">&quot;interrupt_type&quot;</span><span class="p">,</span> <span class="s2">&quot;mapping&quot;</span><span class="p">:</span> <span class="p">{}},</span>
         <span class="p">}</span>
-        <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;ResumePayloadSchema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">resume_payload_schema</span> <span class="o">=</span> <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;ResumePayloadSchema&quot;</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;oneOf&quot;</span><span class="p">:</span> <span class="p">[],</span>
-            <span class="s2">&quot;discriminator&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;propertyName&quot;</span><span class="p">:</span> <span class="s2">&quot;interrupt_type&quot;</span><span class="p">,</span> <span class="s2">&quot;mapping&quot;</span><span class="p">:</span> <span class="p">{}},</span>
         <span class="p">}</span>
-        <span class="k">for</span> <span class="n">interrupt</span> <span class="ow">in</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">interrupts</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_payload</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;object&quot;</span>
-
+        <span class="k">for</span> <span class="n">interrupt</span> <span class="ow">in</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">interrupts</span><span class="p">:</span>
             <span class="n">interrupt_payload_schema_name</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span><span class="si">}</span><span class="s2">InterruptPayload&quot;</span>
             <span class="p">)</span>
-            <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_payload</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;interrupt_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Interrupt Type&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;enum&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span><span class="p">],</span>
-                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;interrupt type which this payload is for&quot;</span><span class="p">,</span>
-            <span class="p">}</span>
-            <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;InterruptPayloadSchema&quot;</span><span class="p">][</span>
-                <span class="s2">&quot;oneOf&quot;</span>
-            <span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">interrupt_payload_schema_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
-            <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;InterruptPayloadSchema&quot;</span><span class="p">][</span>
-                <span class="s2">&quot;discriminator&quot;</span>
-            <span class="p">][</span><span class="s2">&quot;mapping&quot;</span><span class="p">][</span>
-                <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">interrupt_payload_schema_name</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">interrupt_payload_schema</span><span class="p">[</span><span class="s2">&quot;oneOf&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">interrupt_payload_schema_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;additionalProperties&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span><span class="p">],</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
             <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="n">interrupt_payload_schema_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">_convert_descriptor_schema</span><span class="p">(</span>
                     <span class="n">interrupt_payload_schema_name</span><span class="p">,</span> <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_payload</span>
@@ -142,18 +133,18 @@
             <span class="p">)</span>
 
             <span class="n">resume_payload_schema_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span><span class="si">}</span><span class="s2">ResumePayload&quot;</span>
-            <span class="n">interrupt</span><span class="o">.</span><span class="n">resume_payload</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;interrupt_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_payload</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;interrupt_type&quot;</span><span class="p">]</span>
+            <span class="n">resume_payload_schema</span><span class="p">[</span><span class="s2">&quot;oneOf&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">resume_payload_schema_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;additionalProperties&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span><span class="p">],</span>
+                <span class="p">}</span>
             <span class="p">)</span>
-
-            <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;ResumePayloadSchema&quot;</span><span class="p">][</span><span class="s2">&quot;oneOf&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">resume_payload_schema_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
-            <span class="p">)</span>
-            <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;ResumePayloadSchema&quot;</span><span class="p">][</span><span class="s2">&quot;discriminator&quot;</span><span class="p">][</span>
-                <span class="s2">&quot;mapping&quot;</span>
-            <span class="p">][</span>
-                <span class="n">interrupt</span><span class="o">.</span><span class="n">interrupt_type</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">resume_payload_schema_name</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="n">resume_payload_schema_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">_convert_descriptor_schema</span><span class="p">(</span>
                     <span class="n">resume_payload_schema_name</span><span class="p">,</span> <span class="n">interrupt</span><span class="o">.</span><span class="n">resume_payload</span>
@@ -162,7 +153,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Interrupts are not supported</span>
 
-        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">interrupts</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">interrupts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">interrupts</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">interrupts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ACPDescriptorValidationException</span><span class="p">(</span>
                 <span class="s2">&quot;Interrupts defined with `spec.capabilities.interrupts=false`&quot;</span>
             <span class="p">)</span>
@@ -182,19 +173,19 @@
         <span class="p">]</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_streaming</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_streaming</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPSpec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
     <span class="c1"># Manipulate the spec according to the streaming capability flag in the descriptor</span>
     <span class="n">streaming_modes</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">streaming</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">streaming</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">streaming</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">streaming</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
             <span class="n">streaming_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">StreamingMode</span><span class="o">.</span><span class="n">CUSTOM</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">streaming</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">streaming</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
             <span class="n">streaming_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">StreamingMode</span><span class="o">.</span><span class="n">VALUES</span><span class="p">)</span>
 
     <span class="c1"># Perform the checks for custom_streaming_update</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">StreamingMode</span><span class="o">.</span><span class="n">CUSTOM</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">streaming_modes</span>
-        <span class="ow">and</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">custom_streaming_update</span>
+        <span class="ow">and</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">custom_streaming_update</span>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="n">ACPDescriptorValidationException</span><span class="p">(</span>
             <span class="s2">&quot;custom_streaming_update defined with `spec.capabilities.streaming.custom=false`&quot;</span>
@@ -202,7 +193,7 @@
 
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">StreamingMode</span><span class="o">.</span><span class="n">CUSTOM</span> <span class="ow">in</span> <span class="n">streaming_modes</span>
-        <span class="ow">and</span> <span class="ow">not</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">custom_streaming_update</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">custom_streaming_update</span>
     <span class="p">):</span>
         <span class="k">raise</span> <span class="n">ACPDescriptorValidationException</span><span class="p">(</span>
             <span class="s2">&quot;Missing custom_streaming_update definitions with `spec.capabilities.streaming.custom=true`&quot;</span>
@@ -237,9 +228,9 @@
     <span class="p">]</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_callback</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_gen_oas_callback</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPSpec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">):</span>
     <span class="c1"># Manipulate the spec according to the callback capability flag in the descriptor</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">callbacks</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">capabilities</span><span class="o">.</span><span class="n">callbacks</span><span class="p">:</span>
         <span class="c1"># No streaming is supported. Removing callback option from RunCreate</span>
         <span class="k">del</span> <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;RunCreate&quot;</span><span class="p">][</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;webhook&quot;</span><span class="p">]</span>
 
@@ -271,34 +262,43 @@
 <div class="viewcode-block" id="generate_agent_oapi">
 <a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.generator.generate_agent_oapi">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_agent_oapi</span><span class="p">(</span>
-    <span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">spec_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">descriptor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">AgentManifest</span><span class="p">],</span>
+    <span class="n">spec_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="k">if</span> <span class="n">spec_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">spec_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ACP_SPEC_PATH&quot;</span><span class="p">,</span> <span class="s2">&quot;acp-spec/openapi.json&quot;</span><span class="p">)</span>
-
-    <span class="n">spec_dict</span><span class="p">,</span> <span class="n">base_uri</span> <span class="o">=</span> <span class="n">read_from_filename</span><span class="p">(</span><span class="n">spec_path</span><span class="p">)</span>
-
+    <span class="n">spec_dict</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">read_from_filename</span><span class="p">(</span><span class="n">spec_path</span><span class="p">)</span>
     <span class="c1"># If no exception is raised by validate(), the spec is valid.</span>
     <span class="n">validate</span><span class="p">(</span><span class="n">spec_dict</span><span class="p">)</span>
 
-    <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">][</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;ACP Spec for </span><span class="si">{</span><span class="n">descriptor</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">descriptor</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+    <span class="n">agent_spec</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">AgentACPDescriptor</span><span class="p">):</span>
+        <span class="n">agent_spec</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span>
+        <span class="n">agent_name</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">AgentManifest</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">extensions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">OASF_EXTENSION_NAME_MANIFEST</span><span class="p">:</span>
+                <span class="n">agent_spec</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">acp</span>
+                <span class="n">agent_name</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown object type for descriptor&quot;</span><span class="p">)</span>
+
+    <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">][</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ACP Spec for </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;InputSchema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_convert_descriptor_schema</span><span class="p">(</span>
-        <span class="s2">&quot;InputSchema&quot;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">input</span>
+        <span class="s2">&quot;InputSchema&quot;</span><span class="p">,</span> <span class="n">agent_spec</span><span class="o">.</span><span class="n">input</span>
     <span class="p">)</span>
     <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;OutputSchema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_convert_descriptor_schema</span><span class="p">(</span>
-        <span class="s2">&quot;OutputSchema&quot;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">output</span>
+        <span class="s2">&quot;OutputSchema&quot;</span><span class="p">,</span> <span class="n">agent_spec</span><span class="o">.</span><span class="n">output</span>
     <span class="p">)</span>
     <span class="n">spec_dict</span><span class="p">[</span><span class="s2">&quot;components&quot;</span><span class="p">][</span><span class="s2">&quot;schemas&quot;</span><span class="p">][</span><span class="s2">&quot;ConfigSchema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_convert_descriptor_schema</span><span class="p">(</span>
-        <span class="s2">&quot;ConfigSchema&quot;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="o">.</span><span class="n">config</span>
+        <span class="s2">&quot;ConfigSchema&quot;</span><span class="p">,</span> <span class="n">agent_spec</span><span class="o">.</span><span class="n">config</span>
     <span class="p">)</span>
 
-    <span class="n">_gen_oas_thread_runs</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
-    <span class="n">_gen_oas_interrupts</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
-    <span class="n">_gen_oas_streaming</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
-    <span class="n">_gen_oas_callback</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
+    <span class="n">_gen_oas_thread_runs</span><span class="p">(</span><span class="n">agent_spec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
+    <span class="n">_gen_oas_interrupts</span><span class="p">(</span><span class="n">agent_spec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
+    <span class="n">_gen_oas_streaming</span><span class="p">(</span><span class="n">agent_spec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
+    <span class="n">_gen_oas_callback</span><span class="p">(</span><span class="n">agent_spec</span><span class="p">,</span> <span class="n">spec_dict</span><span class="p">)</span>
 
     <span class="n">validate</span><span class="p">(</span><span class="n">spec_dict</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">spec_dict</span></div>
@@ -308,9 +308,25 @@
 <div class="viewcode-block" id="generate_agent_models">
 <a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.generator.generate_agent_models">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_agent_models</span><span class="p">(</span>
-    <span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;models.py&quot;</span>
+    <span class="n">descriptor</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">AgentManifest</span><span class="p">],</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">model_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;models.py&quot;</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="n">agent_spec</span> <span class="o">=</span> <span class="n">generate_agent_oapi_for_schemas</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span>
+    <span class="n">agent_spec</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">AgentACPDescriptor</span><span class="p">):</span>
+        <span class="n">agent_spec</span> <span class="o">=</span> <span class="n">generate_agent_oapi_for_schemas</span><span class="p">(</span><span class="n">descriptor</span><span class="o">.</span><span class="n">specs</span><span class="p">)</span>
+        <span class="n">agent_name</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">AgentManifest</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">extensions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">OASF_EXTENSION_NAME_MANIFEST</span><span class="p">:</span>
+                <span class="n">agent_spec</span> <span class="o">=</span> <span class="n">generate_agent_oapi_for_schemas</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">acp</span><span class="p">)</span>
+                <span class="n">agent_name</span> <span class="o">=</span> <span class="n">descriptor</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;unknown object type for descriptor&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">agent_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cannot find ACP descriptor&quot;</span><span class="p">)</span>
+
     <span class="n">agent_sdk_path</span> <span class="o">=</span> <span class="n">path</span>  <span class="c1"># os.path.join(path, f&#39;{descriptor.metadata.ref.name}&#39;)</span>
     <span class="n">agent_models_dir</span> <span class="o">=</span> <span class="n">agent_sdk_path</span>
     <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
@@ -329,31 +345,9 @@
         <span class="n">output_model_type</span><span class="o">=</span><span class="n">datamodel_code_generator</span><span class="o">.</span><span class="n">DataModelType</span><span class="o">.</span><span class="n">PydanticV2BaseModel</span><span class="p">,</span>
         <span class="n">output</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">modelspath</span><span class="p">),</span>
         <span class="n">disable_timestamp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">custom_file_header</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;# Generated from ACP Descriptor </span><span class="si">{</span><span class="n">descriptor</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> using datamodel_code_generator.&quot;</span><span class="p">,</span>
+        <span class="n">custom_file_header</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;# Generated from ACP Descriptor </span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2"> using datamodel_code_generator.&quot;</span><span class="p">,</span>
         <span class="n">keep_model_order</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">use_double_quotes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># match ruff formatting</span>
-    <span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="generate_agent_client">
-<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.generator.generate_agent_client">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_agent_client</span><span class="p">(</span><span class="n">descriptor</span><span class="p">:</span> <span class="n">AgentACPDescriptor</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="n">agent_spec</span> <span class="o">=</span> <span class="n">generate_agent_oapi</span><span class="p">(</span><span class="n">descriptor</span><span class="p">)</span>
-    <span class="n">agent_sdk_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">descriptor</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">agent_sdk_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">specpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">agent_sdk_path</span><span class="p">,</span> <span class="s2">&quot;openapi.yaml&quot;</span><span class="p">)</span>
-
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">specpath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-        <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">agent_spec</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">CLIENT_SCRIPT_PATH</span><span class="p">,</span> <span class="n">agent_sdk_path</span><span class="p">)</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="s2">&quot;/bin/bash&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;create_acp_client.sh&quot;</span><span class="p">,</span>
-        <span class="p">],</span>
-        <span class="n">cwd</span><span class="o">=</span><span class="n">agent_sdk_path</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

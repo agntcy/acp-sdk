@@ -33,15 +33,16 @@
   <h1>Source code for agntcy_acp.manifest.validator</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright AGNTCY Contributors (https://github.com/agntcy)</span>
 <span class="c1"># SPDX-License-Identifier: Apache-2.0</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidationError</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.agws_v0</span><span class="w"> </span><span class="kn">import</span> <span class="n">OASF_EXTENSION_NAME_MANIFEST</span><span class="p">,</span> <span class="n">AgentManifest</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACPDescriptorValidationException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">agntcy_acp.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentACPDescriptor</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">AgentManifest</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="validate_agent_manifest_file">
@@ -66,11 +67,23 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_descriptor_from_manifest</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="c1"># ACP Descriptor is an Agent Manifest without the deployment part</span>
-    <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
-    <span class="k">del</span> <span class="n">descriptor_json</span><span class="p">[</span><span class="s2">&quot;deployment&quot;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">descriptor_json</span>
+<div class="viewcode-block" id="descriptor_from_manifest_obj">
+<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.descriptor_from_manifest_obj">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">descriptor_from_manifest_obj</span><span class="p">(</span><span class="n">manifest</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">AgentManifest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="c1"># ACP Descriptor is in the extensions of an Agent Manifest</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s2">&quot;extensions&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">manifest</span><span class="o">.</span><span class="n">extensions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">OASF_EXTENSION_NAME_MANIFEST</span><span class="p">:</span>
+                <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">acp</span>
+                <span class="k">return</span> <span class="n">descriptor_json</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">manifest</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;extensions&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">OASF_EXTENSION_NAME_MANIFEST</span><span class="p">:</span>
+                <span class="n">ext_json</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">ext_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;acp&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">return</span> <span class="n">descriptor_json</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
 
 
 <div class="viewcode-block" id="validate_agent_manifest">
@@ -80,13 +93,14 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentManifest</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">manifest</span> <span class="o">=</span> <span class="n">AgentManifest</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
-        <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">_descriptor_from_manifest</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
+        <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">descriptor_from_manifest_obj</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
         <span class="n">validate_agent_descriptor</span><span class="p">(</span><span class="n">descriptor_json</span><span class="p">)</span>
         <span class="c1"># TODO: add additional manifest checks</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">ACPDescriptorValidationException</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">raise_exception</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">manifest</span></div>
@@ -104,9 +118,10 @@
         <span class="c1"># advanced validation</span>
         <span class="c1"># generate_agent_oapi(descriptor)</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">ACPDescriptorValidationException</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">raise_exception</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Validation Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">descriptor</span></div>

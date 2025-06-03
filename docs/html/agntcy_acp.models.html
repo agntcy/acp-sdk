@@ -569,8 +569,8 @@ are ignored.</p></li>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agntcy_acp.models.</span></span><span class="sig-name descname"><span class="pre">AgentDeployment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/agws_v0/models.html#AgentDeployment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.AgentDeployment" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="agntcy_acp.models.AgentDeployment.dependencies">
-<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[List[AgentDependency]]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentDeployment.dependencies" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentDeployment.agent_deps">
+<span class="sig-name descname"><span class="pre">agent_deps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[List[AgentDependency]]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentDeployment.agent_deps" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -596,13 +596,33 @@ are ignored.</p></li>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agntcy_acp.models.</span></span><span class="sig-name descname"><span class="pre">AgentManifest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/agws_v0/models.html#AgentManifest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.AgentManifest" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.deployment">
-<span class="sig-name descname"><span class="pre">deployment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[AgentDeployment]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.deployment" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Dict[str,</span> <span class="pre">str]]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.annotations" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.metadata">
-<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AgentMetadata</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.metadata" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.authors">
+<span class="sig-name descname"><span class="pre">authors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List[str]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.authors" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.created_at" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.extensions">
+<span class="sig-name descname"><span class="pre">extensions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List[Manifest]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.extensions" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.locators">
+<span class="sig-name descname"><span class="pre">locators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List[Locator]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.locators" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -612,8 +632,23 @@ are ignored.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.specs">
-<span class="sig-name descname"><span class="pre">specs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AgentACPSpec</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.specs" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.schema_version">
+<span class="sig-name descname"><span class="pre">schema_version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.schema_version" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.skills">
+<span class="sig-name descname"><span class="pre">skills</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List[Skill]</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.skills" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.AgentManifest.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#agntcy_acp.models.AgentManifest.version" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1387,8 +1422,8 @@ are ignored.</p></li>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agntcy_acp.models.</span></span><span class="sig-name descname"><span class="pre">EnvVarValues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/agws_v0/models.html#EnvVarValues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.EnvVarValues" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="agntcy_acp.models.EnvVarValues.dependencies">
-<span class="sig-name descname"><span class="pre">dependencies</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[List[EnvVarValues]]</span></em><a class="headerlink" href="#agntcy_acp.models.EnvVarValues.dependencies" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="agntcy_acp.models.EnvVarValues.env_deps">
+<span class="sig-name descname"><span class="pre">env_deps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[List[EnvVarValues]]</span></em><a class="headerlink" href="#agntcy_acp.models.EnvVarValues.env_deps" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -3521,7 +3556,7 @@ are ignored.</p></li>
 <dd><p>Returns the dict representation of the actual instance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>], <a class="reference internal" href="#agntcy_acp.models.CustomRunResultUpdate" title="agntcy_acp.acp_v0.models.custom_run_result_update.CustomRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomRunResultUpdate</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunErrorUpdate</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunInterruptUpdate</span></code>, <a class="reference internal" href="#agntcy_acp.models.ValueRunResultUpdate" title="agntcy_acp.acp_v0.models.value_run_result_update.ValueRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunResultUpdate</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>], <a class="reference internal" href="#agntcy_acp.models.CustomRunResultUpdate" title="agntcy_acp.acp_v0.models.custom_run_result_update.CustomRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomRunResultUpdate</span></code></a>, <a class="reference internal" href="#agntcy_acp.models.ValueRunErrorUpdate" title="agntcy_acp.acp_v0.models.value_run_error_update.ValueRunErrorUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunErrorUpdate</span></code></a>, <a class="reference internal" href="#agntcy_acp.models.ValueRunInterruptUpdate" title="agntcy_acp.acp_v0.models.value_run_interrupt_update.ValueRunInterruptUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunInterruptUpdate</span></code></a>, <a class="reference internal" href="#agntcy_acp.models.ValueRunResultUpdate" title="agntcy_acp.acp_v0.models.value_run_result_update.ValueRunResultUpdate"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueRunResultUpdate</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -4414,6 +4449,213 @@ are ignored.</p></li>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code></span></p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agntcy_acp.models.</span></span><span class="sig-name descname"><span class="pre">ValueRunErrorUpdate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_error_update.html#ValueRunErrorUpdate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Partial result provided as value through streaming.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrictStr</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.description" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.errcode">
+<span class="sig-name descname"><span class="pre">errcode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrictInt</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.errcode" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.from_dict">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_error_update.html#ValueRunErrorUpdate.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Create an instance of ValueRunErrorUpdate from a dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.from_json">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_error_update.html#ValueRunErrorUpdate.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Create an instance of ValueRunErrorUpdate from a JSON string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'populate_by_name':</span> <span class="pre">True,</span> <span class="pre">'protected_namespaces':</span> <span class="pre">(),</span> <span class="pre">'validate_assignment':</span> <span class="pre">True,</span> <span class="pre">'validate_by_alias':</span> <span class="pre">True,</span> <span class="pre">'validate_by_name':</span> <span class="pre">True}</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.run_id">
+<span class="sig-name descname"><span class="pre">run_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrictStr</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.run_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RunStatus</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.status" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_error_update.html#ValueRunErrorUpdate.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Return the dictionary representation of the model using alias.</p>
+<p>This has the following differences from calling pydantic’s
+<cite>self.model_dump(by_alias=True)</cite>:</p>
+<ul class="simple">
+<li><p><cite>None</cite> is only added to the output dict for nullable fields that
+were set at model initialization. Other fields with value <cite>None</cite>
+are ignored.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_error_update.html#ValueRunErrorUpdate.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the JSON representation of the model using alias</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_error_update.html#ValueRunErrorUpdate.to_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.to_str" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the string representation of the model using alias</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrictStr</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunErrorUpdate.type_validate_enum">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_validate_enum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_error_update.html#ValueRunErrorUpdate.type_validate_enum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunErrorUpdate.type_validate_enum" title="Link to this definition">¶</a></dt>
+<dd><p>Validates the enum</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">agntcy_acp.models.</span></span><span class="sig-name descname"><span class="pre">ValueRunInterruptUpdate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_interrupt_update.html#ValueRunInterruptUpdate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Partial result provided as value through streaming.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.from_dict">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_interrupt_update.html#ValueRunInterruptUpdate.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Create an instance of ValueRunInterruptUpdate from a dict</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.from_json">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_interrupt_update.html#ValueRunInterruptUpdate.from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.from_json" title="Link to this definition">¶</a></dt>
+<dd><p>Create an instance of ValueRunInterruptUpdate from a JSON string</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.interrupt">
+<span class="sig-name descname"><span class="pre">interrupt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict[str,</span> <span class="pre">Any]</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.interrupt" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'populate_by_name':</span> <span class="pre">True,</span> <span class="pre">'protected_namespaces':</span> <span class="pre">(),</span> <span class="pre">'validate_assignment':</span> <span class="pre">True,</span> <span class="pre">'validate_by_alias':</span> <span class="pre">True,</span> <span class="pre">'validate_by_name':</span> <span class="pre">True}</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.model_config" title="Link to this definition">¶</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.run_id">
+<span class="sig-name descname"><span class="pre">run_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrictStr</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.run_id" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RunStatus</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.status" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_interrupt_update.html#ValueRunInterruptUpdate.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Return the dictionary representation of the model using alias.</p>
+<p>This has the following differences from calling pydantic’s
+<cite>self.model_dump(by_alias=True)</cite>:</p>
+<ul class="simple">
+<li><p><cite>None</cite> is only added to the output dict for nullable fields that
+were set at model initialization. Other fields with value <cite>None</cite>
+are ignored.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_interrupt_update.html#ValueRunInterruptUpdate.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the JSON representation of the model using alias</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_interrupt_update.html#ValueRunInterruptUpdate.to_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.to_str" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the string representation of the model using alias</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StrictStr</span></em><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.type" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="agntcy_acp.models.ValueRunInterruptUpdate.type_validate_enum">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_validate_enum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/agntcy_acp/acp_v0/models/value_run_interrupt_update.html#ValueRunInterruptUpdate.type_validate_enum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#agntcy_acp.models.ValueRunInterruptUpdate.type_validate_enum" title="Link to this definition">¶</a></dt>
+<dd><p>Validates the enum</p>
 </dd></dl>
 
 </dd></dl>
