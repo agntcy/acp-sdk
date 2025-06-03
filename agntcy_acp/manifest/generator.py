@@ -2,26 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 import json
 import os
-import shutil
-import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import datamodel_code_generator
 import yaml
 from openapi_spec_validator import validate
 from openapi_spec_validator.readers import read_from_filename
 
+from ..agws_v0 import OASF_EXTENSION_NAME_MANIFEST, AgentManifest
 from ..exceptions import ACPDescriptorValidationException
 from ..models import (
     AgentACPDescriptor,
     AgentACPSpec,
     StreamingMode,
-)
-
-CLIENT_SCRIPT_PATH = os.path.join(
-    os.path.dirname(__file__), "scripts/create_acp_client.sh"
 )
 
 
@@ -33,24 +28,22 @@ def _convert_descriptor_schema(schema_name, schema):
     )
 
 
-def _gen_oas_thread_runs(descriptor: AgentACPDescriptor, spec_dict):
+def _gen_oas_thread_runs(descriptor: AgentACPSpec, spec_dict):
     # Manipulate the spec according to the thread capability flag in the descriptor
 
-    if descriptor.specs.capabilities.threads:
-        if descriptor.specs.thread_state:
+    if descriptor.capabilities.threads:
+        if descriptor.thread_state:
             spec_dict["components"]["schemas"]["ThreadStateSchema"] = (
-                _convert_descriptor_schema(
-                    "ThreadStateSchema", descriptor.specs.thread_state
-                )
+                _convert_descriptor_schema("ThreadStateSchema", descriptor.thread_state)
             )
         # else:
         #    # No thread schema defined, hence no support to retrieve thread state
         #    del spec_dict['paths']['/threads/{thread_id}/state']
     else:
         # Threads are not enabled
-        if descriptor.specs.thread_state:
+        if descriptor.thread_state:
             raise ACPDescriptorValidationException(
-                "Cannot define `specs.thread_state` if `specs.capabilities.threads` is `false`"
+                "Cannot define `thread_state` if `capabilities.threads` is `false`"
             )
         else:
             # Remove all threads paths
@@ -64,44 +57,42 @@ def _gen_oas_thread_runs(descriptor: AgentACPDescriptor, spec_dict):
             }
 
 
-def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
+def _gen_oas_interrupts(descriptor: AgentACPSpec, spec_dict):
     # Manipulate the spec according to the interrupts capability flag in the descriptor
 
-    if descriptor.specs.capabilities.interrupts:
-        if not descriptor.specs.interrupts or len(descriptor.specs.interrupts) == 0:
+    if descriptor.capabilities.interrupts:
+        if not descriptor.interrupts or len(descriptor.interrupts) == 0:
             raise ACPDescriptorValidationException(
                 "Missing interrupt definitions with `spec.capabilities.interrupts=true`"
             )
 
         # Add the interrupt payload and resume payload types for the schemas declared in the descriptor
-        spec_dict["components"]["schemas"]["InterruptPayloadSchema"] = {
+        interrupt_payload_schema = spec_dict["components"]["schemas"][
+            "InterruptPayloadSchema"
+        ] = {
             "oneOf": [],
-            "discriminator": {"propertyName": "interrupt_type", "mapping": {}},
         }
-        spec_dict["components"]["schemas"]["ResumePayloadSchema"] = {
+        resume_payload_schema = spec_dict["components"]["schemas"][
+            "ResumePayloadSchema"
+        ] = {
             "oneOf": [],
-            "discriminator": {"propertyName": "interrupt_type", "mapping": {}},
         }
-        for interrupt in descriptor.specs.interrupts:
-            assert interrupt.interrupt_payload["type"] == "object"
-
+        for interrupt in descriptor.interrupts:
             interrupt_payload_schema_name = (
                 f"{interrupt.interrupt_type}InterruptPayload"
             )
-            interrupt.interrupt_payload["properties"]["interrupt_type"] = {
-                "title": "Interrupt Type",
-                "type": "string",
-                "enum": [interrupt.interrupt_type],
-                "description": "interrupt type which this payload is for",
-            }
-            spec_dict["components"]["schemas"]["InterruptPayloadSchema"][
-                "oneOf"
-            ].append({"$ref": f"#/components/schemas/{interrupt_payload_schema_name}"})
-            spec_dict["components"]["schemas"]["InterruptPayloadSchema"][
-                "discriminator"
-            ]["mapping"][
-                interrupt.interrupt_type
-            ] = f"#/components/schemas/{interrupt_payload_schema_name}"
+            interrupt_payload_schema["oneOf"].append(
+                {
+                    "type": "object",
+                    "properties": {
+                        interrupt.interrupt_type: {
+                            "$ref": f"#/components/schemas/{interrupt_payload_schema_name}",
+                        },
+                    },
+                    "additionalProperties": False,
+                    "required": [interrupt.interrupt_type],
+                }
+            )
             spec_dict["components"]["schemas"][interrupt_payload_schema_name] = (
                 _convert_descriptor_schema(
                     interrupt_payload_schema_name, interrupt.interrupt_payload
@@ -109,18 +100,18 @@ def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
             )
 
             resume_payload_schema_name = f"{interrupt.interrupt_type}ResumePayload"
-            interrupt.resume_payload["properties"]["interrupt_type"] = (
-                interrupt.interrupt_payload["properties"]["interrupt_type"]
+            resume_payload_schema["oneOf"].append(
+                {
+                    "type": "object",
+                    "properties": {
+                        interrupt.interrupt_type: {
+                            "$ref": f"#/components/schemas/{resume_payload_schema_name}",
+                        },
+                    },
+                    "additionalProperties": False,
+                    "required": [interrupt.interrupt_type],
+                }
             )
-
-            spec_dict["components"]["schemas"]["ResumePayloadSchema"]["oneOf"].append(
-                {"$ref": f"#/components/schemas/{resume_payload_schema_name}"}
-            )
-            spec_dict["components"]["schemas"]["ResumePayloadSchema"]["discriminator"][
-                "mapping"
-            ][
-                interrupt.interrupt_type
-            ] = f"#/components/schemas/{resume_payload_schema_name}"
             spec_dict["components"]["schemas"][resume_payload_schema_name] = (
                 _convert_descriptor_schema(
                     resume_payload_schema_name, interrupt.resume_payload
@@ -129,7 +120,7 @@ def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
     else:
         # Interrupts are not supported
 
-        if descriptor.specs.interrupts and len(descriptor.specs.interrupts) > 0:
+        if descriptor.interrupts and len(descriptor.interrupts) > 0:
             raise ACPDescriptorValidationException(
                 "Interrupts defined with `spec.capabilities.interrupts=false`"
             )
@@ -149,19 +140,19 @@ def _gen_oas_interrupts(descriptor: AgentACPDescriptor, spec_dict):
         ]
 
 
-def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
+def _gen_oas_streaming(descriptor: AgentACPSpec, spec_dict):
     # Manipulate the spec according to the streaming capability flag in the descriptor
     streaming_modes = []
-    if descriptor.specs.capabilities.streaming:
-        if descriptor.specs.capabilities.streaming.custom:
+    if descriptor.capabilities.streaming:
+        if descriptor.capabilities.streaming.custom:
             streaming_modes.append(StreamingMode.CUSTOM)
-        if descriptor.specs.capabilities.streaming.values:
+        if descriptor.capabilities.streaming.values:
             streaming_modes.append(StreamingMode.VALUES)
 
     # Perform the checks for custom_streaming_update
     if (
         StreamingMode.CUSTOM not in streaming_modes
-        and descriptor.specs.custom_streaming_update
+        and descriptor.custom_streaming_update
     ):
         raise ACPDescriptorValidationException(
             "custom_streaming_update defined with `spec.capabilities.streaming.custom=false`"
@@ -169,7 +160,7 @@ def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
 
     if (
         StreamingMode.CUSTOM in streaming_modes
-        and not descriptor.specs.custom_streaming_update
+        and not descriptor.custom_streaming_update
     ):
         raise ACPDescriptorValidationException(
             "Missing custom_streaming_update definitions with `spec.capabilities.streaming.custom=true`"
@@ -204,9 +195,9 @@ def _gen_oas_streaming(descriptor: AgentACPDescriptor, spec_dict):
     ]
 
 
-def _gen_oas_callback(descriptor: AgentACPDescriptor, spec_dict):
+def _gen_oas_callback(descriptor: AgentACPSpec, spec_dict):
     # Manipulate the spec according to the callback capability flag in the descriptor
-    if not descriptor.specs.capabilities.callbacks:
+    if not descriptor.capabilities.callbacks:
         # No streaming is supported. Removing callback option from RunCreate
         del spec_dict["components"]["schemas"]["RunCreate"]["properties"]["webhook"]
 
@@ -233,43 +224,68 @@ def generate_agent_oapi_for_schemas(specs: AgentACPSpec):
 
 
 def generate_agent_oapi(
-    descriptor: AgentACPDescriptor, spec_path: Optional[str] = None
+    descriptor: Union[AgentACPDescriptor, AgentManifest],
+    spec_path: Optional[str] = None,
 ):
     if spec_path is None:
         spec_path = os.getenv("ACP_SPEC_PATH", "acp-spec/openapi.json")
-
-    spec_dict, base_uri = read_from_filename(spec_path)
-
+    spec_dict, _ = read_from_filename(spec_path)
     # If no exception is raised by validate(), the spec is valid.
     validate(spec_dict)
 
-    spec_dict["info"]["title"] = (
-        f"ACP Spec for {descriptor.metadata.ref.name}:{descriptor.metadata.ref.version}"
-    )
+    agent_spec = None
+    if isinstance(descriptor, AgentACPDescriptor):
+        agent_spec = descriptor.specs
+        agent_name = descriptor.metadata.ref.name
+    elif isinstance(descriptor, AgentManifest):
+        for ext in descriptor.extensions:
+            if ext.name == OASF_EXTENSION_NAME_MANIFEST:
+                agent_spec = ext.data.acp
+                agent_name = descriptor.name
+    else:
+        raise ValueError("unknown object type for descriptor")
+
+    spec_dict["info"]["title"] = f"ACP Spec for {agent_name}"
 
     spec_dict["components"]["schemas"]["InputSchema"] = _convert_descriptor_schema(
-        "InputSchema", descriptor.specs.input
+        "InputSchema", agent_spec.input
     )
     spec_dict["components"]["schemas"]["OutputSchema"] = _convert_descriptor_schema(
-        "OutputSchema", descriptor.specs.output
+        "OutputSchema", agent_spec.output
     )
     spec_dict["components"]["schemas"]["ConfigSchema"] = _convert_descriptor_schema(
-        "ConfigSchema", descriptor.specs.config
+        "ConfigSchema", agent_spec.config
     )
 
-    _gen_oas_thread_runs(descriptor, spec_dict)
-    _gen_oas_interrupts(descriptor, spec_dict)
-    _gen_oas_streaming(descriptor, spec_dict)
-    _gen_oas_callback(descriptor, spec_dict)
+    _gen_oas_thread_runs(agent_spec, spec_dict)
+    _gen_oas_interrupts(agent_spec, spec_dict)
+    _gen_oas_streaming(agent_spec, spec_dict)
+    _gen_oas_callback(agent_spec, spec_dict)
 
     validate(spec_dict)
     return spec_dict
 
 
 def generate_agent_models(
-    descriptor: AgentACPDescriptor, path: str, model_file_name: str = "models.py"
+    descriptor: Union[AgentACPDescriptor, AgentManifest],
+    path: str,
+    model_file_name: str = "models.py",
 ):
-    agent_spec = generate_agent_oapi_for_schemas(descriptor.specs)
+    agent_spec = None
+    if isinstance(descriptor, AgentACPDescriptor):
+        agent_spec = generate_agent_oapi_for_schemas(descriptor.specs)
+        agent_name = descriptor.metadata.ref.name
+    elif isinstance(descriptor, AgentManifest):
+        for ext in descriptor.extensions:
+            if ext.name == OASF_EXTENSION_NAME_MANIFEST:
+                agent_spec = generate_agent_oapi_for_schemas(ext.data.acp)
+                agent_name = descriptor.name
+    else:
+        raise ValueError("unknown object type for descriptor")
+
+    if agent_spec is None:
+        raise ValueError("cannot find ACP descriptor")
+
     agent_sdk_path = path  # os.path.join(path, f'{descriptor.metadata.ref.name}')
     agent_models_dir = agent_sdk_path
     tmp_dir = tempfile.TemporaryDirectory()
@@ -288,26 +304,7 @@ def generate_agent_models(
         output_model_type=datamodel_code_generator.DataModelType.PydanticV2BaseModel,
         output=Path(modelspath),
         disable_timestamp=True,
-        custom_file_header=f"# Generated from ACP Descriptor {descriptor.metadata.ref.name} using datamodel_code_generator.",
+        custom_file_header=f"# Generated from ACP Descriptor {agent_name} using datamodel_code_generator.",
         keep_model_order=True,
         use_double_quotes=True,  # match ruff formatting
-    )
-
-
-def generate_agent_client(descriptor: AgentACPDescriptor, path: str):
-    agent_spec = generate_agent_oapi(descriptor)
-    agent_sdk_path = os.path.join(path, f"{descriptor.metadata.ref.name}")
-    os.makedirs(agent_sdk_path, exist_ok=True)
-    specpath = os.path.join(agent_sdk_path, "openapi.yaml")
-
-    with open(specpath, "w") as file:
-        yaml.dump(agent_spec, file, default_flow_style=False)
-
-    shutil.copy(CLIENT_SCRIPT_PATH, agent_sdk_path)
-    subprocess.run(
-        [
-            "/bin/bash",
-            "create_acp_client.sh",
-        ],
-        cwd=agent_sdk_path,
     )

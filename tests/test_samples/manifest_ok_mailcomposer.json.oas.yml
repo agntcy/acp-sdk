@@ -96,6 +96,10 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         custom_streaming_update:
           description: 'This describes the format of an Update in the streaming.  Must
@@ -131,6 +135,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         interrupts:
           description: List of possible interrupts that can be provided by the agent.
@@ -198,6 +206,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         thread_state:
           description: 'This describes the format of ThreadState.  Cannot be specified
@@ -218,6 +230,9 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            type: integer
           type: object
       required:
       - capabilities
@@ -294,277 +309,13 @@ components:
       title: AgentSearchRequest
       type: object
     ConfigSchema:
-      $defs:
-        AIMessage:
-          additionalProperties: true
-          description: 'Message from an AI.
-
-
-            AIMessage is returned from a chat model as a response to a prompt.
-
-
-            This message represents the output of the model and consists of both
-
-            the raw output as returned by the model together standardized fields
-
-            (e.g., tool calls, usage metadata) added by the LangChain framework.'
-          properties:
-            additional_kwargs:
-              title: Additional Kwargs
-              type: object
-            content:
-              anyOf:
-              - type: string
-              - items:
-                  anyOf:
-                  - type: string
-                  - type: object
-                type: array
-              title: Content
-            example:
-              default: false
-              title: Example
-              type: boolean
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Id
-            invalid_tool_calls:
-              default: []
-              items:
-                $ref: '#/components/schemas/ConfigSchema/$defs/InvalidToolCall'
-              title: Invalid Tool Calls
-              type: array
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Name
-            response_metadata:
-              title: Response Metadata
-              type: object
-            tool_calls:
-              default: []
-              items:
-                $ref: '#/components/schemas/ConfigSchema/$defs/ToolCall'
-              title: Tool Calls
-              type: array
-            type:
-              const: ai
-              default: ai
-              title: Type
-              type: string
-            usage_metadata:
-              anyOf:
-              - $ref: '#/components/schemas/ConfigSchema/$defs/UsageMetadata'
-              - type: 'null'
-              default: null
-          required:
-          - content
-          title: AIMessage
-          type: object
-        HumanMessage:
-          additionalProperties: true
-          description: "Message from a human.\n\nHumanMessages are messages that are\
-            \ passed in from a human to the model.\n\nExample:\n\n    .. code-block::\
-            \ python\n\n        from langchain_core.messages import HumanMessage,\
-            \ SystemMessage\n\n        messages = [\n            SystemMessage(\n\
-            \                content=\"You are a helpful assistant! Your name is Bob.\"\
-            \n            ),\n            HumanMessage(\n                content=\"\
-            What is your name?\"\n            )\n        ]\n\n        # Instantiate\
-            \ a chat model and invoke it with the messages\n        model = ...\n\
-            \        print(model.invoke(messages))"
-          properties:
-            additional_kwargs:
-              title: Additional Kwargs
-              type: object
-            content:
-              anyOf:
-              - type: string
-              - items:
-                  anyOf:
-                  - type: string
-                  - type: object
-                type: array
-              title: Content
-            example:
-              default: false
-              title: Example
-              type: boolean
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Id
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Name
-            response_metadata:
-              title: Response Metadata
-              type: object
-            type:
-              const: human
-              default: human
-              title: Type
-              type: string
-          required:
-          - content
-          title: HumanMessage
-          type: object
-        InputTokenDetails:
-          description: "Breakdown of input token counts.\n\nDoes *not* need to sum\
-            \ to full input token count. Does *not* need to have all keys.\n\nExample:\n\
-            \n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n\
-            \            \"cache_creation\": 200,\n            \"cache_read\": 100,\n\
-            \        }\n\n.. versionadded:: 0.3.9"
-          properties:
-            audio:
-              title: Audio
-              type: integer
-            cache_creation:
-              title: Cache Creation
-              type: integer
-            cache_read:
-              title: Cache Read
-              type: integer
-          title: InputTokenDetails
-          type: object
-        InvalidToolCall:
-          description: 'Allowance for errors made by LLM.
-
-
-            Here we add an `error` key to surface errors made during generation
-
-            (e.g., invalid JSON arguments.)'
-          properties:
-            args:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Args
-            error:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Error
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Id
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Name
-            type:
-              const: invalid_tool_call
-              title: Type
-              type: string
-          required:
-          - name
-          - args
-          - id
-          - error
-          title: InvalidToolCall
-          type: object
-        OutputTokenDetails:
-          description: "Breakdown of output token counts.\n\nDoes *not* need to sum\
-            \ to full output token count. Does *not* need to have all keys.\n\nExample:\n\
-            \n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n\
-            \            \"reasoning\": 200,\n        }\n\n.. versionadded:: 0.3.9"
-          properties:
-            audio:
-              title: Audio
-              type: integer
-            reasoning:
-              title: Reasoning
-              type: integer
-          title: OutputTokenDetails
-          type: object
-        ToolCall:
-          description: "Represents a request to call a tool.\n\nExample:\n\n    ..\
-            \ code-block:: python\n\n        {\n            \"name\": \"foo\",\n \
-            \           \"args\": {\"a\": 1},\n            \"id\": \"123\"\n     \
-            \   }\n\n    This represents a request to call the tool named \"foo\"\
-            \ with arguments {\"a\": 1}\n    and an identifier of \"123\"."
-          properties:
-            args:
-              title: Args
-              type: object
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Id
-            name:
-              title: Name
-              type: string
-            type:
-              const: tool_call
-              title: Type
-              type: string
-          required:
-          - name
-          - args
-          - id
-          title: ToolCall
-          type: object
-        UsageMetadata:
-          description: "Usage metadata for a message, such as token counts.\n\nThis\
-            \ is a standard representation of token usage that is consistent across\
-            \ models.\n\nExample:\n\n    .. code-block:: python\n\n        {\n   \
-            \         \"input_tokens\": 350,\n            \"output_tokens\": 240,\n\
-            \            \"total_tokens\": 590,\n            \"input_token_details\"\
-            : {\n                \"audio\": 10,\n                \"cache_creation\"\
-            : 200,\n                \"cache_read\": 100,\n            },\n       \
-            \     \"output_token_details\": {\n                \"audio\": 10,\n  \
-            \              \"reasoning\": 200,\n            }\n        }\n\n.. versionchanged::\
-            \ 0.3.9\n\n    Added ``input_token_details`` and ``output_token_details``."
-          properties:
-            input_token_details:
-              $ref: '#/components/schemas/ConfigSchema/$defs/InputTokenDetails'
-            input_tokens:
-              title: Input Tokens
-              type: integer
-            output_token_details:
-              $ref: '#/components/schemas/ConfigSchema/$defs/OutputTokenDetails'
-            output_tokens:
-              title: Output Tokens
-              type: integer
-            total_tokens:
-              title: Total Tokens
-              type: integer
-          required:
-          - input_tokens
-          - output_tokens
-          - total_tokens
-          title: UsageMetadata
-          type: object
       properties:
-        final_email:
-          title: Final Email
-          type: string
-        is_completed:
-          title: Is Completed
+        test:
+          title: Test
           type: boolean
-        messages:
-          items:
-            anyOf:
-            - $ref: '#/components/schemas/ConfigSchema/$defs/AIMessage'
-            - $ref: '#/components/schemas/ConfigSchema/$defs/HumanMessage'
-          title: Messages
-          type: array
       required:
-      - final_email
-      title: OutputState
+      - test
+      title: ConfigSchema
       type: object
     CustomRunResultUpdate:
       description: Object holding a custom defined update of the agent result during
@@ -598,283 +349,54 @@ components:
       type: string
     InputSchema:
       $defs:
-        AIMessage:
-          additionalProperties: true
-          description: 'Message from an AI.
-
-
-            AIMessage is returned from a chat model as a response to a prompt.
-
-
-            This message represents the output of the model and consists of both
-
-            the raw output as returned by the model together standardized fields
-
-            (e.g., tool calls, usage metadata) added by the LangChain framework.'
+        Message:
           properties:
-            additional_kwargs:
-              title: Additional Kwargs
-              type: object
             content:
-              anyOf:
-              - type: string
-              - items:
-                  anyOf:
-                  - type: string
-                  - type: object
-                type: array
+              description: the content of the message
               title: Content
-            example:
-              default: false
-              title: Example
-              type: boolean
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Id
-            invalid_tool_calls:
-              default: []
-              items:
-                $ref: '#/components/schemas/InputSchema/$defs/InvalidToolCall'
-              title: Invalid Tool Calls
-              type: array
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Name
-            response_metadata:
-              title: Response Metadata
-              type: object
-            tool_calls:
-              default: []
-              items:
-                $ref: '#/components/schemas/InputSchema/$defs/ToolCall'
-              title: Tool Calls
-              type: array
-            type:
-              const: ai
-              default: ai
-              title: Type
               type: string
-            usage_metadata:
-              anyOf:
-              - $ref: '#/components/schemas/InputSchema/$defs/UsageMetadata'
-              - type: 'null'
-              default: null
+            type:
+              $ref: '#/components/schemas/InputSchema/$defs/Type'
+              description: indicates the originator of the message, a human or an
+                assistant
           required:
+          - type
           - content
-          title: AIMessage
+          title: Message
           type: object
-        HumanMessage:
-          additionalProperties: true
-          description: "Message from a human.\n\nHumanMessages are messages that are\
-            \ passed in from a human to the model.\n\nExample:\n\n    .. code-block::\
-            \ python\n\n        from langchain_core.messages import HumanMessage,\
-            \ SystemMessage\n\n        messages = [\n            SystemMessage(\n\
-            \                content=\"You are a helpful assistant! Your name is Bob.\"\
-            \n            ),\n            HumanMessage(\n                content=\"\
-            What is your name?\"\n            )\n        ]\n\n        # Instantiate\
-            \ a chat model and invoke it with the messages\n        model = ...\n\
-            \        print(model.invoke(messages))"
-          properties:
-            additional_kwargs:
-              title: Additional Kwargs
-              type: object
-            content:
-              anyOf:
-              - type: string
-              - items:
-                  anyOf:
-                  - type: string
-                  - type: object
-                type: array
-              title: Content
-            example:
-              default: false
-              title: Example
-              type: boolean
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Id
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Name
-            response_metadata:
-              title: Response Metadata
-              type: object
-            type:
-              const: human
-              default: human
-              title: Type
-              type: string
-          required:
-          - content
-          title: HumanMessage
-          type: object
-        InputTokenDetails:
-          description: "Breakdown of input token counts.\n\nDoes *not* need to sum\
-            \ to full input token count. Does *not* need to have all keys.\n\nExample:\n\
-            \n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n\
-            \            \"cache_creation\": 200,\n            \"cache_read\": 100,\n\
-            \        }\n\n.. versionadded:: 0.3.9"
-          properties:
-            audio:
-              title: Audio
-              type: integer
-            cache_creation:
-              title: Cache Creation
-              type: integer
-            cache_read:
-              title: Cache Read
-              type: integer
-          title: InputTokenDetails
-          type: object
-        InvalidToolCall:
-          description: 'Allowance for errors made by LLM.
-
-
-            Here we add an `error` key to surface errors made during generation
-
-            (e.g., invalid JSON arguments.)'
-          properties:
-            args:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Args
-            error:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Error
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Id
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Name
-            type:
-              const: invalid_tool_call
-              title: Type
-              type: string
-          required:
-          - name
-          - args
-          - id
-          - error
-          title: InvalidToolCall
-          type: object
-        OutputTokenDetails:
-          description: "Breakdown of output token counts.\n\nDoes *not* need to sum\
-            \ to full output token count. Does *not* need to have all keys.\n\nExample:\n\
-            \n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n\
-            \            \"reasoning\": 200,\n        }\n\n.. versionadded:: 0.3.9"
-          properties:
-            audio:
-              title: Audio
-              type: integer
-            reasoning:
-              title: Reasoning
-              type: integer
-          title: OutputTokenDetails
-          type: object
-        ToolCall:
-          description: "Represents a request to call a tool.\n\nExample:\n\n    ..\
-            \ code-block:: python\n\n        {\n            \"name\": \"foo\",\n \
-            \           \"args\": {\"a\": 1},\n            \"id\": \"123\"\n     \
-            \   }\n\n    This represents a request to call the tool named \"foo\"\
-            \ with arguments {\"a\": 1}\n    and an identifier of \"123\"."
-          properties:
-            args:
-              title: Args
-              type: object
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Id
-            name:
-              title: Name
-              type: string
-            type:
-              const: tool_call
-              title: Type
-              type: string
-          required:
-          - name
-          - args
-          - id
-          title: ToolCall
-          type: object
-        UsageMetadata:
-          description: "Usage metadata for a message, such as token counts.\n\nThis\
-            \ is a standard representation of token usage that is consistent across\
-            \ models.\n\nExample:\n\n    .. code-block:: python\n\n        {\n   \
-            \         \"input_tokens\": 350,\n            \"output_tokens\": 240,\n\
-            \            \"total_tokens\": 590,\n            \"input_token_details\"\
-            : {\n                \"audio\": 10,\n                \"cache_creation\"\
-            : 200,\n                \"cache_read\": 100,\n            },\n       \
-            \     \"output_token_details\": {\n                \"audio\": 10,\n  \
-            \              \"reasoning\": 200,\n            }\n        }\n\n.. versionchanged::\
-            \ 0.3.9\n\n    Added ``input_token_details`` and ``output_token_details``."
-          properties:
-            input_token_details:
-              $ref: '#/components/schemas/InputSchema/$defs/InputTokenDetails'
-            input_tokens:
-              title: Input Tokens
-              type: integer
-            output_token_details:
-              $ref: '#/components/schemas/InputSchema/$defs/OutputTokenDetails'
-            output_tokens:
-              title: Output Tokens
-              type: integer
-            total_tokens:
-              title: Total Tokens
-              type: integer
-          required:
-          - input_tokens
-          - output_tokens
-          - total_tokens
-          title: UsageMetadata
-          type: object
+        Type:
+          enum:
+          - human
+          - assistant
+          - ai
+          title: Type
+          type: string
       properties:
         is_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
           title: Is Completed
-          type: boolean
         messages:
-          items:
-            anyOf:
-            - $ref: '#/components/schemas/InputSchema/$defs/AIMessage'
-            - $ref: '#/components/schemas/InputSchema/$defs/HumanMessage'
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/InputSchema/$defs/Message'
+            type: array
+          - type: 'null'
+          default: null
           title: Messages
-          type: array
       title: AgentState
       type: object
     InterruptPayloadSchema:
-      description: "This schema describes the interrupt payload. Actual schema describes\
-        \ a polimorphic object, which means a schema structured with `oneOf` and `discriminator`.\
-        \ The discriminator is the `interrupt_type`, while the schemas will be the\
-        \ ones defined in the agent spec under `interrupts`/`interrupt_payload` For\
-        \ example:          oneOf:\n  - $ref: '#/components/schemas/ApprovalInterruptPayload'\n\
-        \  - $ref: '#/components/schemas/QuestionInterruptPayload'\ndiscriminator:\n\
-        \  propertyName: interruput_type\n  mapping:\n    approval: '#/components/schemas/ApprovalInterruptPayload'\n\
-        \    question: '#/components/schemas/QuestionInterruptPayload'"
-      title: Interrupt Payload
-      type: object
+      oneOf:
+      - additionalProperties: false
+        properties:
+          format_email:
+            $ref: '#/components/schemas/format_emailInterruptPayload'
+        required:
+        - format_email
+        type: object
     Message:
       properties:
         content:
@@ -924,288 +446,61 @@ components:
       type: object
     OutputSchema:
       $defs:
-        AIMessage:
-          additionalProperties: true
-          description: 'Message from an AI.
-
-
-            AIMessage is returned from a chat model as a response to a prompt.
-
-
-            This message represents the output of the model and consists of both
-
-            the raw output as returned by the model together standardized fields
-
-            (e.g., tool calls, usage metadata) added by the LangChain framework.'
+        Message:
           properties:
-            additional_kwargs:
-              title: Additional Kwargs
-              type: object
             content:
-              anyOf:
-              - type: string
-              - items:
-                  anyOf:
-                  - type: string
-                  - type: object
-                type: array
+              description: the content of the message
               title: Content
-            example:
-              default: false
-              title: Example
-              type: boolean
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Id
-            invalid_tool_calls:
-              default: []
-              items:
-                $ref: '#/components/schemas/OutputSchema/$defs/InvalidToolCall'
-              title: Invalid Tool Calls
-              type: array
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Name
-            response_metadata:
-              title: Response Metadata
-              type: object
-            tool_calls:
-              default: []
-              items:
-                $ref: '#/components/schemas/OutputSchema/$defs/ToolCall'
-              title: Tool Calls
-              type: array
-            type:
-              const: ai
-              default: ai
-              title: Type
               type: string
-            usage_metadata:
-              anyOf:
-              - $ref: '#/components/schemas/OutputSchema/$defs/UsageMetadata'
-              - type: 'null'
-              default: null
+            type:
+              $ref: '#/components/schemas/OutputSchema/$defs/Type'
+              description: indicates the originator of the message, a human or an
+                assistant
           required:
+          - type
           - content
-          title: AIMessage
+          title: Message
           type: object
-        HumanMessage:
-          additionalProperties: true
-          description: "Message from a human.\n\nHumanMessages are messages that are\
-            \ passed in from a human to the model.\n\nExample:\n\n    .. code-block::\
-            \ python\n\n        from langchain_core.messages import HumanMessage,\
-            \ SystemMessage\n\n        messages = [\n            SystemMessage(\n\
-            \                content=\"You are a helpful assistant! Your name is Bob.\"\
-            \n            ),\n            HumanMessage(\n                content=\"\
-            What is your name?\"\n            )\n        ]\n\n        # Instantiate\
-            \ a chat model and invoke it with the messages\n        model = ...\n\
-            \        print(model.invoke(messages))"
-          properties:
-            additional_kwargs:
-              title: Additional Kwargs
-              type: object
-            content:
-              anyOf:
-              - type: string
-              - items:
-                  anyOf:
-                  - type: string
-                  - type: object
-                type: array
-              title: Content
-            example:
-              default: false
-              title: Example
-              type: boolean
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Id
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              default: null
-              title: Name
-            response_metadata:
-              title: Response Metadata
-              type: object
-            type:
-              const: human
-              default: human
-              title: Type
-              type: string
-          required:
-          - content
-          title: HumanMessage
-          type: object
-        InputTokenDetails:
-          description: "Breakdown of input token counts.\n\nDoes *not* need to sum\
-            \ to full input token count. Does *not* need to have all keys.\n\nExample:\n\
-            \n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n\
-            \            \"cache_creation\": 200,\n            \"cache_read\": 100,\n\
-            \        }\n\n.. versionadded:: 0.3.9"
-          properties:
-            audio:
-              title: Audio
-              type: integer
-            cache_creation:
-              title: Cache Creation
-              type: integer
-            cache_read:
-              title: Cache Read
-              type: integer
-          title: InputTokenDetails
-          type: object
-        InvalidToolCall:
-          description: 'Allowance for errors made by LLM.
-
-
-            Here we add an `error` key to surface errors made during generation
-
-            (e.g., invalid JSON arguments.)'
-          properties:
-            args:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Args
-            error:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Error
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Id
-            name:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Name
-            type:
-              const: invalid_tool_call
-              title: Type
-              type: string
-          required:
-          - name
-          - args
-          - id
-          - error
-          title: InvalidToolCall
-          type: object
-        OutputTokenDetails:
-          description: "Breakdown of output token counts.\n\nDoes *not* need to sum\
-            \ to full output token count. Does *not* need to have all keys.\n\nExample:\n\
-            \n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n\
-            \            \"reasoning\": 200,\n        }\n\n.. versionadded:: 0.3.9"
-          properties:
-            audio:
-              title: Audio
-              type: integer
-            reasoning:
-              title: Reasoning
-              type: integer
-          title: OutputTokenDetails
-          type: object
-        ToolCall:
-          description: "Represents a request to call a tool.\n\nExample:\n\n    ..\
-            \ code-block:: python\n\n        {\n            \"name\": \"foo\",\n \
-            \           \"args\": {\"a\": 1},\n            \"id\": \"123\"\n     \
-            \   }\n\n    This represents a request to call the tool named \"foo\"\
-            \ with arguments {\"a\": 1}\n    and an identifier of \"123\"."
-          properties:
-            args:
-              title: Args
-              type: object
-            id:
-              anyOf:
-              - type: string
-              - type: 'null'
-              title: Id
-            name:
-              title: Name
-              type: string
-            type:
-              const: tool_call
-              title: Type
-              type: string
-          required:
-          - name
-          - args
-          - id
-          title: ToolCall
-          type: object
-        UsageMetadata:
-          description: "Usage metadata for a message, such as token counts.\n\nThis\
-            \ is a standard representation of token usage that is consistent across\
-            \ models.\n\nExample:\n\n    .. code-block:: python\n\n        {\n   \
-            \         \"input_tokens\": 350,\n            \"output_tokens\": 240,\n\
-            \            \"total_tokens\": 590,\n            \"input_token_details\"\
-            : {\n                \"audio\": 10,\n                \"cache_creation\"\
-            : 200,\n                \"cache_read\": 100,\n            },\n       \
-            \     \"output_token_details\": {\n                \"audio\": 10,\n  \
-            \              \"reasoning\": 200,\n            }\n        }\n\n.. versionchanged::\
-            \ 0.3.9\n\n    Added ``input_token_details`` and ``output_token_details``."
-          properties:
-            input_token_details:
-              $ref: '#/components/schemas/OutputSchema/$defs/InputTokenDetails'
-            input_tokens:
-              title: Input Tokens
-              type: integer
-            output_token_details:
-              $ref: '#/components/schemas/OutputSchema/$defs/OutputTokenDetails'
-            output_tokens:
-              title: Output Tokens
-              type: integer
-            total_tokens:
-              title: Total Tokens
-              type: integer
-          required:
-          - input_tokens
-          - output_tokens
-          - total_tokens
-          title: UsageMetadata
-          type: object
+        Type:
+          enum:
+          - human
+          - assistant
+          - ai
+          title: Type
+          type: string
       properties:
         final_email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Final email produced by the mail composer, in html format
           title: Final Email
-          type: string
         is_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
           title: Is Completed
-          type: boolean
         messages:
-          items:
-            anyOf:
-            - $ref: '#/components/schemas/OutputSchema/$defs/AIMessage'
-            - $ref: '#/components/schemas/OutputSchema/$defs/HumanMessage'
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/OutputSchema/$defs/Message'
+            type: array
+          - type: 'null'
+          default: null
           title: Messages
-          type: array
-      required:
-      - final_email
       title: OutputState
       type: object
     ResumePayloadSchema:
-      description: "This schema describes the resume payload after an interrupt. Actual\
-        \ schema describes a polimorphic object, which means a schema structured with\
-        \ `oneOf` and `discriminator`. The discriminator is the `interrupt_type`,\
-        \ while the schemas will be those defined in the agent spec under `interrupts`/`resume_payload`\
-        \ For example:          oneOf:\n  - $ref: '#/components/schemas/ApprovalResumePayload'\n\
-        \  - $ref: '#/components/schemas/QuestionResumePayload'\ndiscriminator:\n\
-        \  propertyName: interrupt_type\n  mapping:\n    approval: '#/components/schemas/ApprovalResumePayload'\n\
-        \    question: '#/components/schemas/QuestionResumePayload'"
-      title: Resume Payload Schema
-      type: object
+      oneOf:
+      - additionalProperties: false
+        properties:
+          format_email:
+            $ref: '#/components/schemas/format_emailResumePayload'
+        required:
+        - format_email
+        type: object
     Run:
       description: Holds common information of a run
       properties:
@@ -1388,10 +683,12 @@ components:
       discriminator:
         mapping:
           error: '#/components/schemas/RunError'
+          interrupt: '#/components/schemas/RunInterrupt'
           result: '#/components/schemas/RunResult'
         propertyName: type
       oneOf:
       - $ref: '#/components/schemas/RunResult'
+      - $ref: '#/components/schemas/RunInterrupt'
       - $ref: '#/components/schemas/RunError'
       title: Run Output
     RunOutputStream:
@@ -1724,8 +1021,22 @@ components:
     ThreadStateSchema:
       description: The thread state. The schema is described in agent ACP descriptor
         under 'spec.thread_state'.
+      oneOf:
+      - description: 'This object contains an instance of an OpenAPI schema object,
+          formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+        type: object
+      - description: String thread state to the agent.
+        type: string
+      - description: Integer thread state to the agent.
+        type: integer
+      - description: Number thread state to the agent.
+        type: number
+      - description: Boolean thread state to the agent.
+        type: boolean
+      - description: Array input to the agent.
+        items: {}
+        type: array
       title: Thread State Schema
-      type: object
     ThreadStatus:
       enum:
       - idle
@@ -1808,9 +1119,59 @@ components:
       - values
       title: Value Run Result Update
       type: object
+    format_emailInterruptPayload:
+      $defs:
+        Message:
+          properties:
+            content:
+              description: the content of the message
+              title: Content
+              type: string
+            type:
+              $ref: '#/components/schemas/format_emailInterruptPayload/$defs/Type'
+              description: indicates the originator of the message, a human or an
+                assistant
+          required:
+          - type
+          - content
+          title: Message
+          type: object
+        Type:
+          enum:
+          - human
+          - assistant
+          - ai
+          title: Type
+          type: string
+      $ref: '#/components/schemas/format_emailInterruptPayload/$defs/Message'
+    format_emailResumePayload:
+      $defs:
+        Message:
+          properties:
+            content:
+              description: the content of the message
+              title: Content
+              type: string
+            type:
+              $ref: '#/components/schemas/format_emailResumePayload/$defs/Type'
+              description: indicates the originator of the message, a human or an
+                assistant
+          required:
+          - type
+          - content
+          title: Message
+          type: object
+        Type:
+          enum:
+          - human
+          - assistant
+          - ai
+          title: Type
+          type: string
+      $ref: '#/components/schemas/format_emailResumePayload/$defs/Message'
 info:
-  title: ACP Spec for org.agntcy.mailcomposer:0.0.1
-  version: 0.2.2
+  title: ACP Spec for org.agntcy.mailcomposer
+  version: 0.2.3
 openapi: 3.1.1
 paths:
   /agents/search:
@@ -2134,6 +1495,46 @@ paths:
         format: uuid
         title: Run Id
         type: string
+    post:
+      description: Provide the needed input to a run to resume its execution. Can
+        only be called for runs that are in the interrupted state Schema of the provided
+        input must match with the schema specified in the agent specs under interrupts
+        for the interrupt type the agent generated for this specific interruption.
+      operationId: resume_stateless_run
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumePayloadSchema'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunStateless'
+          description: Success
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Conflict
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation Error
+      summary: Resume an interrupted Run
+      tags:
+      - Stateless Runs
   /runs/{run_id}/cancel:
     post:
       operationId: cancel_stateless_run

@@ -96,6 +96,10 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         custom_streaming_update:
           description: 'This describes the format of an Update in the streaming.  Must
@@ -131,6 +135,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         interrupts:
           description: List of possible interrupts that can be provided by the agent.
@@ -198,6 +206,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         thread_state:
           description: 'This describes the format of ThreadState.  Cannot be specified
@@ -218,6 +230,9 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            type: integer
           type: object
       required:
       - capabilities
@@ -332,14 +347,21 @@ components:
     InputSchema:
       type: integer
     InterruptPayloadSchema:
-      discriminator:
-        mapping:
-          clarification: '#/components/schemas/clarificationInterruptPayload'
-          purchase_approval: '#/components/schemas/purchase_approvalInterruptPayload'
-        propertyName: interrupt_type
       oneOf:
-      - $ref: '#/components/schemas/purchase_approvalInterruptPayload'
-      - $ref: '#/components/schemas/clarificationInterruptPayload'
+      - additionalProperties: false
+        properties:
+          purchase_approval:
+            $ref: '#/components/schemas/purchase_approvalInterruptPayload'
+        required:
+        - purchase_approval
+        type: object
+      - additionalProperties: false
+        properties:
+          clarification:
+            $ref: '#/components/schemas/clarificationInterruptPayload'
+        required:
+        - clarification
+        type: object
     Message:
       properties:
         content:
@@ -397,14 +419,21 @@ components:
           type: string
       type: object
     ResumePayloadSchema:
-      discriminator:
-        mapping:
-          clarification: '#/components/schemas/clarificationResumePayload'
-          purchase_approval: '#/components/schemas/purchase_approvalResumePayload'
-        propertyName: interrupt_type
       oneOf:
-      - $ref: '#/components/schemas/purchase_approvalResumePayload'
-      - $ref: '#/components/schemas/clarificationResumePayload'
+      - additionalProperties: false
+        properties:
+          purchase_approval:
+            $ref: '#/components/schemas/purchase_approvalResumePayload'
+        required:
+        - purchase_approval
+        type: object
+      - additionalProperties: false
+        properties:
+          clarification:
+            $ref: '#/components/schemas/clarificationResumePayload'
+        required:
+        - clarification
+        type: object
     Run:
       description: Holds common information of a run
       properties:
@@ -1021,12 +1050,6 @@ components:
     clarificationInterruptPayload:
       description: Additional question the agent is asking
       properties:
-        interrupt_type:
-          description: interrupt type which this payload is for
-          enum:
-          - clarification
-          title: Interrupt Type
-          type: string
         question:
           description: Text of the question
           title: Question
@@ -1039,12 +1062,6 @@ components:
         answer:
           description: Text of the answer
           title: Answer
-          type: string
-        interrupt_type:
-          description: interrupt type which this payload is for
-          enum:
-          - clarification
-          title: Interrupt Type
           type: string
       title: Answer
       type: object
@@ -1068,12 +1085,6 @@ components:
             to be made by this agent
           title: Purchase Description
           type: string
-        interrupt_type:
-          description: interrupt type which this payload is for
-          enum:
-          - purchase_approval
-          title: Interrupt Type
-          type: string
       required:
       - description
       - amount
@@ -1087,12 +1098,6 @@ components:
           description: True if approved, False if declined
           title: Approval Decision
           type: boolean
-        interrupt_type:
-          description: interrupt type which this payload is for
-          enum:
-          - purchase_approval
-          title: Interrupt Type
-          type: string
         reason:
           description: Reason to approve or decline
           title: Approval Reason
@@ -1102,8 +1107,8 @@ components:
       title: Purchase Approval Input
       type: object
 info:
-  title: ACP Spec for org.agntcy.sample-agent-1:0.0.1
-  version: 0.2.2
+  title: ACP Spec for org.agntcy.sample-agent-1
+  version: 0.2.3
 openapi: 3.1.1
 paths:
   /agents/search:

@@ -96,6 +96,10 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         custom_streaming_update:
           description: 'This describes the format of an Update in the streaming.  Must
@@ -131,6 +135,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         interrupts:
           description: List of possible interrupts that can be provided by the agent.
@@ -198,6 +206,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         thread_state:
           description: 'This describes the format of ThreadState.  Cannot be specified
@@ -218,6 +230,9 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            type: integer
           type: object
       required:
       - capabilities
@@ -294,21 +309,31 @@ components:
       title: AgentSearchRequest
       type: object
     ConfigSchema:
+      $defs:
+        TargetAudience:
+          enum:
+          - general
+          - technical
+          - business
+          - academic
+          title: TargetAudience
+          type: string
       properties:
         recipient_email_address:
-          anyOf:
-          - type: string
-          - type: 'null'
-          default: null
           description: Email address of the email recipient
           title: Recipient Email Address
+          type: string
         sender_email_address:
-          anyOf:
-          - type: string
-          - type: 'null'
-          default: null
           description: Email address of the email sender
           title: Sender Email Address
+          type: string
+        target_audience:
+          $ref: '#/components/schemas/ConfigSchema/$defs/TargetAudience'
+          description: Target audience for the marketing campaign
+      required:
+      - recipient_email_address
+      - sender_email_address
+      - target_audience
       title: ConfigModel
       type: object
     CustomRunResultUpdate:
@@ -343,6 +368,54 @@ components:
       type: string
     InputSchema:
       $defs:
+        APIBridgeInput:
+          properties:
+            query:
+              description: Query for the API bridge agent in natural language
+              title: Query
+              type: string
+          required:
+          - query
+          title: APIBridgeInput
+          type: object
+        APIBridgeOutput:
+          properties:
+            result:
+              description: API response from API bridge agent
+              title: Result
+              type: string
+          required:
+          - result
+          title: APIBridgeOutput
+          type: object
+        MailComposerState:
+          properties:
+            input:
+              anyOf:
+              - $ref: '#/components/schemas/InputSchema/$defs/marketing_campaign__mailcomposer__InputSchema'
+              - type: 'null'
+              default: null
+            output:
+              anyOf:
+              - $ref: '#/components/schemas/InputSchema/$defs/marketing_campaign__mailcomposer__OutputSchema'
+              - type: 'null'
+              default: null
+          title: MailComposerState
+          type: object
+        MailReviewerState:
+          properties:
+            input:
+              anyOf:
+              - $ref: '#/components/schemas/InputSchema/$defs/marketing_campaign__email_reviewer__InputSchema'
+              - type: 'null'
+              default: null
+            output:
+              anyOf:
+              - $ref: '#/components/schemas/InputSchema/$defs/marketing_campaign__email_reviewer__OutputSchema'
+              - type: 'null'
+              default: null
+          title: MailReviewerState
+          type: object
         Message:
           properties:
             content:
@@ -358,6 +431,28 @@ components:
           - content
           title: Message
           type: object
+        SendGridState:
+          properties:
+            input:
+              anyOf:
+              - $ref: '#/components/schemas/InputSchema/$defs/APIBridgeInput'
+              - type: 'null'
+              default: null
+            output:
+              anyOf:
+              - $ref: '#/components/schemas/InputSchema/$defs/APIBridgeOutput'
+              - type: 'null'
+              default: null
+          title: SendGridState
+          type: object
+        TargetAudience:
+          enum:
+          - general
+          - technical
+          - business
+          - academic
+          title: TargetAudience
+          type: string
         Type:
           enum:
           - human
@@ -365,7 +460,113 @@ components:
           - ai
           title: Type
           type: string
+        marketing_campaign__email_reviewer__InputSchema:
+          properties:
+            email:
+              description: The email content to be reviewed and corrected
+              title: Email
+              type: string
+            target_audience:
+              $ref: '#/components/schemas/InputSchema/$defs/TargetAudience'
+              description: The target audience for the email, affecting the style
+                of review
+          required:
+          - email
+          - target_audience
+          title: InputSchema
+          type: object
+        marketing_campaign__email_reviewer__OutputSchema:
+          properties:
+            correct:
+              description: Indicates whether the email is correct and requires no
+                changes
+              title: Correct
+              type: boolean
+            corrected_email:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              description: The corrected version of the email, if changes were necessary
+              title: Corrected Email
+          required:
+          - correct
+          title: OutputSchema
+          type: object
+        marketing_campaign__mailcomposer__InputSchema:
+          properties:
+            is_completed:
+              anyOf:
+              - type: boolean
+              - type: 'null'
+              default: null
+              title: Is Completed
+            messages:
+              anyOf:
+              - items:
+                  $ref: '#/components/schemas/InputSchema/$defs/Message'
+                type: array
+              - type: 'null'
+              default: null
+              title: Messages
+          title: InputSchema
+          type: object
+        marketing_campaign__mailcomposer__OutputSchema:
+          properties:
+            final_email:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              description: Final email produced by the mail composer
+              title: Final Email
+            is_completed:
+              anyOf:
+              - type: boolean
+              - type: 'null'
+              default: null
+              title: Is Completed
+            messages:
+              anyOf:
+              - items:
+                  $ref: '#/components/schemas/InputSchema/$defs/Message'
+                type: array
+              - type: 'null'
+              default: null
+              title: Messages
+          title: OutputSchema
+          type: object
       properties:
+        email_reviewer_state:
+          anyOf:
+          - $ref: '#/components/schemas/InputSchema/$defs/MailReviewerState'
+          - type: 'null'
+          default: null
+        has_composer_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Flag indicating if the mail composer has succesfully completed
+            its task
+          title: Has Composer Completed
+        has_reviewer_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Has Reviewer Completed
+        has_sender_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Has Sender Completed
+        mailcomposer_state:
+          anyOf:
+          - $ref: '#/components/schemas/InputSchema/$defs/MailComposerState'
+          - type: 'null'
+          default: null
         messages:
           default: []
           description: Chat messages
@@ -373,7 +574,42 @@ components:
             $ref: '#/components/schemas/InputSchema/$defs/Message'
           title: Messages
           type: array
-      title: InputState
+        operation_logs:
+          default: []
+          description: An array containing all the operations performed and their
+            result. Each operation is appended to this array with a timestamp.
+          examples:
+          - - 'Mar 15 18:10:39 Operation performed: email sent Result: OK'
+            - Mar 19 18:13:39 Operation X failed
+          items:
+            type: string
+          title: Operation Logs
+          type: array
+        recipient_email_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Email address of the email recipient
+          title: Recipient Email Address
+        sender_email_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Email address of the email sender
+          title: Sender Email Address
+        sendgrid_state:
+          anyOf:
+          - $ref: '#/components/schemas/InputSchema/$defs/SendGridState'
+          - type: 'null'
+          default: null
+        target_audience:
+          anyOf:
+          - $ref: '#/components/schemas/InputSchema/$defs/TargetAudience'
+          - type: 'null'
+          default: null
+      title: OverallState
       type: object
     InterruptPayloadSchema:
       description: "This schema describes the interrupt payload. Actual schema describes\
@@ -384,8 +620,22 @@ components:
         \  - $ref: '#/components/schemas/QuestionInterruptPayload'\ndiscriminator:\n\
         \  propertyName: interruput_type\n  mapping:\n    approval: '#/components/schemas/ApprovalInterruptPayload'\n\
         \    question: '#/components/schemas/QuestionInterruptPayload'"
+      oneOf:
+      - description: 'This object contains an instance of an OpenAPI schema object,
+          formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+        type: object
+      - description: String interrupt to the agent.
+        type: string
+      - description: Integer interrupt to the agent.
+        type: integer
+      - description: Number interrupt to the agent.
+        type: number
+      - description: Boolean interrupt to the agent.
+        type: boolean
+      - description: Array input to the agent.
+        items: {}
+        type: array
       title: Interrupt Payload
-      type: object
     Message:
       properties:
         content:
@@ -435,6 +685,54 @@ components:
       type: object
     OutputSchema:
       $defs:
+        APIBridgeInput:
+          properties:
+            query:
+              description: Query for the API bridge agent in natural language
+              title: Query
+              type: string
+          required:
+          - query
+          title: APIBridgeInput
+          type: object
+        APIBridgeOutput:
+          properties:
+            result:
+              description: API response from API bridge agent
+              title: Result
+              type: string
+          required:
+          - result
+          title: APIBridgeOutput
+          type: object
+        MailComposerState:
+          properties:
+            input:
+              anyOf:
+              - $ref: '#/components/schemas/OutputSchema/$defs/marketing_campaign__mailcomposer__InputSchema'
+              - type: 'null'
+              default: null
+            output:
+              anyOf:
+              - $ref: '#/components/schemas/OutputSchema/$defs/marketing_campaign__mailcomposer__OutputSchema'
+              - type: 'null'
+              default: null
+          title: MailComposerState
+          type: object
+        MailReviewerState:
+          properties:
+            input:
+              anyOf:
+              - $ref: '#/components/schemas/OutputSchema/$defs/marketing_campaign__email_reviewer__InputSchema'
+              - type: 'null'
+              default: null
+            output:
+              anyOf:
+              - $ref: '#/components/schemas/OutputSchema/$defs/marketing_campaign__email_reviewer__OutputSchema'
+              - type: 'null'
+              default: null
+          title: MailReviewerState
+          type: object
         Message:
           properties:
             content:
@@ -450,6 +748,28 @@ components:
           - content
           title: Message
           type: object
+        SendGridState:
+          properties:
+            input:
+              anyOf:
+              - $ref: '#/components/schemas/OutputSchema/$defs/APIBridgeInput'
+              - type: 'null'
+              default: null
+            output:
+              anyOf:
+              - $ref: '#/components/schemas/OutputSchema/$defs/APIBridgeOutput'
+              - type: 'null'
+              default: null
+          title: SendGridState
+          type: object
+        TargetAudience:
+          enum:
+          - general
+          - technical
+          - business
+          - academic
+          title: TargetAudience
+          type: string
         Type:
           enum:
           - human
@@ -457,7 +777,113 @@ components:
           - ai
           title: Type
           type: string
+        marketing_campaign__email_reviewer__InputSchema:
+          properties:
+            email:
+              description: The email content to be reviewed and corrected
+              title: Email
+              type: string
+            target_audience:
+              $ref: '#/components/schemas/OutputSchema/$defs/TargetAudience'
+              description: The target audience for the email, affecting the style
+                of review
+          required:
+          - email
+          - target_audience
+          title: InputSchema
+          type: object
+        marketing_campaign__email_reviewer__OutputSchema:
+          properties:
+            correct:
+              description: Indicates whether the email is correct and requires no
+                changes
+              title: Correct
+              type: boolean
+            corrected_email:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              description: The corrected version of the email, if changes were necessary
+              title: Corrected Email
+          required:
+          - correct
+          title: OutputSchema
+          type: object
+        marketing_campaign__mailcomposer__InputSchema:
+          properties:
+            is_completed:
+              anyOf:
+              - type: boolean
+              - type: 'null'
+              default: null
+              title: Is Completed
+            messages:
+              anyOf:
+              - items:
+                  $ref: '#/components/schemas/OutputSchema/$defs/Message'
+                type: array
+              - type: 'null'
+              default: null
+              title: Messages
+          title: InputSchema
+          type: object
+        marketing_campaign__mailcomposer__OutputSchema:
+          properties:
+            final_email:
+              anyOf:
+              - type: string
+              - type: 'null'
+              default: null
+              description: Final email produced by the mail composer
+              title: Final Email
+            is_completed:
+              anyOf:
+              - type: boolean
+              - type: 'null'
+              default: null
+              title: Is Completed
+            messages:
+              anyOf:
+              - items:
+                  $ref: '#/components/schemas/OutputSchema/$defs/Message'
+                type: array
+              - type: 'null'
+              default: null
+              title: Messages
+          title: OutputSchema
+          type: object
       properties:
+        email_reviewer_state:
+          anyOf:
+          - $ref: '#/components/schemas/OutputSchema/$defs/MailReviewerState'
+          - type: 'null'
+          default: null
+        has_composer_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Flag indicating if the mail composer has succesfully completed
+            its task
+          title: Has Composer Completed
+        has_reviewer_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Has Reviewer Completed
+        has_sender_completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Has Sender Completed
+        mailcomposer_state:
+          anyOf:
+          - $ref: '#/components/schemas/OutputSchema/$defs/MailComposerState'
+          - type: 'null'
+          default: null
         messages:
           default: []
           description: Chat messages
@@ -476,7 +902,31 @@ components:
             type: string
           title: Operation Logs
           type: array
-      title: OutputState
+        recipient_email_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Email address of the email recipient
+          title: Recipient Email Address
+        sender_email_address:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Email address of the email sender
+          title: Sender Email Address
+        sendgrid_state:
+          anyOf:
+          - $ref: '#/components/schemas/OutputSchema/$defs/SendGridState'
+          - type: 'null'
+          default: null
+        target_audience:
+          anyOf:
+          - $ref: '#/components/schemas/OutputSchema/$defs/TargetAudience'
+          - type: 'null'
+          default: null
+      title: OverallState
       type: object
     ResumePayloadSchema:
       description: "This schema describes the resume payload after an interrupt. Actual\
@@ -487,8 +937,22 @@ components:
         \  - $ref: '#/components/schemas/QuestionResumePayload'\ndiscriminator:\n\
         \  propertyName: interrupt_type\n  mapping:\n    approval: '#/components/schemas/ApprovalResumePayload'\n\
         \    question: '#/components/schemas/QuestionResumePayload'"
+      oneOf:
+      - description: 'This object contains an instance of an OpenAPI schema object,
+          formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+        type: object
+      - description: String resume to the agent.
+        type: string
+      - description: Integer resume to the agent.
+        type: integer
+      - description: Number resume to the agent.
+        type: number
+      - description: Boolean resume to the agent.
+        type: boolean
+      - description: Array input to the agent.
+        items: {}
+        type: array
       title: Resume Payload Schema
-      type: object
     Run:
       description: Holds common information of a run
       properties:
@@ -1007,8 +1471,22 @@ components:
     ThreadStateSchema:
       description: The thread state. The schema is described in agent ACP descriptor
         under 'spec.thread_state'.
+      oneOf:
+      - description: 'This object contains an instance of an OpenAPI schema object,
+          formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+        type: object
+      - description: String thread state to the agent.
+        type: string
+      - description: Integer thread state to the agent.
+        type: integer
+      - description: Number thread state to the agent.
+        type: number
+      - description: Boolean thread state to the agent.
+        type: boolean
+      - description: Array input to the agent.
+        items: {}
+        type: array
       title: Thread State Schema
-      type: object
     ThreadStatus:
       enum:
       - idle
@@ -1092,8 +1570,8 @@ components:
       title: Value Run Result Update
       type: object
 info:
-  title: ACP Spec for org.agntcy.marketing-campaign:0.0.1
-  version: 0.2.2
+  title: ACP Spec for org.agntcy.marketing-campaign
+  version: 0.2.3
 openapi: 3.1.1
 paths:
   /agents/search:

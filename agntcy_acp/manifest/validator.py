@@ -1,14 +1,15 @@
 # Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
-import copy
 import json
+import logging
 
 from pydantic import ValidationError
 
+from agntcy_acp.agws_v0 import OASF_EXTENSION_NAME_MANIFEST, AgentManifest
 from agntcy_acp.exceptions import ACPDescriptorValidationException
 from agntcy_acp.models import AgentACPDescriptor
 
-from . import AgentManifest
+logger = logging.getLogger(__name__)
 
 
 def validate_agent_manifest_file(
@@ -27,11 +28,20 @@ def validate_agent_descriptor_file(
     return validate_agent_descriptor(descriptor_json, raise_exception)
 
 
-def _descriptor_from_manifest(manifest_json: dict) -> dict:
-    # ACP Descriptor is an Agent Manifest without the deployment part
-    descriptor_json = copy.deepcopy(manifest_json)
-    del descriptor_json["deployment"]
-    return descriptor_json
+def descriptor_from_manifest_obj(manifest: dict | AgentManifest) -> dict:
+    # ACP Descriptor is in the extensions of an Agent Manifest
+    if hasattr(manifest, "extensions"):
+        for ext in manifest.extensions:
+            if ext.name == OASF_EXTENSION_NAME_MANIFEST:
+                descriptor_json = ext.data.acp
+                return descriptor_json
+    else:
+        for ext in manifest.get("extensions", []):
+            if ext.get("name", None) == OASF_EXTENSION_NAME_MANIFEST:
+                ext_json = ext.get("data", {})
+                descriptor_json = ext_json.get("acp", {})
+                return descriptor_json
+    return {}
 
 
 def validate_agent_manifest(
@@ -39,13 +49,14 @@ def validate_agent_manifest(
 ) -> AgentManifest | None:
     try:
         manifest = AgentManifest.model_validate(manifest_json)
-        descriptor_json = _descriptor_from_manifest(manifest_json)
+        descriptor_json = descriptor_from_manifest_obj(manifest_json)
         validate_agent_descriptor(descriptor_json)
         # TODO: add additional manifest checks
     except (ValidationError, ACPDescriptorValidationException) as e:
-        print(f"Validation Error: {e}")
         if raise_exception:
             raise e
+        else:
+            logger.debug(f"Validation Error: {e}")
         return None
 
     return manifest
@@ -60,9 +71,10 @@ def validate_agent_descriptor(
         # advanced validation
         # generate_agent_oapi(descriptor)
     except (ValidationError, ACPDescriptorValidationException) as e:
-        print(f"Validation Error: {e}")
         if raise_exception:
             raise e
+        else:
+            logger.debug(f"Validation Error: {e}")
         return None
 
     return descriptor

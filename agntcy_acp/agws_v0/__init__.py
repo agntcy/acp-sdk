@@ -73,3 +73,5 @@ from .models import (
     Locator,
     DeploymentManifest,
 )
+
+OASF_EXTENSION_NAME_MANIFEST = "oasf.agntcy.org/feature/runtime/manifest"

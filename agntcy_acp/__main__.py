@@ -57,8 +57,13 @@ def generate_agent_models(agent_descriptor_path, output_dir, model_file_name):
     Generate pydantic models from agent manifest or descriptor.
     """
     descriptor = validate_agent_descriptor_file(
-        agent_descriptor_path, raise_exception=True
+        agent_descriptor_path,
     )
+    if descriptor is None:
+        descriptor = validate_agent_manifest_file(
+            agent_descriptor_path, raise_exception=True
+        )
+
     generator.generate_agent_models(descriptor, output_dir, model_file_name)
 
 
@@ -70,6 +75,11 @@ def generate_agent_oapi(agent_descriptor_path, output):
     Generate OpenAPI Spec from agent manifest or descriptor
     """
     descriptor = validate_agent_descriptor_file(agent_descriptor_path)
+    if descriptor is None:
+        descriptor = validate_agent_manifest_file(
+            agent_descriptor_path, raise_exception=True
+        )
+
     oas = generator.generate_agent_oapi(descriptor)
     if output:
         with open(output, "w") as file:

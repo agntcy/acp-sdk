@@ -108,7 +108,7 @@ docs docs/html/index.html: docs/sphinx/agntcy_acp.rst
 
 .PHONY: test
 test:
-	ACP_SPEC_PATH="$(ACP_SPEC_DIR)/openapi.yaml" \
+	ACP_SPEC_PATH="$(ACP_SPEC_FILE)" \
 	uv run --locked --with pytest --group test -- \
 	  pytest --exitfirst -vv tests/
 

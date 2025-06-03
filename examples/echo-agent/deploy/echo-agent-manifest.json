@@ -288,7 +288,7 @@
             {
               "type": "source_code",
               "name": "source_code_local",
-              "url": "..",
+              "url": "file://..",
               "framework_config": {
                 "framework_type": "langgraph",
                 "graph": "echo_agent.langgraph:AGENT_GRAPH"

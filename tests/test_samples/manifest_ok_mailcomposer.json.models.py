@@ -2,95 +2,40 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from enum import Enum
+from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import Literal
-
-
-class AIMessage(BaseModel):
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    content: Union[str, List[Union[str, Dict[str, Any]]]] = Field(..., title="Content")
-    additional_kwargs: Optional[Dict[str, Any]] = Field(None, title="Additional Kwargs")
-    response_metadata: Optional[Dict[str, Any]] = Field(None, title="Response Metadata")
-    type: Literal["ai"] = Field("ai", title="Type")
-    name: Optional[str] = Field(None, title="Name")
-    id: Optional[str] = Field(None, title="Id")
-    example: Optional[bool] = Field(False, title="Example")
-    tool_calls: Optional[List[ToolCall]] = Field([], title="Tool Calls")
-    invalid_tool_calls: Optional[List[InvalidToolCall]] = Field(
-        [], title="Invalid Tool Calls"
-    )
-    usage_metadata: Optional[UsageMetadata] = None
+from pydantic import BaseModel, Field
 
 
 class ConfigSchema(BaseModel):
-    messages: Optional[List[Union[AIMessage, HumanMessage]]] = Field(
-        None, title="Messages"
-    )
-    is_completed: Optional[bool] = Field(None, title="Is Completed")
-    final_email: str = Field(..., title="Final Email")
-
-
-class HumanMessage(BaseModel):
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    content: Union[str, List[Union[str, Dict[str, Any]]]] = Field(..., title="Content")
-    additional_kwargs: Optional[Dict[str, Any]] = Field(None, title="Additional Kwargs")
-    response_metadata: Optional[Dict[str, Any]] = Field(None, title="Response Metadata")
-    type: Literal["human"] = Field("human", title="Type")
-    name: Optional[str] = Field(None, title="Name")
-    id: Optional[str] = Field(None, title="Id")
-    example: Optional[bool] = Field(False, title="Example")
+    test: bool = Field(..., title="Test")
 
 
 class InputSchema(BaseModel):
-    messages: Optional[List[Union[AIMessage, HumanMessage]]] = Field(
-        None, title="Messages"
-    )
+    messages: Optional[List[Message]] = Field(None, title="Messages")
     is_completed: Optional[bool] = Field(None, title="Is Completed")
 
 
-class InputTokenDetails(BaseModel):
-    audio: Optional[int] = Field(None, title="Audio")
-    cache_creation: Optional[int] = Field(None, title="Cache Creation")
-    cache_read: Optional[int] = Field(None, title="Cache Read")
-
-
-class InvalidToolCall(BaseModel):
-    name: Optional[str] = Field(..., title="Name")
-    args: Optional[str] = Field(..., title="Args")
-    id: Optional[str] = Field(..., title="Id")
-    error: Optional[str] = Field(..., title="Error")
-    type: Literal["invalid_tool_call"] = Field("invalid_tool_call", title="Type")
+class Message(BaseModel):
+    type: Type = Field(
+        ...,
+        description="indicates the originator of the message, a human or an assistant",
+    )
+    content: str = Field(..., description="the content of the message", title="Content")
 
 
 class OutputSchema(BaseModel):
-    messages: Optional[List[Union[AIMessage, HumanMessage]]] = Field(
-        None, title="Messages"
-    )
+    messages: Optional[List[Message]] = Field(None, title="Messages")
     is_completed: Optional[bool] = Field(None, title="Is Completed")
-    final_email: str = Field(..., title="Final Email")
+    final_email: Optional[str] = Field(
+        None,
+        description="Final email produced by the mail composer, in html format",
+        title="Final Email",
+    )
 
 
-class OutputTokenDetails(BaseModel):
-    audio: Optional[int] = Field(None, title="Audio")
-    reasoning: Optional[int] = Field(None, title="Reasoning")
-
-
-class ToolCall(BaseModel):
-    name: str = Field(..., title="Name")
-    args: Dict[str, Any] = Field(..., title="Args")
-    id: Optional[str] = Field(..., title="Id")
-    type: Literal["tool_call"] = Field("tool_call", title="Type")
-
-
-class UsageMetadata(BaseModel):
-    input_tokens: int = Field(..., title="Input Tokens")
-    output_tokens: int = Field(..., title="Output Tokens")
-    total_tokens: int = Field(..., title="Total Tokens")
-    input_token_details: Optional[InputTokenDetails] = None
-    output_token_details: Optional[OutputTokenDetails] = None
+class Type(Enum):
+    human = "human"
+    assistant = "assistant"
+    ai = "ai"

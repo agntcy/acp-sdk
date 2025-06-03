@@ -96,6 +96,10 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         custom_streaming_update:
           description: 'This describes the format of an Update in the streaming.  Must
@@ -131,6 +135,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         interrupts:
           description: List of possible interrupts that can be provided by the agent.
@@ -198,6 +206,10 @@ components:
             required:
             - name
             type: object
+          - description: User's age
+            format: int32
+            minimum: 0
+            type: integer
           type: object
         thread_state:
           description: 'This describes the format of ThreadState.  Cannot be specified
@@ -218,6 +230,9 @@ components:
             required:
             - name
             type: object
+          - description: An integer value
+            format: int32
+            type: integer
           type: object
       required:
       - capabilities
@@ -340,8 +355,22 @@ components:
         \  - $ref: '#/components/schemas/QuestionInterruptPayload'\ndiscriminator:\n\
         \  propertyName: interruput_type\n  mapping:\n    approval: '#/components/schemas/ApprovalInterruptPayload'\n\
         \    question: '#/components/schemas/QuestionInterruptPayload'"
+      oneOf:
+      - description: 'This object contains an instance of an OpenAPI schema object,
+          formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+        type: object
+      - description: String interrupt to the agent.
+        type: string
+      - description: Integer interrupt to the agent.
+        type: integer
+      - description: Number interrupt to the agent.
+        type: number
+      - description: Boolean interrupt to the agent.
+        type: boolean
+      - description: Array input to the agent.
+        items: {}
+        type: array
       title: Interrupt Payload
-      type: object
     Message:
       properties:
         content:
@@ -407,8 +436,22 @@ components:
         \  - $ref: '#/components/schemas/QuestionResumePayload'\ndiscriminator:\n\
         \  propertyName: interrupt_type\n  mapping:\n    approval: '#/components/schemas/ApprovalResumePayload'\n\
         \    question: '#/components/schemas/QuestionResumePayload'"
+      oneOf:
+      - description: 'This object contains an instance of an OpenAPI schema object,
+          formatted as per the OpenAPI specs: https://spec.openapis.org/oas/v3.1.1.html#schema-object'
+        type: object
+      - description: String resume to the agent.
+        type: string
+      - description: Integer resume to the agent.
+        type: integer
+      - description: Number resume to the agent.
+        type: number
+      - description: Boolean resume to the agent.
+        type: boolean
+      - description: Array input to the agent.
+        items: {}
+        type: array
       title: Resume Payload Schema
-      type: object
     Run:
       description: Holds common information of a run
       properties:
@@ -1021,8 +1064,8 @@ components:
       title: Value Run Result Update
       type: object
 info:
-  title: ACP Spec for org.agntcy.sample-agent-1:0.0.1
-  version: 0.2.2
+  title: ACP Spec for org.agntcy.sample-agent-1
+  version: 0.2.3
 openapi: 3.1.1
 paths:
   /agents/search:

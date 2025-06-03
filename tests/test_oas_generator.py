@@ -7,7 +7,10 @@ from deepdiff import diff
 from openapi_spec_validator.readers import read_from_filename
 
 from agntcy_acp.manifest.generator import generate_agent_oapi
-from agntcy_acp.manifest.validator import validate_agent_descriptor_file
+from agntcy_acp.manifest.validator import (
+    validate_agent_descriptor_file,
+    validate_agent_manifest_file,
+)
 
 
 @pytest.mark.needs_acp_spec
@@ -31,13 +34,18 @@ from agntcy_acp.manifest.validator import validate_agent_descriptor_file
 )
 def test_oas_generator(test_filename, oas_ref_filename, monkeypatch):
     curpwd = os.path.dirname(os.path.realpath(__file__))
-    ref_spec, base_uri = read_from_filename(
+    ref_spec, _ = read_from_filename(
         os.path.join(curpwd, "test_samples", oas_ref_filename)
     )
 
-    descriptor = validate_agent_descriptor_file(
-        os.path.join(curpwd, "test_samples", test_filename)
-    )
+    agent_descriptor_path = os.path.join(curpwd, "test_samples", test_filename)
+    descriptor = validate_agent_descriptor_file(agent_descriptor_path)
+    if descriptor is None:
+        descriptor = validate_agent_manifest_file(
+            agent_descriptor_path, raise_exception=True
+        )
+
+    assert descriptor is not None
     gen_spec = generate_agent_oapi(descriptor, "acp-spec/openapi.json")
     mapdiff = diff.DeepDiff(gen_spec, ref_spec)
     assert len(mapdiff.affected_paths) == 0

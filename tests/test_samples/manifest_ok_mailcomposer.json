@@ -1,1139 +1,290 @@
 {
-  "metadata": {
-    "ref": {
-      "name": "org.agntcy.mailcomposer",
-      "version": "0.0.1"
-    },
-    "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign"
+  "authors": ["Cisco Systems Inc."],
+  "annotations": {
+    "type": "langgraph"
   },
-  "specs": {
-    "capabilities": {
-      "threads": false,
-      "interrupts": false,
-      "callbacks": false
+  "created_at": "2025-05-21T00:00:00Z",
+  "name": "org.agntcy.mailcomposer",
+  "description": "Offer a chat interface to compose an email for a marketing campaign. Final output is the email that could be used for the campaign",
+  "version": "0.0.1",
+  "schema_version": "0.3.1",
+  "skills": [
+    {
+      "category_name": "Natural Language Processing",
+      "category_uid": 1,
+      "class_name": "Dialogue Generation",
+      "class_uid": 10204
     },
-    "input": {
-      "$defs": {
-        "AIMessage": {
-          "additionalProperties": true,
-          "description": "Message from an AI.\n\nAIMessage is returned from a chat model as a response to a prompt.\n\nThis message represents the output of the model and consists of both\nthe raw output as returned by the model together standardized fields\n(e.g., tool calls, usage metadata) added by the LangChain framework.",
-          "properties": {
-            "content": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "type": "array"
-                }
-              ],
-              "title": "Content"
-            },
-            "additional_kwargs": {
-              "title": "Additional Kwargs",
-              "type": "object"
-            },
-            "response_metadata": {
-              "title": "Response Metadata",
-              "type": "object"
-            },
-            "type": {
-              "const": "ai",
-              "default": "ai",
-              "title": "Type",
-              "type": "string"
-            },
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Name"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Id"
-            },
-            "example": {
-              "default": false,
-              "title": "Example",
-              "type": "boolean"
-            },
-            "tool_calls": {
-              "default": [],
-              "items": {
-                "$ref": "#/$defs/ToolCall"
-              },
-              "title": "Tool Calls",
-              "type": "array"
-            },
-            "invalid_tool_calls": {
-              "default": [],
-              "items": {
-                "$ref": "#/$defs/InvalidToolCall"
-              },
-              "title": "Invalid Tool Calls",
-              "type": "array"
-            },
-            "usage_metadata": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/UsageMetadata"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null
-            }
-          },
-          "required": [
-            "content"
-          ],
-          "title": "AIMessage",
-          "type": "object"
-        },
-        "HumanMessage": {
-          "additionalProperties": true,
-          "description": "Message from a human.\n\nHumanMessages are messages that are passed in from a human to the model.\n\nExample:\n\n    .. code-block:: python\n\n        from langchain_core.messages import HumanMessage, SystemMessage\n\n        messages = [\n            SystemMessage(\n                content=\"You are a helpful assistant! Your name is Bob.\"\n            ),\n            HumanMessage(\n                content=\"What is your name?\"\n            )\n        ]\n\n        # Instantiate a chat model and invoke it with the messages\n        model = ...\n        print(model.invoke(messages))",
-          "properties": {
-            "content": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "type": "array"
-                }
-              ],
-              "title": "Content"
-            },
-            "additional_kwargs": {
-              "title": "Additional Kwargs",
-              "type": "object"
-            },
-            "response_metadata": {
-              "title": "Response Metadata",
-              "type": "object"
-            },
-            "type": {
-              "const": "human",
-              "default": "human",
-              "title": "Type",
-              "type": "string"
-            },
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Name"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Id"
-            },
-            "example": {
-              "default": false,
-              "title": "Example",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "content"
-          ],
-          "title": "HumanMessage",
-          "type": "object"
-        },
-        "InputTokenDetails": {
-          "description": "Breakdown of input token counts.\n\nDoes *not* need to sum to full input token count. Does *not* need to have all keys.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n            \"cache_creation\": 200,\n            \"cache_read\": 100,\n        }\n\n.. versionadded:: 0.3.9",
-          "properties": {
-            "audio": {
-              "title": "Audio",
-              "type": "integer"
-            },
-            "cache_creation": {
-              "title": "Cache Creation",
-              "type": "integer"
-            },
-            "cache_read": {
-              "title": "Cache Read",
-              "type": "integer"
-            }
-          },
-          "title": "InputTokenDetails",
-          "type": "object"
-        },
-        "InvalidToolCall": {
-          "description": "Allowance for errors made by LLM.\n\nHere we add an `error` key to surface errors made during generation\n(e.g., invalid JSON arguments.)",
-          "properties": {
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Name"
-            },
-            "args": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Args"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Id"
-            },
-            "error": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Error"
-            },
-            "type": {
-              "const": "invalid_tool_call",
-              "title": "Type",
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "args",
-            "id",
-            "error"
-          ],
-          "title": "InvalidToolCall",
-          "type": "object"
-        },
-        "OutputTokenDetails": {
-          "description": "Breakdown of output token counts.\n\nDoes *not* need to sum to full output token count. Does *not* need to have all keys.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n            \"reasoning\": 200,\n        }\n\n.. versionadded:: 0.3.9",
-          "properties": {
-            "audio": {
-              "title": "Audio",
-              "type": "integer"
-            },
-            "reasoning": {
-              "title": "Reasoning",
-              "type": "integer"
-            }
-          },
-          "title": "OutputTokenDetails",
-          "type": "object"
-        },
-        "ToolCall": {
-          "description": "Represents a request to call a tool.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"name\": \"foo\",\n            \"args\": {\"a\": 1},\n            \"id\": \"123\"\n        }\n\n    This represents a request to call the tool named \"foo\" with arguments {\"a\": 1}\n    and an identifier of \"123\".",
-          "properties": {
-            "name": {
-              "title": "Name",
-              "type": "string"
-            },
-            "args": {
-              "title": "Args",
-              "type": "object"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Id"
-            },
-            "type": {
-              "const": "tool_call",
-              "title": "Type",
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "args",
-            "id"
-          ],
-          "title": "ToolCall",
-          "type": "object"
-        },
-        "UsageMetadata": {
-          "description": "Usage metadata for a message, such as token counts.\n\nThis is a standard representation of token usage that is consistent across models.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"input_tokens\": 350,\n            \"output_tokens\": 240,\n            \"total_tokens\": 590,\n            \"input_token_details\": {\n                \"audio\": 10,\n                \"cache_creation\": 200,\n                \"cache_read\": 100,\n            },\n            \"output_token_details\": {\n                \"audio\": 10,\n                \"reasoning\": 200,\n            }\n        }\n\n.. versionchanged:: 0.3.9\n\n    Added ``input_token_details`` and ``output_token_details``.",
-          "properties": {
-            "input_tokens": {
-              "title": "Input Tokens",
-              "type": "integer"
-            },
-            "output_tokens": {
-              "title": "Output Tokens",
-              "type": "integer"
-            },
-            "total_tokens": {
-              "title": "Total Tokens",
-              "type": "integer"
-            },
-            "input_token_details": {
-              "$ref": "#/$defs/InputTokenDetails"
-            },
-            "output_token_details": {
-              "$ref": "#/$defs/OutputTokenDetails"
-            }
-          },
-          "required": [
-            "input_tokens",
-            "output_tokens",
-            "total_tokens"
-          ],
-          "title": "UsageMetadata",
-          "type": "object"
-        }
-      },
-      "properties": {
-        "messages": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/AIMessage"
-              },
-              {
-                "$ref": "#/$defs/HumanMessage"
-              }
-            ]
-          },
-          "title": "Messages",
-          "type": "array"
-        },
-        "is_completed": {
-          "title": "Is Completed",
-          "type": "boolean"
-        }
-      },
-      "title": "AgentState",
-      "type": "object"
+    {
+      "category_name": "Natural Language Processing",
+      "category_uid": 1,
+      "class_name": "Text Completion",
+      "class_uid": 10201
     },
-    "output": {
-      "$defs": {
-        "AIMessage": {
-          "additionalProperties": true,
-          "description": "Message from an AI.\n\nAIMessage is returned from a chat model as a response to a prompt.\n\nThis message represents the output of the model and consists of both\nthe raw output as returned by the model together standardized fields\n(e.g., tool calls, usage metadata) added by the LangChain framework.",
-          "properties": {
-            "content": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "type": "array"
-                }
-              ],
-              "title": "Content"
-            },
-            "additional_kwargs": {
-              "title": "Additional Kwargs",
-              "type": "object"
-            },
-            "response_metadata": {
-              "title": "Response Metadata",
-              "type": "object"
-            },
-            "type": {
-              "const": "ai",
-              "default": "ai",
-              "title": "Type",
-              "type": "string"
-            },
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Name"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Id"
-            },
-            "example": {
-              "default": false,
-              "title": "Example",
-              "type": "boolean"
-            },
-            "tool_calls": {
-              "default": [],
-              "items": {
-                "$ref": "#/$defs/ToolCall"
-              },
-              "title": "Tool Calls",
-              "type": "array"
-            },
-            "invalid_tool_calls": {
-              "default": [],
-              "items": {
-                "$ref": "#/$defs/InvalidToolCall"
-              },
-              "title": "Invalid Tool Calls",
-              "type": "array"
-            },
-            "usage_metadata": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/UsageMetadata"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null
-            }
-          },
-          "required": [
-            "content"
-          ],
-          "title": "AIMessage",
-          "type": "object"
-        },
-        "HumanMessage": {
-          "additionalProperties": true,
-          "description": "Message from a human.\n\nHumanMessages are messages that are passed in from a human to the model.\n\nExample:\n\n    .. code-block:: python\n\n        from langchain_core.messages import HumanMessage, SystemMessage\n\n        messages = [\n            SystemMessage(\n                content=\"You are a helpful assistant! Your name is Bob.\"\n            ),\n            HumanMessage(\n                content=\"What is your name?\"\n            )\n        ]\n\n        # Instantiate a chat model and invoke it with the messages\n        model = ...\n        print(model.invoke(messages))",
-          "properties": {
-            "content": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "type": "array"
-                }
-              ],
-              "title": "Content"
-            },
-            "additional_kwargs": {
-              "title": "Additional Kwargs",
-              "type": "object"
-            },
-            "response_metadata": {
-              "title": "Response Metadata",
-              "type": "object"
-            },
-            "type": {
-              "const": "human",
-              "default": "human",
-              "title": "Type",
-              "type": "string"
-            },
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Name"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Id"
-            },
-            "example": {
-              "default": false,
-              "title": "Example",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "content"
-          ],
-          "title": "HumanMessage",
-          "type": "object"
-        },
-        "InputTokenDetails": {
-          "description": "Breakdown of input token counts.\n\nDoes *not* need to sum to full input token count. Does *not* need to have all keys.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n            \"cache_creation\": 200,\n            \"cache_read\": 100,\n        }\n\n.. versionadded:: 0.3.9",
-          "properties": {
-            "audio": {
-              "title": "Audio",
-              "type": "integer"
-            },
-            "cache_creation": {
-              "title": "Cache Creation",
-              "type": "integer"
-            },
-            "cache_read": {
-              "title": "Cache Read",
-              "type": "integer"
-            }
-          },
-          "title": "InputTokenDetails",
-          "type": "object"
-        },
-        "InvalidToolCall": {
-          "description": "Allowance for errors made by LLM.\n\nHere we add an `error` key to surface errors made during generation\n(e.g., invalid JSON arguments.)",
-          "properties": {
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Name"
-            },
-            "args": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Args"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Id"
-            },
-            "error": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Error"
-            },
-            "type": {
-              "const": "invalid_tool_call",
-              "title": "Type",
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "args",
-            "id",
-            "error"
-          ],
-          "title": "InvalidToolCall",
-          "type": "object"
-        },
-        "OutputTokenDetails": {
-          "description": "Breakdown of output token counts.\n\nDoes *not* need to sum to full output token count. Does *not* need to have all keys.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n            \"reasoning\": 200,\n        }\n\n.. versionadded:: 0.3.9",
-          "properties": {
-            "audio": {
-              "title": "Audio",
-              "type": "integer"
-            },
-            "reasoning": {
-              "title": "Reasoning",
-              "type": "integer"
-            }
-          },
-          "title": "OutputTokenDetails",
-          "type": "object"
-        },
-        "ToolCall": {
-          "description": "Represents a request to call a tool.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"name\": \"foo\",\n            \"args\": {\"a\": 1},\n            \"id\": \"123\"\n        }\n\n    This represents a request to call the tool named \"foo\" with arguments {\"a\": 1}\n    and an identifier of \"123\".",
-          "properties": {
-            "name": {
-              "title": "Name",
-              "type": "string"
-            },
-            "args": {
-              "title": "Args",
-              "type": "object"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Id"
-            },
-            "type": {
-              "const": "tool_call",
-              "title": "Type",
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "args",
-            "id"
-          ],
-          "title": "ToolCall",
-          "type": "object"
-        },
-        "UsageMetadata": {
-          "description": "Usage metadata for a message, such as token counts.\n\nThis is a standard representation of token usage that is consistent across models.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"input_tokens\": 350,\n            \"output_tokens\": 240,\n            \"total_tokens\": 590,\n            \"input_token_details\": {\n                \"audio\": 10,\n                \"cache_creation\": 200,\n                \"cache_read\": 100,\n            },\n            \"output_token_details\": {\n                \"audio\": 10,\n                \"reasoning\": 200,\n            }\n        }\n\n.. versionchanged:: 0.3.9\n\n    Added ``input_token_details`` and ``output_token_details``.",
-          "properties": {
-            "input_tokens": {
-              "title": "Input Tokens",
-              "type": "integer"
-            },
-            "output_tokens": {
-              "title": "Output Tokens",
-              "type": "integer"
-            },
-            "total_tokens": {
-              "title": "Total Tokens",
-              "type": "integer"
-            },
-            "input_token_details": {
-              "$ref": "#/$defs/InputTokenDetails"
-            },
-            "output_token_details": {
-              "$ref": "#/$defs/OutputTokenDetails"
-            }
-          },
-          "required": [
-            "input_tokens",
-            "output_tokens",
-            "total_tokens"
-          ],
-          "title": "UsageMetadata",
-          "type": "object"
-        }
-      },
-      "properties": {
-        "messages": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/AIMessage"
-              },
-              {
-                "$ref": "#/$defs/HumanMessage"
-              }
-            ]
-          },
-          "title": "Messages",
-          "type": "array"
-        },
-        "is_completed": {
-          "title": "Is Completed",
-          "type": "boolean"
-        },
-        "final_email": {
-          "title": "Final Email",
-          "type": "string"
-        }
-      },
-      "required": [
-        "final_email"
-      ],
-      "title": "OutputState",
-      "type": "object"
+    {
+      "category_name": "Natural Language Processing",
+      "category_uid": 1,
+      "class_name": "Text Paraphrasing",
+      "class_uid": 10203
     },
-    "config": {
-      "$defs": {
-        "AIMessage": {
-          "additionalProperties": true,
-          "description": "Message from an AI.\n\nAIMessage is returned from a chat model as a response to a prompt.\n\nThis message represents the output of the model and consists of both\nthe raw output as returned by the model together standardized fields\n(e.g., tool calls, usage metadata) added by the LangChain framework.",
-          "properties": {
-            "content": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "type": "array"
-                }
-              ],
-              "title": "Content"
-            },
-            "additional_kwargs": {
-              "title": "Additional Kwargs",
-              "type": "object"
-            },
-            "response_metadata": {
-              "title": "Response Metadata",
-              "type": "object"
-            },
-            "type": {
-              "const": "ai",
-              "default": "ai",
-              "title": "Type",
-              "type": "string"
-            },
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Name"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Id"
-            },
-            "example": {
-              "default": false,
-              "title": "Example",
-              "type": "boolean"
-            },
-            "tool_calls": {
-              "default": [],
-              "items": {
-                "$ref": "#/$defs/ToolCall"
-              },
-              "title": "Tool Calls",
-              "type": "array"
-            },
-            "invalid_tool_calls": {
-              "default": [],
-              "items": {
-                "$ref": "#/$defs/InvalidToolCall"
-              },
-              "title": "Invalid Tool Calls",
-              "type": "array"
-            },
-            "usage_metadata": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/UsageMetadata"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null
-            }
-          },
-          "required": [
-            "content"
-          ],
-          "title": "AIMessage",
-          "type": "object"
-        },
-        "HumanMessage": {
-          "additionalProperties": true,
-          "description": "Message from a human.\n\nHumanMessages are messages that are passed in from a human to the model.\n\nExample:\n\n    .. code-block:: python\n\n        from langchain_core.messages import HumanMessage, SystemMessage\n\n        messages = [\n            SystemMessage(\n                content=\"You are a helpful assistant! Your name is Bob.\"\n            ),\n            HumanMessage(\n                content=\"What is your name?\"\n            )\n        ]\n\n        # Instantiate a chat model and invoke it with the messages\n        model = ...\n        print(model.invoke(messages))",
-          "properties": {
-            "content": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object"
-                      }
-                    ]
-                  },
-                  "type": "array"
-                }
-              ],
-              "title": "Content"
-            },
-            "additional_kwargs": {
-              "title": "Additional Kwargs",
-              "type": "object"
-            },
-            "response_metadata": {
-              "title": "Response Metadata",
-              "type": "object"
-            },
-            "type": {
-              "const": "human",
-              "default": "human",
-              "title": "Type",
-              "type": "string"
-            },
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Name"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "title": "Id"
-            },
-            "example": {
-              "default": false,
-              "title": "Example",
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "content"
-          ],
-          "title": "HumanMessage",
-          "type": "object"
-        },
-        "InputTokenDetails": {
-          "description": "Breakdown of input token counts.\n\nDoes *not* need to sum to full input token count. Does *not* need to have all keys.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n            \"cache_creation\": 200,\n            \"cache_read\": 100,\n        }\n\n.. versionadded:: 0.3.9",
-          "properties": {
-            "audio": {
-              "title": "Audio",
-              "type": "integer"
-            },
-            "cache_creation": {
-              "title": "Cache Creation",
-              "type": "integer"
-            },
-            "cache_read": {
-              "title": "Cache Read",
-              "type": "integer"
-            }
-          },
-          "title": "InputTokenDetails",
-          "type": "object"
-        },
-        "InvalidToolCall": {
-          "description": "Allowance for errors made by LLM.\n\nHere we add an `error` key to surface errors made during generation\n(e.g., invalid JSON arguments.)",
-          "properties": {
-            "name": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Name"
-            },
-            "args": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Args"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Id"
-            },
-            "error": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Error"
-            },
-            "type": {
-              "const": "invalid_tool_call",
-              "title": "Type",
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "args",
-            "id",
-            "error"
-          ],
-          "title": "InvalidToolCall",
-          "type": "object"
-        },
-        "OutputTokenDetails": {
-          "description": "Breakdown of output token counts.\n\nDoes *not* need to sum to full output token count. Does *not* need to have all keys.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"audio\": 10,\n            \"reasoning\": 200,\n        }\n\n.. versionadded:: 0.3.9",
-          "properties": {
-            "audio": {
-              "title": "Audio",
-              "type": "integer"
-            },
-            "reasoning": {
-              "title": "Reasoning",
-              "type": "integer"
-            }
-          },
-          "title": "OutputTokenDetails",
-          "type": "object"
-        },
-        "ToolCall": {
-          "description": "Represents a request to call a tool.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"name\": \"foo\",\n            \"args\": {\"a\": 1},\n            \"id\": \"123\"\n        }\n\n    This represents a request to call the tool named \"foo\" with arguments {\"a\": 1}\n    and an identifier of \"123\".",
-          "properties": {
-            "name": {
-              "title": "Name",
-              "type": "string"
-            },
-            "args": {
-              "title": "Args",
-              "type": "object"
-            },
-            "id": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Id"
-            },
-            "type": {
-              "const": "tool_call",
-              "title": "Type",
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "args",
-            "id"
-          ],
-          "title": "ToolCall",
-          "type": "object"
-        },
-        "UsageMetadata": {
-          "description": "Usage metadata for a message, such as token counts.\n\nThis is a standard representation of token usage that is consistent across models.\n\nExample:\n\n    .. code-block:: python\n\n        {\n            \"input_tokens\": 350,\n            \"output_tokens\": 240,\n            \"total_tokens\": 590,\n            \"input_token_details\": {\n                \"audio\": 10,\n                \"cache_creation\": 200,\n                \"cache_read\": 100,\n            },\n            \"output_token_details\": {\n                \"audio\": 10,\n                \"reasoning\": 200,\n            }\n        }\n\n.. versionchanged:: 0.3.9\n\n    Added ``input_token_details`` and ``output_token_details``.",
-          "properties": {
-            "input_tokens": {
-              "title": "Input Tokens",
-              "type": "integer"
-            },
-            "output_tokens": {
-              "title": "Output Tokens",
-              "type": "integer"
-            },
-            "total_tokens": {
-              "title": "Total Tokens",
-              "type": "integer"
-            },
-            "input_token_details": {
-              "$ref": "#/$defs/InputTokenDetails"
-            },
-            "output_token_details": {
-              "$ref": "#/$defs/OutputTokenDetails"
-            }
-          },
-          "required": [
-            "input_tokens",
-            "output_tokens",
-            "total_tokens"
-          ],
-          "title": "UsageMetadata",
-          "type": "object"
-        }
-      },
-      "properties": {
-        "messages": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/AIMessage"
-              },
-              {
-                "$ref": "#/$defs/HumanMessage"
-              }
-            ]
-          },
-          "title": "Messages",
-          "type": "array"
-        },
-        "is_completed": {
-          "title": "Is Completed",
-          "type": "boolean"
-        },
-        "final_email": {
-          "title": "Final Email",
-          "type": "string"
-        }
-      },
-      "required": [
-        "final_email"
-      ],
-      "title": "OutputState",
-      "type": "object"
+    {
+      "category_name": "Natural Language Processing",
+      "category_uid": 1,
+      "class_name": "Text Style Transfer",
+      "class_uid": 10206
+    },
+    {
+      "category_name": "Natural Language Processing",
+      "category_uid": 1,
+      "class_name": "Tone and Style Adjustment",
+      "class_uid": 10602
+    },
+    {
+      "category_name": "Natural Language Processing",
+      "category_uid": 1,
+      "class_name": "Contextual Comprehension",
+      "class_uid": 10101
     }
-  },
-  "deployment": {
-    "dependencies": [],
-    "deployment_options": [
-      {
-        "type": "source_code",
-        "name": "src",
-        "url": "file://../",
-        "framework_config": {
-          "framework_type": "langgraph",
-          "graph": "mailcomposer.mailcomposer:graph"
+  ],
+  "locators": [
+    {
+      "type": "source-code",
+      "url": "https://github.com/agntcy/agentic-apps/tree/main/mailcomposer"
+    },
+    {
+      "type": "py-package",
+      "url": "https://github.com/agntcy/agentic-apps/tree/main/mailcomposer/pyproject.toml"
+    }
+  ],  
+  "extensions": [     
+    {
+      "name": "oasf.agntcy.org/feature/runtime/manifest",
+      "data": {
+        "acp": {
+          "capabilities": {
+            "threads": false,
+            "interrupts": true,
+            "callbacks": false
+          },
+          "input": {
+            "$defs": {
+              "Message": {
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/Type",
+                    "description": "indicates the originator of the message, a human or an assistant"
+                  },
+                  "content": {
+                    "description": "the content of the message",
+                    "title": "Content",
+                    "type": "string"
+                  }
+                },
+                "required": ["type", "content"],
+                "title": "Message",
+                "type": "object"
+              },
+              "Type": {
+                "enum": ["human", "assistant", "ai"],
+                "title": "Type",
+                "type": "string"
+              }
+            },
+            "properties": {
+              "messages": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/Message"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Messages"
+              },
+              "is_completed": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Is Completed"
+              }
+            },
+            "title": "AgentState",
+            "type": "object"
+          },
+          "output": {
+            "$defs": {
+              "Message": {
+                "properties": {
+                  "type": {
+                    "$ref": "#/$defs/Type",
+                    "description": "indicates the originator of the message, a human or an assistant"
+                  },
+                  "content": {
+                    "description": "the content of the message",
+                    "title": "Content",
+                    "type": "string"
+                  }
+                },
+                "required": ["type", "content"],
+                "title": "Message",
+                "type": "object"
+              },
+              "Type": {
+                "enum": ["human", "assistant", "ai"],
+                "title": "Type",
+                "type": "string"
+              }
+            },
+            "properties": {
+              "messages": {
+                "anyOf": [
+                  {
+                    "items": {
+                      "$ref": "#/$defs/Message"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Messages"
+              },
+              "is_completed": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Is Completed"
+              },
+              "final_email": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Final email produced by the mail composer, in html format",
+                "title": "Final Email"
+              }
+            },
+            "title": "OutputState",
+            "type": "object"
+          },
+          "config": {
+            "properties": {
+              "test": {
+                "title": "Test",
+                "type": "boolean"
+              }
+            },
+            "required": ["test"],
+            "title": "ConfigSchema",
+            "type": "object"
+          },
+          "interrupts": [
+            {
+              "interrupt_type": "format_email",
+              "interrupt_payload": {
+                "$defs": {
+                  "Message": {
+                    "properties": {
+                      "type": {
+                        "$ref": "#/$defs/Type",
+                        "description": "indicates the originator of the message, a human or an assistant"
+                      },
+                      "content": {
+                        "description": "the content of the message",
+                        "title": "Content",
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type", "content"],
+                    "title": "Message",
+                    "type": "object"
+                  },
+                  "Type": {
+                    "enum": ["human", "assistant", "ai"],
+                    "title": "Type",
+                    "type": "string"
+                  }
+                },
+                "$ref": "#/$defs/Message"
+              },
+              "resume_payload": {
+                "$defs": {
+                  "Message": {
+                    "properties": {
+                      "type": {
+                        "$ref": "#/$defs/Type",
+                        "description": "indicates the originator of the message, a human or an assistant"
+                      },
+                      "content": {
+                        "description": "the content of the message",
+                        "title": "Content",
+                        "type": "string"
+                      }
+                    },
+                    "required": ["type", "content"],
+                    "title": "Message",
+                    "type": "object"
+                  },
+                  "Type": {
+                    "enum": ["human", "assistant", "ai"],
+                    "title": "Type",
+                    "type": "string"
+                  }
+                },
+                "$ref": "#/$defs/Message"
+              }
+            }
+          ]
+        },
+        "deployment": {
+          "deployment_options": [
+            {
+              "type": "source_code",
+              "name": "source_code_local",
+              "url": "file://../",
+              "framework_config": {
+                "framework_type": "langgraph",
+                "graph": "mailcomposer.mailcomposer:graph"
+              }
+            }
+          ],
+          "env_vars": [
+            {
+              "desc": "Azure key for the OpenAI service",
+              "name": "AZURE_OPENAI_API_KEY"
+            },
+            {
+              "desc": "Azure endpoint for the OpenAI service",
+              "name": "AZURE_OPENAI_ENDPOINT"
+            }
+          ],
+          "agent_deps": []
         }
       }
-    ]
-  }
+    }
+  ]
 }
