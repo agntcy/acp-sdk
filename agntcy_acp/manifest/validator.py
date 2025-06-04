@@ -28,7 +28,7 @@ def validate_agent_descriptor_file(
     return validate_agent_descriptor(descriptor_json, raise_exception)
 
 
-def descriptor_from_manifest_obj(manifest: dict | AgentManifest) -> dict:
+def descriptor_from_manifest(manifest: dict | AgentManifest) -> dict:
     # ACP Descriptor is in the extensions of an Agent Manifest
     if hasattr(manifest, "extensions"):
         for ext in manifest.extensions:
@@ -49,7 +49,7 @@ def validate_agent_manifest(
 ) -> AgentManifest | None:
     try:
         manifest = AgentManifest.model_validate(manifest_json)
-        descriptor_json = descriptor_from_manifest_obj(manifest_json)
+        descriptor_json = descriptor_from_manifest(manifest_json)
         validate_agent_descriptor(descriptor_json)
         # TODO: add additional manifest checks
     except (ValidationError, ACPDescriptorValidationException) as e:

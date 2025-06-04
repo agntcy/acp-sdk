@@ -67,9 +67,9 @@
 
 
 
-<div class="viewcode-block" id="descriptor_from_manifest_obj">
-<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.descriptor_from_manifest_obj">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">descriptor_from_manifest_obj</span><span class="p">(</span><span class="n">manifest</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">AgentManifest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="descriptor_from_manifest">
+<a class="viewcode-back" href="../../../agntcy_acp.manifest.html#agntcy_acp.manifest.validator.descriptor_from_manifest">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">descriptor_from_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="n">AgentManifest</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="c1"># ACP Descriptor is in the extensions of an Agent Manifest</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="s2">&quot;extensions&quot;</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">manifest</span><span class="o">.</span><span class="n">extensions</span><span class="p">:</span>
@@ -93,7 +93,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AgentManifest</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">manifest</span> <span class="o">=</span> <span class="n">AgentManifest</span><span class="o">.</span><span class="n">model_validate</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
-        <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">descriptor_from_manifest_obj</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
+        <span class="n">descriptor_json</span> <span class="o">=</span> <span class="n">descriptor_from_manifest</span><span class="p">(</span><span class="n">manifest_json</span><span class="p">)</span>
         <span class="n">validate_agent_descriptor</span><span class="p">(</span><span class="n">descriptor_json</span><span class="p">)</span>
         <span class="c1"># TODO: add additional manifest checks</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">ValidationError</span><span class="p">,</span> <span class="n">ACPDescriptorValidationException</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
