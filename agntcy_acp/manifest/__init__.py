@@ -1,1 +1,1 @@
-from ..agws_v0.models import *  # NOQA
+from ..agws_v0 import *  # NOQA

@@ -74,4 +74,4 @@ from .models import (
     DeploymentManifest,
 )
 
-OASF_EXTENSION_NAME_MANIFEST = "oasf.agntcy.org/feature/runtime/manifest"
+OASF_EXTENSION_NAME_MANIFEST = "schema.oasf.agntcy.org/features/runtime/manifest"
