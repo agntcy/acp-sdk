@@ -72,6 +72,8 @@ from .models import (
     AgentManifest,
     Locator,
     DeploymentManifest,
+    Manifest,
+    Skill,
 )
 
 OASF_EXTENSION_NAME_MANIFEST = "schema.oasf.agntcy.org/features/runtime/manifest"
